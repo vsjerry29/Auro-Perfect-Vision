@@ -36,64 +36,64 @@ export function OrderSummary({
   return (
     <div className="space-y-6">
       {/* Appointment Snapshot Card */}
-      <div className="bg-white p-5 rounded-xl border border-ink-border space-y-4 shadow-subtle">
-        <h4 className="font-serif text-base font-medium text-ink pb-2 border-b border-ink-border/50">
+      <div className="bg-white p-6 rounded-3xl border border-brand-gray/80 space-y-4 shadow-sm">
+        <h4 className="font-sora text-base font-bold text-brand-charcoal pb-3 border-b border-brand-gray/80">
           Booking Overview
         </h4>
 
-        <div className="space-y-3 text-xs">
+        <div className="space-y-3.5 text-xs font-inter">
           <div className="flex justify-between items-start">
-            <span className="text-ink-muted">Offering</span>
-            <span className="font-medium text-ink text-right max-w-[200px]">
+            <span className="text-brand-secondary">Offering</span>
+            <span className="font-semibold text-brand-charcoal text-right max-w-[200px]">
               {offering.title}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-ink-muted">Practitioner</span>
-            <span className="font-medium text-ink">
+            <span className="text-brand-secondary">Practitioner</span>
+            <span className="font-semibold text-brand-charcoal">
               {therapist?.displayName || "Assigned Guide"}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-ink-muted">Date & Time</span>
-            <span className="font-medium text-ink text-right">
+            <span className="text-brand-secondary">Date & Time</span>
+            <span className="font-semibold text-brand-charcoal text-right">
               {dateStr} • {timeSlot}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-ink-muted">Timezone</span>
-            <span className="font-medium text-ink">{clientTimezone}</span>
+            <span className="text-brand-secondary">Timezone</span>
+            <span className="font-semibold text-brand-charcoal">{clientTimezone}</span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-ink-muted">Format / Delivery</span>
-            <span className="font-medium text-ink capitalize">
+            <span className="text-brand-secondary">Format / Delivery</span>
+            <span className="font-semibold text-brand-charcoal capitalize">
               {offering.format} • {offering.delivery} ({offering.durationMinutes} mins)
             </span>
           </div>
 
           {offering.format === "group" && (
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Participants</span>
-              <span className="font-medium text-ink">{seats} seat(s)</span>
+              <span className="text-brand-secondary">Participants</span>
+              <span className="font-semibold text-brand-charcoal">{seats} seat(s)</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Currency & Total Breakdown */}
-      <div className="bg-canvas-light p-5 rounded-xl border border-ink-border space-y-3">
+      <div className="bg-[#FAF9FC] p-6 rounded-3xl border border-brand-gray/80 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-ink">Select Billing Currency:</span>
-          <div className="inline-flex rounded-lg border border-ink-border p-0.5 bg-white">
+          <span className="text-xs font-inter font-semibold text-brand-charcoal">Billing Currency:</span>
+          <div className="inline-flex rounded-xl border border-brand-gray p-1 bg-white">
             <button
               type="button"
               onClick={() => onCurrencyChange("INR")}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${
-                currency === "INR" ? "bg-plum text-white shadow-xs" : "text-ink hover:text-plum"
+              className={`px-3 py-1.5 text-xs rounded-lg font-sora font-semibold transition-all ${
+                currency === "INR" ? "bg-brand-purple text-white shadow-sm" : "text-brand-secondary hover:text-brand-charcoal"
               }`}
             >
               INR (₹)
@@ -101,8 +101,8 @@ export function OrderSummary({
             <button
               type="button"
               onClick={() => onCurrencyChange("USD")}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${
-                currency === "USD" ? "bg-plum text-white shadow-xs" : "text-ink hover:text-plum"
+              className={`px-3 py-1.5 text-xs rounded-lg font-sora font-semibold transition-all ${
+                currency === "USD" ? "bg-brand-purple text-white shadow-sm" : "text-brand-secondary hover:text-brand-charcoal"
               }`}
             >
               USD ($)
@@ -110,12 +110,12 @@ export function OrderSummary({
           </div>
         </div>
 
-        <div className="pt-2 border-t border-ink-border/60 flex items-baseline justify-between">
+        <div className="pt-3 border-t border-brand-gray/80 flex items-baseline justify-between">
           <div>
-            <span className="text-xs text-ink-muted block">Total Payable</span>
-            <span className="text-[10px] text-ink-faint">Includes all applicable taxes</span>
+            <span className="text-xs font-inter font-medium text-brand-secondary block">Total Payable</span>
+            <span className="text-[11px] font-inter text-brand-secondary/80">Includes all applicable taxes</span>
           </div>
-          <span className="font-serif text-2xl font-medium text-plum">
+          <span className="font-sora text-3xl font-extrabold text-brand-purple">
             {formatCurrency(totalPrice, currency)}
           </span>
         </div>
@@ -123,17 +123,17 @@ export function OrderSummary({
 
       {/* Payment Rail Selector */}
       <div className="space-y-3">
-        <label className="block font-serif text-sm font-medium text-ink">
+        <label className="block font-sora text-sm font-bold text-brand-charcoal">
           Choose Payment Method
         </label>
 
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-3">
           {/* Online Payment Option */}
           <label
-            className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+            className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all flex items-start gap-3.5 ${
               paymentMethod === "online_razorpay"
-                ? "bg-plum-muted/60 border-plum shadow-xs"
-                : "bg-white border-ink-border hover:border-ink-muted"
+                ? "bg-brand-lavender/50 border-brand-purple shadow-sm ring-1 ring-brand-purple"
+                : "bg-white border-brand-gray hover:border-brand-purple/30"
             }`}
           >
             <input
@@ -141,25 +141,25 @@ export function OrderSummary({
               name="paymentMethod"
               checked={paymentMethod === "online_razorpay"}
               onChange={() => onPaymentMethodChange("online_razorpay")}
-              className="mt-1 text-plum focus:ring-plum"
+              className="mt-1 text-brand-purple focus:ring-brand-purple"
             />
-            <div className="flex-1 text-xs">
-              <div className="flex items-center gap-2 font-medium text-ink">
-                <CreditCard className="w-4 h-4 text-plum" />
+            <div className="flex-1 text-xs font-inter">
+              <div className="flex items-center gap-2 font-sora font-bold text-brand-charcoal">
+                <CreditCard className="w-4 h-4 text-brand-purple" />
                 <span>Online Payment (UPI, Cards, Netbanking)</span>
               </div>
-              <p className="text-[11px] text-ink-muted mt-1">
-                Simulated instant confirmation. Produces immediate downloadable invoice and WhatsApp alert.
+              <p className="text-[11px] text-brand-secondary mt-1 leading-relaxed">
+                Simulated instant confirmation. Produces immediate downloadable invoice and automated booking tracking.
               </p>
             </div>
           </label>
 
           {/* Offline Payment Option */}
           <label
-            className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
+            className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all flex items-start gap-3.5 ${
               paymentMethod === "offline_cash"
-                ? "bg-plum-muted/60 border-plum shadow-xs"
-                : "bg-white border-ink-border hover:border-ink-muted"
+                ? "bg-brand-lavender/50 border-brand-purple shadow-sm ring-1 ring-brand-purple"
+                : "bg-white border-brand-gray hover:border-brand-purple/30"
             }`}
           >
             <input
@@ -167,14 +167,14 @@ export function OrderSummary({
               name="paymentMethod"
               checked={paymentMethod === "offline_cash"}
               onChange={() => onPaymentMethodChange("offline_cash")}
-              className="mt-1 text-plum focus:ring-plum"
+              className="mt-1 text-brand-purple focus:ring-brand-purple"
             />
-            <div className="flex-1 text-xs">
-              <div className="flex items-center gap-2 font-medium text-ink">
-                <Building2 className="w-4 h-4 text-gold-dark" />
+            <div className="flex-1 text-xs font-inter">
+              <div className="flex items-center gap-2 font-sora font-bold text-brand-charcoal">
+                <Building2 className="w-4 h-4 text-brand-orange" />
                 <span>Pay at Centre / Bank Transfer (Offline)</span>
               </div>
-              <p className="text-[11px] text-ink-muted mt-1">
+              <p className="text-[11px] text-brand-secondary mt-1 leading-relaxed">
                 Held as pending confirmation. Staff confirms in Admin Console upon cash/wire receipt, releasing the invoice.
               </p>
             </div>

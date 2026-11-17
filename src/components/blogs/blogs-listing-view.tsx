@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useDemoStore } from "@/lib/store";
 import { BlogPost } from "@/lib/types";
-import { Clock, ArrowRight, BookOpen, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Clock, ArrowRight, BookOpen, Search, Sparkles } from "lucide-react";
 
 interface BlogsListingViewProps {
   initialBlogs?: BlogPost[];
@@ -32,18 +31,19 @@ export function BlogsListingView({ initialBlogs }: BlogsListingViewProps) {
   });
 
   return (
-    <div className="bg-canvas min-h-screen pb-24">
-      {/* Editorial Header */}
-      <section className="pt-16 pb-16 border-b border-ink-border/50 bg-canvas-light">
+    <div className="bg-[#FAF9FC] min-h-screen pb-24">
+      {/* Header */}
+      <section className="pt-20 pb-16 bg-white border-b border-brand-gray/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-          <Badge variant="gold" className="text-xs">
-            Vision Research & Practices
-          </Badge>
-          <h1 className="font-serif text-4xl sm:text-5xl text-ink font-normal tracking-tight">
-            The Eye Wellness <span className="italic text-plum">Journal</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+            <span>Vision Research & Daily Practices</span>
+          </div>
+          <h1 className="font-sora text-4xl sm:text-5xl font-extrabold text-brand-charcoal tracking-tight">
+            The Eye Wellness <span className="text-brand-purple">Journal</span>
           </h1>
-          <p className="text-sm sm:text-base text-ink-muted max-w-xl mx-auto leading-relaxed">
-            Practical guides on digital eye strain, classical palming routines, and holistic nourishment from our Auroville practitioners.
+          <p className="font-inter text-base text-brand-secondary max-w-xl mx-auto leading-relaxed">
+            Practical guides on digital eye strain, classical palming routines, and holistic visual habits from our Auroville practitioners.
           </p>
         </div>
       </section>
@@ -57,10 +57,10 @@ export function BlogsListingView({ initialBlogs }: BlogsListingViewProps) {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 text-xs rounded-full font-medium transition-all ${
+                className={`px-4 py-2 text-xs rounded-full font-sora font-semibold transition-all ${
                   selectedCategory === cat
-                    ? "bg-plum text-white shadow-sm"
-                    : "bg-white text-ink hover:text-plum border border-ink-border"
+                    ? "bg-brand-purple text-white shadow-sm"
+                    : "bg-white text-brand-charcoal hover:bg-brand-lavender/40 border border-brand-gray"
                 }`}
               >
                 {cat === "all" ? "All Topics" : cat}
@@ -69,14 +69,14 @@ export function BlogsListingView({ initialBlogs }: BlogsListingViewProps) {
           </div>
 
           {/* Search Box */}
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-ink-muted absolute left-3 top-2.5" />
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-brand-secondary absolute left-3.5 top-3" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search articles..."
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-full border border-ink-border bg-white text-ink focus:outline-none focus:ring-2 focus:ring-plum"
+              placeholder="Search articles & guides..."
+              className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-full border border-brand-gray bg-white text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 shadow-sm"
             />
           </div>
         </div>
@@ -87,43 +87,43 @@ export function BlogsListingView({ initialBlogs }: BlogsListingViewProps) {
             <Link
               key={post.id}
               href={`/blogs/${post.slug}`}
-              className="group bg-white rounded-2xl overflow-hidden border border-ink-border shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+              className="group bg-white rounded-3xl overflow-hidden border border-brand-gray/80 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(75,29,143,0.1)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
             >
               <div>
-                <div className="h-52 overflow-hidden bg-canvas-dark">
+                <div className="aspect-[16/10] overflow-hidden bg-brand-gray relative">
                   <img
                     src={post.coverImage}
                     alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
+                  <div className="absolute top-3.5 left-3.5">
+                    <span className="px-3 py-1 rounded-full text-xs font-sora font-semibold bg-white/95 backdrop-blur-sm text-brand-purple shadow-sm">
+                      {post.category}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="p-6">
-                  <div className="flex items-center justify-between text-xs text-ink-muted mb-2">
-                    <Badge variant="sage" className="text-[10px]">
-                      {post.category}
-                    </Badge>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {post.readTime}
-                    </span>
+                  <div className="flex items-center gap-2 text-xs font-inter text-brand-secondary mb-2.5">
+                    <Clock className="w-3.5 h-3.5 text-brand-purple" />
+                    <span>{post.readTime}</span>
+                    <span>•</span>
+                    <span>{post.publishedDate}</span>
                   </div>
 
-                  <h3 className="font-serif text-xl font-normal text-ink group-hover:text-plum transition-colors mb-2 leading-snug">
+                  <h3 className="font-sora text-xl font-bold text-brand-charcoal group-hover:text-brand-purple transition-colors leading-snug mb-2.5">
                     {post.title}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-ink-muted line-clamp-3 leading-relaxed">
+                  <p className="font-inter text-xs sm:text-sm text-brand-secondary line-clamp-3 leading-relaxed">
                     {post.excerpt}
                   </p>
                 </div>
               </div>
 
-              <div className="px-6 pb-6 pt-2 border-t border-ink-border/40 flex items-center justify-between text-xs text-ink-muted">
-                <span>By {post.authorName}</span>
-                <span className="font-medium text-gold-dark flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Read article <ArrowRight className="w-3.5 h-3.5" />
-                </span>
+              <div className="p-6 pt-0 border-t border-brand-gray/60 mt-4 flex items-center justify-between text-xs font-sora font-semibold text-brand-orange">
+                <span>Read Article</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           ))}

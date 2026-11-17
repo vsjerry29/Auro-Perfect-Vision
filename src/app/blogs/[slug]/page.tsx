@@ -2,9 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBlogPostBySlug, getAllBlogPosts } from "@/lib/server/cms";
-import { Clock, ArrowLeft, ArrowRight, User, Calendar, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Clock, ArrowLeft, ArrowRight, User, Calendar, ShieldCheck, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +17,14 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   if (!post || !post.isPublished) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4">
-        <h2 className="font-serif text-3xl text-ink">Article Not Found</h2>
-        <p className="text-sm text-ink-muted">The requested journal entry does not exist or is still in draft.</p>
-        <Link href="/blogs">
-          <Button variant="primary" size="md">
-            Return to Journal
-          </Button>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4 bg-white">
+        <h2 className="font-sora text-3xl font-bold text-brand-charcoal">Article Not Found</h2>
+        <p className="text-sm font-inter text-brand-secondary">The requested journal entry does not exist or is still in draft.</p>
+        <Link
+          href="/blogs"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-purple text-white text-sm font-sora font-semibold hover:bg-brand-violet transition-colors"
+        >
+          Return to Journal
         </Link>
       </div>
     );
@@ -35,33 +34,37 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
   const related = allBlogs.filter((b) => b.id !== post.id).slice(0, 2);
 
   return (
-    <article className="bg-canvas min-h-screen pb-24">
+    <article className="bg-[#FAF9FC] min-h-screen pb-24">
       {/* Back link */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <Link
-          href="/blogs"
-          className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-plum font-medium transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Journal</span>
-        </Link>
+      <div className="bg-white border-b border-brand-gray/80 py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link
+            href="/blogs"
+            className="inline-flex items-center gap-2 text-xs font-sora font-semibold text-brand-secondary hover:text-brand-purple transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to All Articles</span>
+          </Link>
+        </div>
       </div>
 
       {/* Article Header */}
-      <header className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10 space-y-5 text-center">
+      <header className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 space-y-5 text-center">
         <div className="inline-flex items-center gap-2">
-          <Badge variant="plum">{post.category}</Badge>
-          <span className="text-xs text-ink-muted flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" /> {post.readTime}
+          <span className="px-3.5 py-1 rounded-full text-xs font-sora font-semibold bg-brand-lavender text-brand-purple">
+            {post.category}
+          </span>
+          <span className="text-xs font-inter text-brand-secondary flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-brand-orange" /> {post.readTime}
           </span>
         </div>
 
-        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-ink font-normal tracking-tight leading-tight">
+        <h1 className="font-sora text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-charcoal tracking-tight leading-tight">
           {post.title}
         </h1>
 
-        <div className="flex items-center justify-center gap-4 text-xs text-ink-muted pt-2 border-t border-b border-ink-border/50 py-3">
-          <span className="font-medium text-ink">Author: {post.authorName}</span>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-inter text-brand-secondary pt-2 border-t border-b border-brand-gray/80 py-3">
+          <span className="font-semibold text-brand-charcoal">Author: {post.authorName}</span>
           <span>•</span>
           <span>Published: {post.publishedDate}</span>
           <span>•</span>
@@ -71,48 +74,48 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
       {/* Hero Cover Image */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        <div className="rounded-3xl overflow-hidden shadow-elevated border-4 border-white">
+        <div className="rounded-3xl overflow-hidden shadow-lg border border-brand-gray/80 bg-white">
           <img
             src={post.coverImage}
             alt={post.title}
-            className="w-full h-80 sm:h-[420px] object-cover"
+            className="w-full h-80 sm:h-[460px] object-cover"
           />
         </div>
       </div>
 
       {/* Article Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="prose prose-stone max-w-none text-ink leading-relaxed space-y-6 text-base font-sans">
+        <div className="bg-white p-8 sm:p-12 rounded-3xl border border-brand-gray/80 shadow-sm space-y-6">
           {post.content.split("\n\n").map((para, i) => {
             if (para.startsWith("### ")) {
               return (
-                <h3 key={i} className="font-serif text-2xl text-ink font-medium mt-8 mb-3">
+                <h3 key={i} className="font-sora text-xl sm:text-2xl font-bold text-brand-charcoal mt-8 mb-3">
                   {para.replace("### ", "")}
                 </h3>
               );
             }
             return (
-              <p key={i} className="text-ink/90 leading-relaxed text-sm sm:text-base">
+              <p key={i} className="text-brand-charcoal/90 leading-relaxed text-sm sm:text-base font-inter">
                 {para}
               </p>
             );
           })}
-        </div>
 
-        {/* Disclaimer Note */}
-        <div className="mt-12 p-6 bg-sage/40 rounded-2xl border border-sage-muted text-xs text-ink-muted leading-relaxed flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-sage-dark flex-shrink-0 mt-0.5" />
-          <div>
-            <span className="font-semibold text-ink block mb-0.5">Educational Notice:</span>
-            <span>
-              The techniques discussed in this article are intended for ocular relaxation, stress release, and natural ergonomic awareness. They are not a substitute for professional clinical medical advice or surgical treatments.
-            </span>
+          {/* Disclaimer Note */}
+          <div className="mt-8 p-6 bg-brand-lavender/50 rounded-2xl border border-brand-purple/20 text-xs font-inter text-brand-secondary leading-relaxed flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-brand-purple flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-brand-charcoal block mb-0.5">Educational Purpose Notice:</span>
+              <span>
+                The routines and concepts outlined in this article are intended for ocular relaxation, visual ergonomics, and natural wellness education. They do not substitute for certified clinical ophthalmological diagnoses or surgical treatment.
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Related Articles */}
-        <div className="mt-16 pt-10 border-t border-ink-border space-y-6">
-          <h3 className="font-serif text-2xl text-ink font-normal">
+        <div className="mt-16 pt-10 border-t border-brand-gray/80 space-y-6">
+          <h3 className="font-sora text-2xl font-bold text-brand-charcoal">
             More from the Journal
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -120,19 +123,19 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
               <Link
                 key={item.id}
                 href={`/blogs/${item.slug}`}
-                className="p-5 rounded-2xl bg-white border border-ink-border shadow-subtle hover:shadow-card transition-all flex flex-col justify-between"
+                className="p-6 rounded-3xl bg-white border border-brand-gray/80 shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all flex flex-col justify-between group"
               >
                 <div>
-                  <Badge variant="sage" className="mb-2 text-[10px]">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-sora font-semibold bg-brand-lavender text-brand-purple mb-3">
                     {item.category}
-                  </Badge>
-                  <h4 className="font-serif text-base font-medium text-ink line-clamp-2">
+                  </span>
+                  <h4 className="font-sora text-base font-bold text-brand-charcoal group-hover:text-brand-purple transition-colors line-clamp-2 leading-snug">
                     {item.title}
                   </h4>
                 </div>
-                <div className="pt-4 text-xs text-gold-dark font-medium flex items-center gap-1">
+                <div className="pt-4 text-xs font-sora font-semibold text-brand-orange flex items-center gap-1">
                   <span>Read article</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             ))}

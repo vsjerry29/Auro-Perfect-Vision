@@ -1,5 +1,155 @@
 [
   {
+    "id": "act-1794942528316",
+    "clientContactId": "client-1794942528223",
+    "eventType": "clients_merged",
+    "title": "Duplicate Profiles Merged",
+    "description": "Merged with Jean-Paul Sartre (Alternate) (APV-CLI-1010) by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T19:08:48.316Z"
+  },
+  {
+    "id": "act-1794942528307",
+    "clientContactId": "client-1794942528306",
+    "eventType": "client_created",
+    "title": "Client Contact Created",
+    "description": "Manually created by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T19:08:48.307Z"
+  },
+  {
+    "id": "act-1794942528292",
+    "clientContactId": "client-1794942528223",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T19:08:48.292Z"
+  },
+  {
+    "id": "act-1794942528285",
+    "clientContactId": "client-1794942528223",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T19:08:48.285Z"
+  },
+  {
+    "id": "act-1794942528277",
+    "clientContactId": "client-1794942528223",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T19:08:48.277Z"
+  },
+  {
+    "id": "act-1794941773516",
+    "clientContactId": "client-1794941773424",
+    "eventType": "clients_merged",
+    "title": "Duplicate Profiles Merged",
+    "description": "Merged with Jean-Paul Sartre (Alternate) (APV-CLI-1009) by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:56:13.516Z"
+  },
+  {
+    "id": "act-1794941773506",
+    "clientContactId": "client-1794941773505",
+    "eventType": "client_created",
+    "title": "Client Contact Created",
+    "description": "Manually created by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:56:13.506Z"
+  },
+  {
+    "id": "act-1794941773491",
+    "clientContactId": "client-1794941773424",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:56:13.491Z"
+  },
+  {
+    "id": "act-1794941773485",
+    "clientContactId": "client-1794941773424",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:56:13.485Z"
+  },
+  {
+    "id": "act-1794941773476",
+    "clientContactId": "client-1794941773424",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:56:13.476Z"
+  },
+  {
+    "id": "act-1794941172617",
+    "clientContactId": "client-1794941172522",
+    "eventType": "clients_merged",
+    "title": "Duplicate Profiles Merged",
+    "description": "Merged with Jean-Paul Sartre (Alternate) (APV-CLI-1008) by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:46:12.617Z"
+  },
+  {
+    "id": "act-1794941172608",
+    "clientContactId": "client-1794941172607",
+    "eventType": "client_created",
+    "title": "Client Contact Created",
+    "description": "Manually created by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:46:12.608Z"
+  },
+  {
+    "id": "act-1794941172593",
+    "clientContactId": "client-1794941172522",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:46:12.593Z"
+  },
+  {
+    "id": "act-1794941172586",
+    "clientContactId": "client-1794941172522",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:46:12.586Z"
+  },
+  {
+    "id": "act-1794941172578",
+    "clientContactId": "client-1794941172522",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T18:46:12.578Z"
+  },
+  {
     "id": "act-1794932806059",
     "clientContactId": "client-1794932806001",
     "eventType": "clients_merged",

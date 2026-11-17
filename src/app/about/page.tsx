@@ -1,109 +1,187 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Eye, Sparkles, Trees, Heart, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  Compass,
+  Sun,
+  Eye,
+  HeartHandshake,
+  CheckCircle2,
+  TreePine,
+} from "lucide-react";
 
 export const metadata = {
   title: "About Us | Auro Perfect Vision — Centre for Vision Beyond Glasses",
   description:
-    "Our philosophy, educational Bates and yogic methodology, and our roots in the intentional township of Auroville.",
+    "Discover the philosophy, integrative Bates methodology, and serene Auroville roots of Auro Perfect Vision.",
 };
 
 export default function AboutPage() {
   return (
-    <div className="bg-canvas">
-      {/* Editorial Hero */}
-      <section className="pt-16 pb-20 border-b border-ink-border/50 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
-          <Badge variant="gold" className="text-xs">
-            Our Purpose & Origins
-          </Badge>
+    <div className="bg-[#FAF9FC] min-h-screen pb-24">
+      {/* Hero Section */}
+      <section className="pt-20 pb-16 bg-white border-b border-brand-gray/80 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+            <span>Our Heritage & Purpose</span>
+          </div>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink font-normal tracking-tight leading-tight">
-            Nurturing sight as a <span className="italic text-plum">conscious, living sense.</span>
+          <h1 className="font-sora text-4xl sm:text-5xl lg:text-6xl font-extrabold text-brand-charcoal tracking-tight leading-tight">
+            Nurturing Sight as a <span className="text-brand-purple">Conscious, Dynamic Sense.</span>
           </h1>
 
-          <p className="font-sans text-base sm:text-lg text-ink-muted leading-relaxed max-w-2xl mx-auto">
-            Auro Perfect Vision was established in Auroville with a simple yet profound conviction: the eyes are dynamic organs capable of relaxation, flexibility, and sustained comfort when given mindful care.
+          <p className="font-inter text-base sm:text-lg text-brand-secondary leading-relaxed max-w-3xl mx-auto">
+            Auro Perfect Vision was established in Auroville with a transformative conviction: the eyes are dynamic organs capable of relaxation, neuromuscular adaptability, and sustained comfort when given mindful care and proper visual hygiene.
           </p>
         </div>
       </section>
 
-      {/* Main Story & Values */}
-      <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-        {/* Story Block 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
-          <div className="md:col-span-6 space-y-4">
-            <span className="text-xs font-sans uppercase tracking-widest text-gold-dark font-semibold">
-              The Auroville Connection
+      {/* Main Narrative & Photographic Journey */}
+      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+        {/* Story Block 1: Auroville Forest Haven */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6 space-y-5">
+            <span className="text-xs font-inter font-bold uppercase tracking-widest text-brand-orange">
+              The Auroville Sanctuary
             </span>
-            <h2 className="font-serif text-3xl text-ink font-normal">
-              An ecosystem of holistic living and human unity.
+            <h2 className="font-sora text-3xl sm:text-4xl font-bold text-brand-charcoal leading-tight">
+              An ecosystem of mindful living, green canopies, and quiet distance.
             </h2>
-            <p className="text-sm text-ink-muted leading-relaxed">
-              Situated in the international universal township of Auroville, our centre draws deeply from the spirit of integral education pioneered by Sri Aurobindo and The Mother. Rather than viewing eye fatigue as an isolated optical malfunction, we approach it within the context of total human wellbeing — physical relaxation, mental stillness, and harmony with natural light.
+            <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
+              Situated in the international universal township of Auroville, our centre draws deeply from the spirit of integral development. Rather than treating ocular fatigue as an isolated mechanical defect, we understand it within the broader rhythm of human wellbeing — physical relaxation, mental stillness, and harmony with natural sunlight.
             </p>
-            <p className="text-sm text-ink-muted leading-relaxed">
-              Our quiet facility is surrounded by lush red soil, ancient banyan trees, and tranquil walking trails that invite the eyes to gaze into natural distance.
+            <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
+              Our quiet facility is surrounded by lush green foliage and open horizons that naturally encourage the ciliary muscles to disengage from constant near-point strain and gaze effortlessly into infinity.
             </p>
           </div>
-          <div className="md:col-span-6 rounded-2xl overflow-hidden shadow-card border-4 border-white">
+          <div className="lg:col-span-6 rounded-3xl overflow-hidden shadow-lg border border-brand-gray/80 group">
             <img
-              src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1000&q=80"
+              src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80"
               alt="Serene natural setting in Auroville"
-              className="w-full h-80 object-cover"
+              className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             />
           </div>
         </div>
 
-        {/* Story Block 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center md:flex-row-reverse">
-          <div className="md:col-span-6 rounded-2xl overflow-hidden shadow-card border-4 border-white md:order-last">
-            <img
-              src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1000&q=80"
-              alt="Palming and relaxation practice"
-              className="w-full h-80 object-cover"
-            />
-          </div>
-          <div className="md:col-span-6 space-y-4">
-            <span className="text-xs font-sans uppercase tracking-widest text-gold-dark font-semibold">
-              Our Integrated Methods
+        {/* 4 Pillars Grid */}
+        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-brand-gray/80 shadow-sm space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-inter font-bold uppercase tracking-wider text-brand-purple">
+              Core Principles
             </span>
-            <h2 className="font-serif text-3xl text-ink font-normal">
-              Gentle practices rooted in classical vision education.
+            <h3 className="font-sora text-2xl sm:text-3xl font-bold text-brand-charcoal">
+              Four Pillars of Natural Eye Wellness
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-2xl bg-[#FAF9FC] border border-brand-gray/80 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-purple flex items-center justify-center">
+                <Sun className="w-5 h-5 text-brand-orange" />
+              </div>
+              <h4 className="font-sora text-base font-bold text-brand-charcoal">
+                Sun & Natural Light
+              </h4>
+              <p className="font-inter text-xs text-brand-secondary leading-relaxed">
+                Gentle sunning rituals to desensitize photophobia and nourish retinal cellular metabolism.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAF9FC] border border-brand-gray/80 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-purple flex items-center justify-center">
+                <Eye className="w-5 h-5 text-brand-purple" />
+              </div>
+              <h4 className="font-sora text-base font-bold text-brand-charcoal">
+                Central Fixation
+              </h4>
+              <p className="font-inter text-xs text-brand-secondary leading-relaxed">
+                Retraining the macula to see clearly without squinting, furrowing brows, or staring rigidly.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAF9FC] border border-brand-gray/80 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-purple flex items-center justify-center">
+                <TreePine className="w-5 h-5 text-emerald-600" />
+              </div>
+              <h4 className="font-sora text-base font-bold text-brand-charcoal">
+                Relaxed Mobility
+              </h4>
+              <p className="font-inter text-xs text-brand-secondary leading-relaxed">
+                Rhythmical sway and shifting exercises that break habitual eye spasms caused by monitor fixations.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#FAF9FC] border border-brand-gray/80 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-purple flex items-center justify-center">
+                <HeartHandshake className="w-5 h-5 text-brand-orange" />
+              </div>
+              <h4 className="font-sora text-base font-bold text-brand-charcoal">
+                Empowered Habits
+              </h4>
+              <p className="font-inter text-xs text-brand-secondary leading-relaxed">
+                Daily 10-minute micro-habits that allow students and professionals to sustain visual ease for life.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Story Block 2: Integrative Methodology */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6 rounded-3xl overflow-hidden shadow-lg border border-brand-gray/80 group lg:order-1 order-2">
+            <img
+              src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80"
+              alt="Mindful vision exercise"
+              className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            />
+          </div>
+          <div className="lg:col-span-6 space-y-5 lg:order-2 order-1">
+            <span className="text-xs font-inter font-bold uppercase tracking-widest text-brand-orange">
+              Our Methodology
+            </span>
+            <h2 className="font-sora text-3xl sm:text-4xl font-bold text-brand-charcoal leading-tight">
+              Gentle practices harmonized with modern ocular photobiomodulation.
             </h2>
-            <p className="text-sm text-ink-muted leading-relaxed">
-              Our methodology harmonizes classical Bates relaxation routines (palming, sunning, shifting) with contemporary ocular photobiomodulation (red light therapy) and digital ergonomic hygiene.
+            <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
+              Our educational curriculum combines classical Bates relaxation techniques (palming, long swing, sunning) with supportive 670nm red-light photobiomodulation and digital workspace ergonomics.
             </p>
-            <p className="text-sm text-ink-muted leading-relaxed">
-              We guide children struggling with early near-point strain and adults facing prolonged monitor glare to rebuild relaxed accommodation habits, effortless blinking reflexes, and peripheral visual breadth.
+            <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
+              We guide children encountering early near-point strain and working adults facing digital eye fatigue to rebuild relaxed accommodation habits, effortless blinking reflexes, and peripheral visual presence.
             </p>
           </div>
         </div>
 
-        {/* Health Responsibility & Disclaimer Card */}
-        <div className="bg-sage/40 rounded-2xl p-8 border border-sage-muted space-y-3">
-          <div className="flex items-center gap-2 text-sage-dark font-serif text-lg font-medium">
-            <ShieldCheck className="w-5 h-5 text-sage-dark" />
+        {/* Responsible Boundaries & Disclaimer */}
+        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-brand-gray/80 shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5 text-brand-charcoal font-sora text-lg font-bold">
+            <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
             <span>Responsible Wellness & Clinical Boundaries</span>
           </div>
-          <p className="text-xs sm:text-sm text-ink-muted leading-relaxed">
-            Auro Perfect Vision provides educational vision wellness, eye yoga, and complementary ocular relaxation therapies. We do not claim to replace licensed medical ophthalmological surgery, medical prescriptions, or emergency disease diagnosis. We encourage all participants to maintain routine clinical examinations with their certified eye care specialists.
+          <p className="font-inter text-xs sm:text-sm text-brand-secondary leading-relaxed">
+            Auro Perfect Vision provides educational vision wellness, eye yoga, and complementary ocular relaxation therapies. We do not perform ophthalmological surgery, prescribe medical drugs, or replace hospital clinical diagnosis. We actively encourage all clients to maintain regular check-ups with certified ophthalmologists.
           </p>
         </div>
 
         {/* Call to action */}
-        <div className="text-center pt-8 space-y-4">
-          <h3 className="font-serif text-2xl text-ink">
-            Experience our mindful approach in person or online.
+        <div className="text-center pt-8 space-y-5">
+          <h3 className="font-sora text-2xl sm:text-3xl font-bold text-brand-charcoal">
+            Experience our mindful approach in Auroville or online.
           </h3>
-          <div className="flex justify-center gap-4">
-            <Link href="/therapies">
-              <Button variant="primary" size="lg" className="gap-2">
-                <span>View Therapies & Book</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/therapies"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white text-sm font-sora font-bold shadow-md hover:shadow-lg transition-all"
+            >
+              <span>Explore Therapies & Book</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white text-brand-purple border border-brand-purple/30 text-sm font-sora font-semibold hover:bg-brand-lavender/50 transition-colors"
+            >
+              <span>Contact Our Team</span>
             </Link>
           </div>
         </div>

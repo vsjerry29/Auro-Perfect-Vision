@@ -3,27 +3,89 @@
 @tailwind utilities;
 
 :root {
-  --font-fraunces: 'Fraunces', Georgia, serif;
-  --font-dmsans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --canvas: #F8F5F0;
-  --plum: #432747;
-  --gold: #BA9453;
-  --sage: #E8EDE6;
-  --ink: #2E2435;
+  --font-sora: 'Sora', system-ui, sans-serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  
+  --brand-purple: #4B1D8F;
+  --brand-violet: #6838D3;
+  --brand-deep: #2E145C;
+  --brand-orange: #FF6B1A;
+  --brand-orange-hover: #E9550C;
+  --brand-lavender: #F4F0FF;
+  --brand-gray: #F3F5F8;
+  --brand-charcoal: #1F2430;
+  --brand-secondary: #667085;
 }
 
 @layer base {
   body {
-    background-color: var(--canvas);
-    color: var(--ink);
-    font-family: var(--font-dmsans);
+    background-color: #FFFFFF;
+    color: #1F2430;
+    font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, .font-serif {
-    font-family: var(--font-fraunces);
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sora);
+    letter-spacing: -0.02em;
+    color: #1F2430;
   }
+}
+
+/* Fluid responsive typography helpers */
+.hero-headline {
+  font-size: clamp(2.35rem, 5.5vw, 4.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.section-headline {
+  font-size: clamp(1.85rem, 3.8vw, 3rem);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+
+.card-title {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  line-height: 1.25;
+}
+
+/* Glassmorphism & Modern card utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-panel-dark {
+  background: rgba(46, 20, 92, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Interactive transitions */
+.card-hover-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Horizontal category scroll rail without visible scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Accessible focus ring */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #FF6B1A;
+  outline-offset: 2px;
 }
 
 /* Reduced Motion Safety */

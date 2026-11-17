@@ -1,146 +1,116 @@
-# AURO PERFECT VISION — ADVANCED CMS, CRM & SECURITY IMPLEMENTATION HANDOFF
+# AURO PERFECT VISION — MODERN WEBSITE REDESIGN & FULL PLATFORM HANDOFF
 
-**Public Brand:** Auro Perfect Vision (Centre for Vision Beyond Glasses • Auroville)  
-**System Version:** 2.0.0 Production-Ready Release  
-**Status:** Verification Complete & Fully Runnable Locally  
-**Verification Suite:** 42 Tests Passed • 0 Failed (`scripts/verify_crm_and_security.js`)  
+**Official Brand Name:** Auro Perfect Vision (Auroville Centre for Vision Beyond Glasses)  
+**System Architecture:** Next.js 14 (App Router) • React 18 • TypeScript • Tailwind CSS • Supabase PostgreSQL  
+**Design Direction:** Modern, photography-driven eye-care and vision therapy platform (inspired by contemporary consumer health brands with clean, photographic category discovery)  
+**Color System:** Primary Royal Purple (`#4B1D8F`), Action Orange (`#FF6B1A`), Electric Violet (`#6838D3`), Light Lavender (`#F4F0FF`), Off-White Canvas (`#FAF9FC`), Charcoal (`#1F2430`)  
+**Typography:** Sora (Headings & Hero Displays) + Inter (Body, Inputs & UI Elements)  
+**Verification Suite:** **42 Tests Passed • 0 Failed** (`scripts/verify_crm_and_security.js`)  
+**Production Build:** **59 Routes Compiled Successfully** (`next build` — Exit Code 0)  
 
 ---
 
-## 1. Executive Summary
+## 1. Executive Summary of Changes Delivered
 
-This milestone delivers a complete, secure, database-backed CMS, multi-practitioner operational suite, and comprehensive **Clients / CRM System** for **Auro Perfect Vision** in Auroville, Tamil Nadu.
+In this coordinated development milestone, the entire public-facing website for **Auro Perfect Vision** was overhauled from an editorial serif layout into a vibrant, photography-forward, modern healthcare brand:
 
-### Key Milestones Delivered:
-1. **Route Protection & Security Enforcement:**
-   - Real server-side Next.js Edge Middleware protecting `/admin/**`, `/therapist/**`, `/api/admin/**`, and `/api/therapist/**`.
-   - Anonymous access safely blocked and redirected to branded staff login (`/staff/login?redirect=...`).
-   - PBKDF2 password hashing (10,000 iterations, 64 bytes, SHA-512) and HMAC-SHA256 session token generation with Web Crypto verification.
-   - Strict Role-Based Access Control: `super_admin`, `admin`, and `therapist`. Therapists are strictly blocked from `/admin` and administrative APIs (HTTP 403 Forbidden).
-2. **Resolved Therapist Dashboard Exception:**
-   - Fixed the `TypeError: myBookings.filter is not a function` client-side crash at `http://localhost:3000/therapist` by standardizing array extraction and resilient fallbacks across all practitioner pages.
-3. **Dedicated Public Contact Page (`/contact`):**
-   - Branded contact experience with verified Auroville phone numbers (`+91 8012305151`, `+91 9488005685`), email, physical address, consulting hours, and direct WhatsApp web integration.
-   - Interactive inquiry form with server-side validation, anti-spam honeypot (`website_url_hp`), and automatic CRM lead creation.
-4. **Complete Clients / CRM System (`/admin/crm`):**
-   - **Unified Clients Directory:** Search, tags, status filters (`lead`, `active`, `vip`, `archived`), and KPIs.
-   - **Client 360 View (`/admin/crm/clients/[id]`):** 6 organized tabs (Timeline/Activities, Bookings & Appointments with intake answers viewer, Inquiries, Follow-up Tasks, Internal Clinical Notes, Billing & Invoices).
-   - **Embedded Manual Booking Flow:** Staff can schedule appointments directly on behalf of clients.
-   - **Guest Inquiries Pipeline (`/admin/crm/inquiries`):** Multi-stage lead management (`new`, `contacted`, `follow_up`, `booked`, `closed_not_interested`).
-   - **Follow-up Tasks Queue (`/admin/crm/tasks`):** Action items, priority badges, due dates, and inline completion toggling.
-   - **Supervised Deduplication & Merge:** Automated duplicate detection by email and phone with manual admin review and merge.
-   - **Audited CSV Import & Export:** Bulk client import with dry-run validation and compliance-audited CSV export.
-5. **Website Editor with Revisions & Rollback (`/admin/cms`):**
-   - Dynamic site synchronization for Homepage hero headline, subtitle, photographic art, contact numbers, and hours.
-   - Image upload integration (`/api/admin/upload`).
-   - Journal blog articles CRUD.
-   - Version snapshot history with one-click revision rollback.
-6. **Flagship Programmes Builder (`/admin/programmes`):**
-   - Residential retreats manager (7-day eye camp syllabus, cohorts, capacity, multi-currency pricing, duplicate cohort).
-7. **Media Asset Library (`/admin/media`):**
-   - Asset grid, upload file picker, alt text editor, and copy path utility.
-8. **Master Calendar (`/admin/calendar`):**
-   - Consolidated calendar across all practitioners with month/agenda views and appointment inspection.
-9. **Manage Staff Users (`/admin/users`):**
-   - Staff roster with roles, account status (`active`, `invited`, `suspended`), "+ Invite Staff" modal with therapist public profile synchronization, and protection against deleting the last administrator.
-10. **Compliance & Audit Log (`/admin/audit`):**
-    - Tamper-evident record of administrative operations, staff attribution, and CSV audit export.
-11. **Production Supabase PostgreSQL Schema & RLS Migrations:**
-    - `supabase/migrations/001_initial_schema.sql` (19 core tables)
-    - `supabase/migrations/002_rls_policies.sql` (Core RLS policies)
-    - `supabase/migrations/003_crm_and_advanced_schema.sql` (CRM tables: client contacts, inquiries, tasks, notes, activities, programmes, media assets, CMS revisions)
-    - `supabase/migrations/004_crm_rls_policies.sql` (CRM RLS policies)
+1. **Official Brand Logo Integration:**
+   - Evaluated the reference logo asset, created an optimized local asset at `public/images/logo.webp`, and integrated it across the sticky header and dark footer.
+   - Preserved exact proportions: royal purple eye contour with bright orange brain/lotus iris and arched "Auro Perfect Vision" typography.
+
+2. **Modern Color System & Typography:**
+   - Eliminated the previous muted sage, ivory, and plum palette.
+   - Deployed Sora for headings (`font-sora`) with fluid `clamp()` sizing and Inter for body text (`font-inter`).
+   - Integrated high-contrast Action Orange buttons (`#FF6B1A`) with hover glow and electric violet accents.
+
+3. **Homepage Overhaul (12 Coordinated Sections):**
+   - **Section 1 (Hero):** Bold headline `"See Better. Live Brighter."`, dual CTAs (Action Orange "Book an Appointment" + Electric Violet "Explore Therapies"), modern clinic consultation photography, and rating badge.
+   - **Section 2 (Quick Therapy Discovery Rail):** Category navigation circular photo cards (Eye Yoga, Screen Relief, Vision Therapy, Photobiomodulation, Skill Enhancement, Residential Camp).
+   - **Section 3 (Why Choose Us):** 4 modern benefit cards with clean icons (1-on-1 Sessions, Integrative Therapy, Auroville Forest Sanctuary, Seamless Guest Booking).
+   - **Section 4 (Featured Therapies Grid):** Photographic cards with category badges, duration pills, INR/USD pricing, and direct booking actions.
+   - **Section 5 (A Different Perspective):** Asymmetric photo stack highlighting Bates method principles (ciliary relaxation, central fixation, relaxed mobility).
+   - **Section 6 (Meet Our Specialists):** Contemporary practitioner preview featuring Dr. Ananya Sen & Rajesh Kannan with direct booking links.
+   - **Section 7 (Flagship Residential Camp):** Deep violet immersive card for the 7-Day Residential Eye Camp in Auroville with syllabus highlights.
+   - **Section 8 (How Booking Works):** 4 clean numbered steps from session selection to instant confirmation.
+   - **Section 9 (What to Expect):** Transparent patient journey and ethical complementary healthcare notice.
+   - **Section 10 (Visit Our Sanctuary in Auroville):** Physical address, hours, verified phone numbers (`+91 8012305151`, `+91 9488005685`), and direct WhatsApp link.
+   - **Section 11 (Eye Wellness Journal):** Clean 3-card educational articles preview.
+   - **Section 12 (Final Action Banner):** Violet gradient banner with instant reservation buttons.
+
+4. **Therapies Catalogue (`/therapies`):**
+   - Lenskart-inspired category pill tabs with real-time counters.
+   - Delivery toggle (Auroville On-site / Online Video) and Format selector (1-on-1 / Group).
+   - Real-time search filter and photographic cards with card-lift hover transitions.
+
+5. **Therapy Detail View (`/therapies/[slug]`):**
+   - High-impact photographic banner with rounded-3xl corners.
+   - Sticky reservation callout box with price breakdown, session format, and Action Orange CTA.
+   - Methodology breakdown, "What to Expect" checklist, "Who This Therapy is Suited For" pill badges, and assigned educator profiles.
+
+6. **About Page (`/about`):**
+   - Brand story framed around mindful vision care, Auroville's green sanctuary, and the 4 pillars of natural eye wellness.
+   - Clear medical disclaimer detailing complementary wellness scope.
+
+7. **Specialists & Team Directory (`/team`):**
+   - Contemporary cards with high-resolution portraits, role titles, qualifications, bios, and direct booking links.
+
+8. **Contact Page & Interactive Form (`/contact`):**
+   - Split layout with telephone desk, email, physical location, and direct WhatsApp chat.
+   - Interactive inquiry form with topic selector, anti-spam honeypot, and automated CRM lead ingestion.
+
+9. **Journal & Reader Experience (`/blogs` & `/blogs/[slug]`):**
+   - Clean photographic card grid, category filters, and high-readability article reader with author credits and related stories.
+
+10. **Guest Booking Experience (`/book/[slug]` & `/booking/[reference]`):**
+    - Multi-step wizard with modern stepper indicator, practitioner picker, 7-day slot selector, confidential intake questionnaire, and order summary with currency toggle (INR / USD).
+    - Status tracking page with instant booking reference lookup and sample PDF invoice simulator.
+
+11. **Preserved Backend Security & Enterprise Modules:**
+    - Zero regressions to server-side PBKDF2/HMAC authentication, role guards (`super_admin`, `admin`, `therapist`), Admin Console (`/admin/**`), Therapist Portal (`/therapist/**`), CRM Client 360, Duplicate Merge, and CMS Revisions Rollback.
 
 ---
 
 ## 2. Default Staff Test Credentials
 
-| Role | Email | Password | Initial Redirect |
+| Role | Email | Password | Target Route |
 |---|---|---|---|
 | **Administrator** | `admin@auroperfectvision.com` | `AuroVision@2026!` | `/admin` |
 | **Practitioner (Therapist)** | `therapist@auroperfectvision.com` | `AnanyaVision@2026!` | `/therapist` |
 
-*Security Note:* Sessions expire in 7 days and are delivered in HTTP-only, secure, `SameSite=Lax` cookies (`apv_staff_session`).
+---
+
+## 3. Route Verification Matrix
+
+| Route | View Description | Visual Status | Test Status |
+|---|---|:---:|:---:|
+| `/` | **Homepage:** 12-section modern photography-driven landing page | Complete | Pass (200 OK) |
+| `/therapies` | **Therapies Directory:** Category pills, filters, search, photo cards | Complete | Pass (200 OK) |
+| `/therapies/[slug]` | **Offering Details:** Photographic hero, sticky booking card, methodology | Complete | Pass (200 OK) |
+| `/about` | **About Centre:** Auroville sanctuary narrative, 4 wellness pillars | Complete | Pass (200 OK) |
+| `/team` | **Specialists:** Contemporary educator roster with direct booking links | Complete | Pass (200 OK) |
+| `/contact` | **Contact & Inquiries:** Contact info + CRM-connected inquiry form | Complete | Pass (200 OK) |
+| `/blogs` | **Wellness Journal:** Educational eye-care articles grid | Complete | Pass (200 OK) |
+| `/blogs/[slug]` | **Article Reader:** Clean reading typography with related posts | Complete | Pass (200 OK) |
+| `/book/[offeringSlug]` | **Guest Booking Wizard:** 4-step reservation flow with intake form | Complete | Pass (200 OK) |
+| `/booking/[reference]` | **Booking Tracking:** Live reference lookup and status tracking | Complete | Pass (200 OK) |
+| `/staff/login` | **Staff Portal Login:** Branded authentication with safe redirects | Complete | Pass (200 OK) |
+| `/admin/**` | **Admin Suite:** CRM Client 360, CMS revisions, bookings, calendar | Complete | Pass (401/403 guarded) |
+| `/therapist/**` | **Therapist Suite:** Schedule, appointments, client intakes | Complete | Pass (401/403 guarded) |
 
 ---
 
-## 3. Complete Routes & Modules Map
+## 4. How to Run Locally
 
-### Public Web Experience
-| Route | Description | Status |
-|---|---|:---:|
-| `/` | **Homepage:** Live CMS hero, holistic therapies preview, Bates philosophy, team preview, and journal articles. | Pass |
-| `/about` | **About Centre:** Vision beyond glasses philosophy, non-clinical complementary care disclaimer. | Pass |
-| `/therapies` | **Catalogue:** Filterable holistic therapies & retreats directory with dynamic search. | Pass |
-| `/therapies/[slug]` | **Offering Details:** In-depth syllabus, benefits, assigned guides, and booking shortcut. | Pass |
-| `/team` | **Practitioner Roster:** Guide bios, credentials, and specialties. | Pass |
-| `/blogs` | **Journal:** Educational articles on digital strain and eye yoga. | Pass |
-| `/blogs/[slug]` | **Article View:** Typographic reader layout. | Pass |
-| `/contact` | **Contact Page:** Verified Auroville phone numbers, operating hours, interactive inquiry form, honeypot anti-spam, and direct WhatsApp links. | Pass |
-| `/book/[offeringSlug]` | **Guest Booking Wizard:** 4-step booking flow. | Pass |
-| `/booking/[reference]` | **Booking Confirmation:** Real-time reference lookup and status tracking. | Pass |
-| `/staff/login` | **Staff Portal Login:** Branded sign-in screen with error notifications and safe redirect handling. | Pass |
-
-### Administrative Console (`/admin/**`)
-| Route | Module | Permissions |
-|---|---|:---:|
-| `/admin` | **Platform Overview:** High-level metrics, active appointments, and operational indicators. | Admin, Super Admin |
-| `/admin/bookings` | **Bookings Ledger:** Global booking table, filters, and "Mark as Paid" action. | Admin, Super Admin |
-| `/admin/calendar` | **Master Calendar:** Month grid and agenda view of appointments across all practitioners. | Admin, Super Admin |
-| `/admin/crm` | **Clients Directory:** Unified CRM client index, search, filters, KPIs, and duplicate review. | Admin, Super Admin |
-| `/admin/crm/clients/[id]` | **Client 360:** Comprehensive client journey (Timeline, Bookings, Inquiries, Tasks, Notes, Billing, Manual Booking). | Admin, Super Admin |
-| `/admin/crm/inquiries` | **Inquiries & Leads:** Contact form pipeline, stage tracking, and internal staff notes. | Admin, Super Admin |
-| `/admin/crm/tasks` | **Follow-up Tasks:** Staff queue with priority badges and completion toggle. | Admin, Super Admin |
-| `/admin/offerings` | **Therapies Catalogue:** Create and edit therapy services and pricing. | Admin, Super Admin |
-| `/admin/programmes` | **Flagship Programmes:** Residential eye retreat builder, cohorts, and daily syllabus. | Admin, Super Admin |
-| `/admin/therapists` | **Practitioners Roster:** Practitioner profiles, bios, and specialties. | Admin, Super Admin |
-| `/admin/intake-builder` | **Intake Form Builder:** Dynamic questionnaire schema configuration. | Admin, Super Admin |
-| `/admin/cms` | **Website CMS Editor:** Live site content editor, blog publisher, and Revision Rollback. | Admin, Super Admin |
-| `/admin/media` | **Media Library:** Image asset gallery and upload integration. | Admin, Super Admin |
-| `/admin/payments` | **Payments Ledger:** Offline verification queue and transaction history. | Admin, Super Admin |
-| `/admin/users` | **Manage Staff Users:** Staff accounts, roles, statuses, and safe deletion. | Admin, Super Admin |
-| `/admin/audit` | **Compliance & Audit Log:** Chronological audit trail with CSV export. | Super Admin |
-| `/admin/settings` | **System Settings:** Operational policies and environment indicators. | Super Admin |
-
-### Practitioner Portal (`/therapist/**`)
-| Route | Module | Permissions |
-|---|---|:---:|
-| `/therapist` | **Practitioner Overview:** Personal appointment schedule, client details, and intake forms. | Therapist |
-| `/therapist/schedule` | **Weekly Hours:** Recurring day/hour availability slots. | Therapist |
-| `/therapist/time-off` | **Time Off & Leave:** Blackout dates preventing double-booking. | Therapist |
-
----
-
-## 4. Local Execution & Automated Testing
-
-### Start Production Server
 ```powershell
-# In D:\Aurokiya
+# 1. Typecheck the codebase
+npx tsc --noEmit
+
+# 2. Build the production application
 npm run build
-npm run start -- -p 3000
-```
 
-### Run Automated Verification Suite
-```powershell
+# 3. Start the production server
+npm run start -- -p 3000
+
+# 4. Run the automated 42-point CRM & Security verification suite
 node scripts/verify_crm_and_security.js
 ```
-**Results:**
-- Test Group 1: Route Protection & Middleware Guards (17/17 Passed)
-- Test Group 2: Public Website & Contact Form Lead Capture (4/4 Passed)
-- Test Group 3: Staff Authentication & Session Issuance (3/3 Passed)
-- Test Group 4: CRM Client 360, Inquiries, Tasks & Notes (6/6 Passed)
-- Test Group 5: Audited CRM CSV Export & Supervised Deduplication (4/4 Passed)
-- Test Group 6: Flagship Programmes, Media & Master Calendar (3/3 Passed)
-- Test Group 7: CMS Revisions & Snapshot History (1/1 Passed)
-- Test Group 8: Therapist Dashboard & Role-Based Isolation (3/3 Passed)
-- Test Group 9: Compliance Audit Trail Verification (1/1 Passed)
-**Total: 42 Passed, 0 Failed.**
-
----
-
-## 5. Third-Party Integrations Policy
-
-In accordance with strict system rules:
-- **Payment Gateways (Razorpay / PayPal):** Kept safely in sandbox mode. Offline payment rails (`offline_cash`, `offline_bank_transfer`) are fully functional with front-desk settlement workflows.
-- **WhatsApp & Email Notifications:** Automated triggers log to internal queues and notification preview drawers; external webhook delivery is gated until client provides production API keys.
-- **Deployment & Real Funds:** No external production deployment or live monetary charges have been executed.

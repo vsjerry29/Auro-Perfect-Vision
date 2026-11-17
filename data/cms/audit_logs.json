@@ -9,6 +9,45 @@
     "details": {
       "format": "CSV"
     },
+    "id": "audit-1794942528299",
+    "timestamp": "2026-11-17T19:08:48.299Z"
+  },
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
+    "id": "audit-1794941773498",
+    "timestamp": "2026-11-17T18:56:13.499Z"
+  },
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
+    "id": "audit-1794941172600",
+    "timestamp": "2026-11-17T18:46:12.600Z"
+  },
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
     "id": "audit-1794932806045",
     "timestamp": "2026-11-17T16:26:46.045Z"
   },

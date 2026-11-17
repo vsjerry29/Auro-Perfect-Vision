@@ -3,142 +3,195 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Eye, Heart, MapPin, Mail, Phone, Clock } from "lucide-react";
+import {
+  MapPin,
+  Mail,
+  Phone,
+  Clock,
+  MessageCircle,
+  Shield,
+  Heart,
+  ArrowRight,
+  Lock,
+} from "lucide-react";
 
 export function SiteFooter() {
   const pathname = usePathname();
 
-  // Do not render marketing footer inside admin or therapist dashboards
-  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/therapist") || pathname.startsWith("/staff");
+  // Exclude administrative dashboards safely
+  const isDashboard = Boolean(
+    pathname &&
+      (pathname.startsWith("/admin") ||
+        pathname.startsWith("/therapist") ||
+        pathname.startsWith("/staff"))
+  );
   if (isDashboard) return null;
 
   return (
-    <footer className="bg-ink text-canvas-light border-t border-ink-muted/30 pt-16 pb-12 font-sans">
+    <footer className="bg-brand-charcoal text-white font-inter border-t border-brand-gray/20 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-ink-muted/40">
-          {/* Column 1: Brand & Auroville Identity */}
-          <div className="md:col-span-1 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-gold flex items-center justify-center text-plum shadow">
-                <Eye className="w-5 h-5 stroke-[2.2]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/10">
+          {/* Column 1: Brand & Logo (2 cols on lg) */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <div className="w-12 h-10 bg-white rounded-xl p-1 shadow-sm shrink-0 flex items-center justify-center">
+                <img
+                  src="/images/logo.webp"
+                  alt="Auro Perfect Vision Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="font-serif text-xl text-canvas-light tracking-tight">
-                Auro Perfect Vision
-              </span>
-            </div>
-            <p className="text-xs text-canvas-dark/80 leading-relaxed">
-              Centre for Vision Beyond Glasses. Grounded in the conscious lifestyle of Auroville, dedicating our work to natural eye relaxation, visual motor skills, and mindful screen recovery.
+              <div>
+                <span className="font-sora text-xl font-bold tracking-tight text-white block">
+                  Auro Perfect <span className="text-brand-orange">Vision</span>
+                </span>
+                <span className="text-[10px] font-inter uppercase tracking-widest text-white/60 block font-semibold">
+                  Auroville Centre for Vision Beyond Glasses
+                </span>
+              </div>
+            </Link>
+
+            <p className="text-xs text-white/70 leading-relaxed max-w-sm">
+              Dedicated to natural vision improvement, mindful eye relaxation, Bates exercises, and digital screen recovery for children and adults worldwide. Rooted in the serene environment of Auroville, Tamil Nadu.
             </p>
-            <div className="text-xs text-gold-light/90 flex items-center gap-1.5 pt-1">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Auroville, Tamil Nadu 605101, India</span>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <a
+                href="https://wa.me/918012305151"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 text-xs hover:bg-emerald-600/30 transition-colors"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>Chat on WhatsApp</span>
+              </a>
+              <a
+                href="tel:+918012305151"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 text-white/90 border border-white/15 text-xs hover:bg-white/20 transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>+91 80123 05151</span>
+              </a>
             </div>
           </div>
 
-          {/* Column 2: Public Navigation */}
-          <div>
-            <h4 className="font-serif text-sm font-semibold tracking-wider uppercase text-gold mb-4">
-              Explore
+          {/* Column 2: Holistic Therapies */}
+          <div className="space-y-3">
+            <h4 className="font-sora text-xs font-bold tracking-wider uppercase text-brand-orange">
+              Therapies & Retreats
             </h4>
-            <ul className="space-y-2.5 text-xs text-canvas-dark/90">
+            <ul className="space-y-2 text-xs text-white/70">
               <li>
-                <Link href="/about" className="hover:text-gold-light transition-colors">
-                  Our Mission & Philosophy
+                <Link href="/therapies/eye-yoga" className="hover:text-white transition-colors">
+                  Eye Yoga (All Ages)
                 </Link>
               </li>
               <li>
-                <Link href="/therapies" className="hover:text-gold-light transition-colors">
-                  Therapies & Flagship Programmes
+                <Link href="/therapies/vision-stress-relief" className="hover:text-white transition-colors">
+                  Digital Screen Relief
                 </Link>
               </li>
               <li>
-                <Link href="/team" className="hover:text-gold-light transition-colors">
-                  Meet the Practitioners
-                </Link>
-              </li>
-              <li>
-                <Link href="/blogs" className="hover:text-gold-light transition-colors">
-                  Eye Wellness Journal
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-gold-light transition-colors">
-                  Contact & Directions
-                </Link>
-              </li>
-              <li>
-                <Link href="/therapies" className="hover:text-gold-light transition-colors">
-                  Book a Consultation
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Core Offerings */}
-          <div>
-            <h4 className="font-serif text-sm font-semibold tracking-wider uppercase text-gold mb-4">
-              Core Offerings
-            </h4>
-            <ul className="space-y-2.5 text-xs text-canvas-dark/90">
-              <li>
-                <Link href="/therapies/eye-yoga" className="hover:text-gold-light transition-colors">
-                  Eye Yoga (Children & Adults)
-                </Link>
-              </li>
-              <li>
-                <Link href="/therapies/vision-stress-relief" className="hover:text-gold-light transition-colors">
-                  Vision Stress Relief Therapy
-                </Link>
-              </li>
-              <li>
-                <Link href="/therapies/customized-vision-therapy" className="hover:text-gold-light transition-colors">
+                <Link href="/therapies/customized-vision-therapy" className="hover:text-white transition-colors">
                   Customized Vision Therapy
                 </Link>
               </li>
               <li>
-                <Link href="/therapies/visual-skill-enhancement" className="hover:text-gold-light transition-colors">
+                <Link href="/therapies/visual-skill-enhancement" className="hover:text-white transition-colors">
                   Visual Skill Enhancement
                 </Link>
               </li>
               <li>
-                <Link href="/therapies/retreat-holistic-vision-awakening" className="hover:text-gold-light transition-colors">
-                  7-Day Vision Awakening Retreat
+                <Link href="/therapies/dry-eye-red-light-therapy" className="hover:text-white transition-colors">
+                  Dry Eye Photobiomodulation
+                </Link>
+              </li>
+              <li>
+                <Link href="/therapies/retreat-holistic-vision-awakening" className="hover:text-white transition-colors font-medium text-brand-violet">
+                  7-Day Residential Eye Camp
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Contact & Responsible Health Notice */}
-          <div className="space-y-4">
-            <h4 className="font-serif text-sm font-semibold tracking-wider uppercase text-gold mb-4">
-              Visiting & Inquiries
+          {/* Column 3: Navigation */}
+          <div className="space-y-3">
+            <h4 className="font-sora text-xs font-bold tracking-wider uppercase text-brand-orange">
+              Explore
             </h4>
-            <div className="space-y-2 text-xs text-canvas-dark/90">
-              <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-gold" />
-                <span>Mon - Sat: 9:00 AM - 5:30 PM IST</span>
+            <ul className="space-y-2 text-xs text-white/70">
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  Our Philosophy & Approach
+                </Link>
+              </li>
+              <li>
+                <Link href="/therapies" className="hover:text-white transition-colors">
+                  All Therapies Catalogue
+                </Link>
+              </li>
+              <li>
+                <Link href="/team" className="hover:text-white transition-colors">
+                  Meet Our Vision Guides
+                </Link>
+              </li>
+              <li>
+                <Link href="/blogs" className="hover:text-white transition-colors">
+                  Eye Wellness Journal
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-white transition-colors">
+                  Location & Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/therapies" className="hover:text-white transition-colors text-brand-orange font-semibold">
+                  Book an Appointment &rarr;
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Contact & Auroville */}
+          <div className="space-y-3">
+            <h4 className="font-sora text-xs font-bold tracking-wider uppercase text-brand-orange">
+              Sanctuary Details
+            </h4>
+            <div className="space-y-2 text-xs text-white/70">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
+                <span>Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-gold" />
+                <Phone className="w-4 h-4 text-brand-orange shrink-0" />
+                <span>+91 80123 05151 / +91 94880 05685</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-brand-orange shrink-0" />
                 <span>connect@auroperfectvision.com</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-gold" />
-                <span>+91 8012305151 / +91 9488005685</span>
+              <div className="flex items-start gap-2 pt-1">
+                <Clock className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
+                <span>Mon – Sat: 9:00 AM – 5:30 PM IST (Closed Sundays)</span>
               </div>
             </div>
-            <p className="text-[11px] text-canvas-dark/60 leading-normal pt-2 border-t border-ink-muted/30">
-              Educational & Complementary Notice: Natural vision exercises and eye yoga are designed for relaxation and visual hygiene. They are not a replacement for ophthalmological medical diagnosis or surgical care.
-            </p>
           </div>
         </div>
 
-        {/* Bottom Strip */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-canvas-dark/60 gap-4">
-          <p>© {new Date().getFullYear()} Auro Perfect Vision. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Built with care for conscious living in Auroville <Heart className="w-3 h-3 text-gold fill-gold inline" />
+        {/* Advisory & Bottom Bar */}
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/50">
+          <p className="text-[11px] max-w-2xl leading-relaxed text-white/40">
+            <strong>Advisory Notice:</strong> Auro Perfect Vision provides holistic eye yoga, relaxation education, and complementary vision wellness therapies. We do not perform surgical procedures or dispense prescription medication. Consult an ophthalmologist for acute pathology.
           </p>
+
+          <div className="flex items-center gap-4 text-[11px] shrink-0">
+            <span>&copy; {new Date().getFullYear()} Auro Perfect Vision.</span>
+            <span>•</span>
+            <Link href="/staff/login" className="hover:text-white/80 transition-colors flex items-center gap-1 text-[10px]">
+              <Lock className="w-2.5 h-2.5" /> Staff Portal
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -9,9 +9,7 @@ import { SlotPicker } from "./slot-picker";
 import { DynamicIntakeForm } from "./dynamic-intake-form";
 import { OrderSummary } from "./order-summary";
 import { ConfirmationView } from "./confirmation-view";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, ShieldCheck, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, Check, RefreshCw } from "lucide-react";
 
 interface BookingWizardProps {
   offering: Offering;
@@ -43,7 +41,6 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
   );
 
   const initialDateStr = useMemo(() => {
-    // Pick tomorrow as initial candidate date
     return format(addDays(startOfToday(), 1), "yyyy-MM-dd");
   }, []);
 
@@ -147,7 +144,7 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
   return (
     <div className="space-y-8">
       {/* Wizard Progress Stepper */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-ink-border shadow-subtle">
+      <div className="bg-white p-4 sm:p-6 rounded-3xl border border-brand-gray/80 shadow-sm">
         <div className="grid grid-cols-4 gap-2 sm:gap-4 text-center">
           {stepsLabels.map((label, idx) => {
             const stepNum = idx + 1;
@@ -157,23 +154,23 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
             return (
               <div key={idx} className="flex flex-col items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold mb-1.5 transition-all ${
+                  className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs font-sora font-bold mb-1.5 transition-all ${
                     isPassed
-                      ? "bg-plum text-white"
+                      ? "bg-brand-purple text-white shadow-sm"
                       : isCurrent
-                      ? "bg-gold text-white ring-4 ring-gold-soft"
-                      : "bg-canvas-dark text-ink-muted"
+                      ? "bg-brand-orange text-white shadow-md ring-4 ring-brand-orange/20"
+                      : "bg-brand-gray text-brand-secondary"
                   }`}
                 >
                   {isPassed ? <Check className="w-4 h-4" /> : stepNum}
                 </div>
                 <span
-                  className={`text-[11px] sm:text-xs font-sans truncate max-w-full ${
+                  className={`text-[11px] sm:text-xs font-inter truncate max-w-full ${
                     isCurrent
-                      ? "font-semibold text-ink"
+                      ? "font-bold text-brand-charcoal"
                       : isPassed
-                      ? "text-plum font-medium"
-                      : "text-ink-muted"
+                      ? "text-brand-purple font-semibold"
+                      : "text-brand-secondary"
                   }`}
                 >
                   {label}
@@ -207,20 +204,18 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
             onTimezoneChange={setClientTimezone}
           />
 
-          <div className="flex justify-end pt-4 border-t border-ink-border">
-            <Button
-              variant="primary"
-              size="lg"
+          <div className="flex justify-end pt-4 border-t border-brand-gray/80">
+            <button
               disabled={!canProceedStep1}
               onClick={() => {
                 setCurrentStep(2);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
-              className="gap-2"
+              className="py-3.5 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <span>Continue to Intake Details</span>
               <ArrowRight className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         </div>
       )}
@@ -243,26 +238,22 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
             errors={formErrors}
           />
 
-          <div className="flex justify-between items-center pt-4 border-t border-ink-border">
-            <Button
-              variant="outline"
-              size="md"
+          <div className="flex justify-between items-center pt-4 border-t border-brand-gray/80">
+            <button
               onClick={() => setCurrentStep(1)}
-              className="gap-2"
+              className="py-3 px-5 rounded-2xl bg-white border border-brand-gray text-brand-charcoal font-sora font-semibold text-xs flex items-center gap-2 hover:bg-brand-lavender/40 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Slot</span>
-            </Button>
+            </button>
 
-            <Button
-              variant="primary"
-              size="lg"
+            <button
               onClick={handleNextFromStep2}
-              className="gap-2"
+              className="py-3.5 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
             >
               <span>Proceed to Review & Payment</span>
               <ArrowRight className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         </div>
       )}
@@ -283,26 +274,25 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
             onPaymentMethodChange={setPaymentMethod}
           />
 
-          <div className="flex justify-between items-center pt-4 border-t border-ink-border">
-            <Button
-              variant="outline"
-              size="md"
+          <div className="flex justify-between items-center pt-4 border-t border-brand-gray/80">
+            <button
               onClick={() => setCurrentStep(2)}
-              className="gap-2"
+              className="py-3 px-5 rounded-2xl bg-white border border-brand-gray text-brand-charcoal font-sora font-semibold text-xs flex items-center gap-2 hover:bg-brand-lavender/40 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Intake</span>
-            </Button>
+            </button>
 
-            <Button
-              variant="gold"
-              size="lg"
+            <button
               disabled={isSubmitting}
               onClick={handleFinalSubmit}
-              className="gap-2 text-plum font-semibold"
+              className="py-3.5 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all disabled:opacity-60 cursor-pointer"
             >
               {isSubmitting ? (
-                <span>Confirming Booking...</span>
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Confirming Booking...</span>
+                </>
               ) : (
                 <>
                   <span>
@@ -313,7 +303,7 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
-            </Button>
+            </button>
           </div>
         </div>
       )}

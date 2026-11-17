@@ -1,5 +1,41 @@
 [
   {
+    "id": "note-1794942528276",
+    "clientContactId": "client-1794942528223",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T19:08:48.276Z",
+    "updatedAt": "2026-11-17T19:08:48.276Z"
+  },
+  {
+    "id": "note-1794941773475",
+    "clientContactId": "client-1794941773424",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T18:56:13.475Z",
+    "updatedAt": "2026-11-17T18:56:13.475Z"
+  },
+  {
+    "id": "note-1794941172576",
+    "clientContactId": "client-1794941172522",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T18:46:12.576Z",
+    "updatedAt": "2026-11-17T18:46:12.576Z"
+  },
+  {
     "id": "note-1794932806029",
     "clientContactId": "client-1794932806001",
     "authorStaffId": "staff-admin-1",

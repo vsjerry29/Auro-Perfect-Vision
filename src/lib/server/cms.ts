@@ -108,7 +108,22 @@ export function getAllOfferings(includeDrafts = true): Offering[] {
 
 export function getOfferingBySlug(slug: string): Offering | undefined {
   const offerings = getAllOfferings(true);
-  return offerings.find((o) => o.slug === slug);
+  const found = offerings.find((o) => o.slug === slug);
+  if (found) return found;
+
+  // Resilient slug aliases for legacy/descriptive links
+  const slugAliases: Record<string, string> = {
+    "eye-yoga-children-adults": "eye-yoga",
+    "vision-stress-relief-therapy": "vision-stress-relief",
+    "dry-eye-photobiomodulation": "dry-eye-red-light-therapy",
+    "residential-retreat": "retreat-holistic-vision-awakening",
+  };
+
+  const targetSlug = slugAliases[slug];
+  if (targetSlug) {
+    return offerings.find((o) => o.slug === targetSlug);
+  }
+  return undefined;
 }
 
 export function saveOffering(offeringData: Partial<Offering> & { title: string }): Offering {

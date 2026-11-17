@@ -32,10 +32,10 @@ export function DynamicIntakeForm({
   return (
     <div className="space-y-6">
       {/* Privacy Guarantee Pill */}
-      <div className="flex items-start gap-3 bg-sage/50 p-4 rounded-xl border border-sage-muted text-xs text-sage-dark">
-        <Lock className="w-4 h-4 flex-shrink-0 mt-0.5 text-sage-dark" />
+      <div className="flex items-start gap-3 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 text-xs font-inter text-emerald-800">
+        <Lock className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-700" />
         <div>
-          <span className="font-semibold block">Confidential Medical & Lifestyle Privacy</span>
+          <span className="font-bold block">Confidential Medical & Lifestyle Privacy</span>
           <span>
             Your responses are shared exclusively with your assigned practitioner to personalize your session. Zero account registration required.
           </span>
@@ -43,15 +43,15 @@ export function DynamicIntakeForm({
       </div>
 
       {/* Primary Contact Details */}
-      <div className="bg-white p-5 rounded-xl border border-ink-border space-y-4">
-        <h4 className="font-serif text-sm font-semibold text-ink uppercase tracking-wide border-b border-ink-border/50 pb-2">
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-gray/80 space-y-5 shadow-sm">
+        <h4 className="font-sora text-sm font-bold text-brand-charcoal uppercase tracking-wider border-b border-brand-gray/80 pb-3">
           Your Contact Information
         </h4>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-ink mb-1">
-              Full Name <span className="text-red-600">*</span>
+            <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+              Full Name <span className="text-brand-orange">*</span>
             </label>
             <input
               type="text"
@@ -59,18 +59,18 @@ export function DynamicIntakeForm({
               value={clientName}
               onChange={(e) => onNameChange(e.target.value)}
               placeholder="e.g. Meera Krishnan"
-              className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                errors.clientName ? "border-red-500" : "border-ink-border"
+              className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all ${
+                errors.clientName ? "border-rose-400" : "border-brand-gray"
               }`}
             />
             {errors.clientName && (
-              <p className="text-[11px] text-red-600 mt-1">{errors.clientName}</p>
+              <p className="text-[11px] text-rose-600 mt-1 font-inter">{errors.clientName}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-ink mb-1">
-              Email Address (for Invoice & Details) <span className="text-red-600">*</span>
+            <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+              Email Address (for Invoice & Details) <span className="text-brand-orange">*</span>
             </label>
             <input
               type="email"
@@ -78,18 +78,18 @@ export function DynamicIntakeForm({
               value={clientEmail}
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="meera@example.com"
-              className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                errors.clientEmail ? "border-red-500" : "border-ink-border"
+              className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all ${
+                errors.clientEmail ? "border-rose-400" : "border-brand-gray"
               }`}
             />
             {errors.clientEmail && (
-              <p className="text-[11px] text-red-600 mt-1">{errors.clientEmail}</p>
+              <p className="text-[11px] text-rose-600 mt-1 font-inter">{errors.clientEmail}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-ink mb-1">
-              WhatsApp Phone Number <span className="text-red-600">*</span>
+            <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+              WhatsApp Phone Number <span className="text-brand-orange">*</span>
             </label>
             <input
               type="tel"
@@ -97,20 +97,20 @@ export function DynamicIntakeForm({
               value={clientPhone}
               onChange={(e) => onPhoneChange(e.target.value)}
               placeholder="+91 98765 43210"
-              className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                errors.clientPhone ? "border-red-500" : "border-ink-border"
+              className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all ${
+                errors.clientPhone ? "border-rose-400" : "border-brand-gray"
               }`}
             />
             {errors.clientPhone && (
-              <p className="text-[11px] text-red-600 mt-1">{errors.clientPhone}</p>
+              <p className="text-[11px] text-rose-600 mt-1 font-inter">{errors.clientPhone}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Dynamic Session Questions */}
-      <div className="bg-white p-5 rounded-xl border border-ink-border space-y-5">
-        <h4 className="font-serif text-sm font-semibold text-ink uppercase tracking-wide border-b border-ink-border/50 pb-2">
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-gray/80 space-y-5 shadow-sm">
+        <h4 className="font-sora text-sm font-bold text-brand-charcoal uppercase tracking-wider border-b border-brand-gray/80 pb-3">
           Session Specific Questionnaire
         </h4>
 
@@ -120,12 +120,12 @@ export function DynamicIntakeForm({
 
           return (
             <div key={field.id} className="space-y-1.5">
-              <label className="block text-xs font-medium text-ink">
-                {field.label} {field.isRequired && <span className="text-red-600">*</span>}
+              <label className="block text-xs font-inter font-semibold text-brand-charcoal">
+                {field.label} {field.isRequired && <span className="text-brand-orange">*</span>}
               </label>
 
               {field.helpText && (
-                <p className="text-[11px] text-ink-muted">{field.helpText}</p>
+                <p className="text-[11px] font-inter text-brand-secondary">{field.helpText}</p>
               )}
 
               {/* Text Field */}
@@ -135,8 +135,8 @@ export function DynamicIntakeForm({
                   value={value}
                   placeholder={field.placeholder}
                   onChange={(e) => onChange(field.fieldKey, e.target.value)}
-                  className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                    error ? "border-red-500" : "border-ink-border"
+                  className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all ${
+                    error ? "border-rose-400" : "border-brand-gray"
                   }`}
                 />
               )}
@@ -148,8 +148,8 @@ export function DynamicIntakeForm({
                   value={value}
                   placeholder={field.placeholder}
                   onChange={(e) => onChange(field.fieldKey, e.target.value)}
-                  className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                    error ? "border-red-500" : "border-ink-border"
+                  className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all ${
+                    error ? "border-rose-400" : "border-brand-gray"
                   }`}
                 />
               )}
@@ -161,42 +161,41 @@ export function DynamicIntakeForm({
                   value={value}
                   placeholder={field.placeholder}
                   onChange={(e) => onChange(field.fieldKey, e.target.value)}
-                  className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                    error ? "border-red-500" : "border-ink-border"
+                  className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all resize-y ${
+                    error ? "border-rose-400" : "border-brand-gray"
                   }`}
                 />
               )}
 
-              {/* Select Dropdown */}
+              {/* Select Field */}
               {field.fieldType === "select" && (
                 <select
                   value={value}
                   onChange={(e) => onChange(field.fieldKey, e.target.value)}
-                  className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum ${
-                    error ? "border-red-500" : "border-ink-border"
+                  className={`w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white transition-all cursor-pointer ${
+                    error ? "border-rose-400" : "border-brand-gray"
                   }`}
                 >
-                  <option value="">-- Please select an option --</option>
-                  {field.options?.map((opt, i) => (
-                    <option key={i} value={opt}>
+                  <option value="">Select an option...</option>
+                  {field.options?.map((opt, idx) => (
+                    <option key={idx} value={opt}>
                       {opt}
                     </option>
                   ))}
                 </select>
               )}
 
-              {/* Radio Group */}
+              {/* Radio Field */}
               {field.fieldType === "radio" && (
-                <div className="space-y-2 pt-1">
-                  {field.options?.map((opt, i) => (
-                    <label key={i} className="flex items-center gap-2.5 text-xs text-ink cursor-pointer">
+                <div className="flex flex-wrap gap-4 pt-1">
+                  {(field.options || ["Yes", "No"]).map((opt, idx) => (
+                    <label key={idx} className="inline-flex items-center gap-2 text-xs font-inter cursor-pointer text-brand-charcoal">
                       <input
                         type="radio"
                         name={field.fieldKey}
-                        value={opt}
                         checked={value === opt}
                         onChange={() => onChange(field.fieldKey, opt)}
-                        className="text-plum focus:ring-plum h-4 w-4"
+                        className="text-brand-purple focus:ring-brand-purple"
                       />
                       <span>{opt}</span>
                     </label>
@@ -204,7 +203,25 @@ export function DynamicIntakeForm({
                 </div>
               )}
 
-              {error && <p className="text-[11px] text-red-600">{error}</p>}
+              {/* Checkbox Field */}
+              {field.fieldType === "checkbox" && (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id={field.fieldKey}
+                    checked={Boolean(value)}
+                    onChange={(e) => onChange(field.fieldKey, e.target.checked)}
+                    className="h-4 w-4 rounded border-brand-gray text-brand-purple focus:ring-brand-purple"
+                  />
+                  <label htmlFor={field.fieldKey} className="text-xs font-inter text-brand-secondary cursor-pointer">
+                    {field.label}
+                  </label>
+                </div>
+              )}
+
+              {error && (
+                <p className="text-[11px] text-rose-600 font-inter mt-1">{error}</p>
+              )}
             </div>
           );
         })}

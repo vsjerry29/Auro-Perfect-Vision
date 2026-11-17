@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, CheckCircle2, AlertCircle, RefreshCw, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Send, CheckCircle2, AlertCircle, RefreshCw, MessageSquare, Sparkles } from "lucide-react";
 
 export function ContactFormView() {
   const [name, setName] = useState("");
@@ -18,6 +16,14 @@ export function ContactFormView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successInfo, setSuccessInfo] = useState<{ reference: string; message: string } | null>(null);
+
+  const categories = [
+    "General Inquiry",
+    "Vision Therapy Consultation",
+    "Residential Eye Camp",
+    "Online Programme",
+    "Visiting Auroville Centre",
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,200 +100,216 @@ export function ContactFormView() {
 
   if (successInfo) {
     return (
-      <div className="bg-white p-8 sm:p-12 rounded-3xl border border-ink-border shadow-card space-y-6 animate-in fade-in duration-300 text-center">
-        <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto border-2 border-emerald-200">
+      <div className="bg-white p-8 sm:p-12 rounded-3xl border border-brand-gray/80 shadow-lg space-y-6 animate-in fade-in duration-300 text-center">
+        <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border-2 border-emerald-200">
           <CheckCircle2 className="w-8 h-8" />
         </div>
 
         <div className="space-y-2">
-          <Badge variant="success" className="text-xs">
-            Inquiry Submitted Successfully
-          </Badge>
-          <h3 className="font-serif text-2xl sm:text-3xl text-ink font-normal">
-            We Have Received Your Message
+          <span className="inline-flex items-center gap-1 text-xs font-inter font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+            Inquiry Received
+          </span>
+          <h3 className="font-sora text-2xl font-bold text-brand-charcoal">
+            Thank you for reaching out!
           </h3>
-          <p className="text-xs sm:text-sm text-ink-muted max-w-md mx-auto leading-relaxed">
+          <p className="font-inter text-sm text-brand-secondary max-w-md mx-auto leading-relaxed">
             {successInfo.message}
           </p>
         </div>
 
-        <div className="p-4 bg-canvas-light rounded-xl border border-ink-border max-w-sm mx-auto">
-          <span className="text-[10px] text-ink-muted uppercase tracking-wider block">
-            Tracking Reference
+        <div className="bg-[#FAF9FC] p-4 rounded-2xl border border-brand-gray max-w-sm mx-auto space-y-1">
+          <span className="text-[11px] uppercase font-inter font-bold tracking-wider text-brand-secondary block">
+            Reference Identifier
           </span>
-          <span className="font-mono text-base font-bold text-plum block mt-0.5">
+          <span className="font-mono text-base font-bold text-brand-purple">
             {successInfo.reference}
           </span>
+          <p className="text-[11px] text-brand-secondary pt-1">
+            Our team will reply to <span className="font-semibold text-brand-charcoal">{email}</span> within 24 business hours.
+          </p>
         </div>
 
         <div className="pt-2">
-          <Button variant="outline" size="md" onClick={handleReset} className="gap-2">
-            <RefreshCw className="w-4 h-4" />
-            <span>Submit Another Message</span>
-          </Button>
+          <button
+            onClick={handleReset}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-purple hover:bg-brand-violet text-white text-xs font-sora font-semibold transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Send Another Inquiry</span>
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 sm:p-10 rounded-3xl border border-ink-border shadow-card space-y-6">
-      <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-xs text-gold-dark font-semibold uppercase tracking-wider">
-          <MessageSquare className="w-3.5 h-3.5" />
-          <span>Send an Online Message</span>
-        </div>
-        <h3 className="font-serif text-2xl text-ink font-normal">
-          Inquire Directly with Our Centre
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 sm:p-10 rounded-3xl border border-brand-gray/80 shadow-lg space-y-6"
+    >
+      <div className="space-y-1 border-b border-brand-gray/80 pb-5">
+        <h3 className="font-sora text-xl sm:text-2xl font-bold text-brand-charcoal flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-brand-purple" />
+          <span>Send Us an Inquiry</span>
         </h3>
-        <p className="text-xs text-ink-muted leading-relaxed">
-          Fill in your details below and our team will get back to you with guidance and slot recommendations.
+        <p className="font-inter text-xs sm:text-sm text-brand-secondary">
+          Our team answers questions about vision consultations, retreat eligibility, and personalized routines.
         </p>
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-inter flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Anti-spam trap: hidden from real visitors */}
-        <div className="hidden" aria-hidden="true">
+      {/* Honeypot Spam Trap */}
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="website_url_hp">Website URL (Leave blank)</label>
+        <input
+          id="website_url_hp"
+          type="text"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
+      {/* Category Pills */}
+      <div>
+        <label className="block text-xs font-inter font-bold uppercase tracking-wider text-brand-secondary mb-2">
+          Topic / Area of Interest
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              type="button"
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-3 py-1.5 rounded-full text-xs font-inter transition-all ${
+                category === cat
+                  ? "bg-brand-purple text-white font-semibold shadow-sm"
+                  : "bg-[#FAF9FC] text-brand-charcoal border border-brand-gray hover:border-brand-purple/40"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Two column inputs: Name & Email */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+            Full Name <span className="text-brand-orange">*</span>
+          </label>
           <input
             type="text"
-            tabIndex={-1}
-            value={honeypot}
-            onChange={(e) => setHoneypot(e.target.value)}
-            autoComplete="off"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Priya Sharma"
+            className="w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white"
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-ink mb-1.5">
-              Your Full Name <span className="text-plum">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Maya Raman"
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-ink mb-1.5">
-              Email Address <span className="text-plum">*</span>
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+            Email Address <span className="text-brand-orange">*</span>
+          </label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="priya@example.com"
+            className="w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white"
+          />
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-ink mb-1.5">
-              Phone / WhatsApp Number <span className="text-ink-muted">(Optional)</span>
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum font-mono"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-ink mb-1.5">
-              Inquiry Category
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
-            >
-              <option value="General Inquiry">General Center Inquiry</option>
-              <option value="Natural Vision Therapy">Natural Vision Therapy (1:1)</option>
-              <option value="Digital Eye Strain">Digital Screen Fatigue Relief</option>
-              <option value="7-Day Residential Retreat">7-Day Residential Retreat in Auroville</option>
-              <option value="Booking Assistance">Booking & Rescheduling Help</option>
-              <option value="Other">Other Question</option>
-            </select>
-          </div>
+      {/* Two column inputs: Phone & Subject */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+            Phone / WhatsApp <span className="text-xs text-brand-secondary font-normal">(Optional)</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+91 98765 43210"
+            className="w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white"
+          />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-ink mb-1.5">
-            Subject <span className="text-plum">*</span>
+          <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+            Subject <span className="text-brand-orange">*</span>
           </label>
           <input
             type="text"
             required
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="e.g. Inquiring about November retreat schedule or children sessions"
-            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
+            placeholder="e.g. Inquiry regarding 7-day retreat"
+            className="w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white"
           />
         </div>
+      </div>
 
-        <div>
-          <label className="block text-xs font-medium text-ink mb-1.5">
-            Your Message <span className="text-plum">*</span>
-          </label>
-          <textarea
-            required
-            rows={4}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Please write your questions or context here. (Note: For confidential medical history, our session-specific intake form is filled after selecting a booking date)."
-            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum resize-none leading-relaxed"
-          />
-        </div>
+      {/* Message textarea */}
+      <div>
+        <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
+          Your Message <span className="text-brand-orange">*</span>
+        </label>
+        <textarea
+          required
+          rows={4}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Please share details about your eye condition, daily screen habits, or any questions about our methodology..."
+          className="w-full px-4 py-3 text-xs sm:text-sm font-inter rounded-2xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white resize-y"
+        />
+      </div>
 
-        {/* Consent Checkbox */}
-        <div className="pt-2 flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="contact-consent"
-            checked={consent}
-            onChange={(e) => setConsent(e.target.checked)}
-            className="w-4 h-4 rounded text-plum focus:ring-plum mt-0.5 cursor-pointer"
-          />
-          <label htmlFor="contact-consent" className="text-xs text-ink-muted leading-relaxed cursor-pointer select-none">
-            I agree to let Auro Perfect Vision contact me via email or phone/WhatsApp in response to this message.
-          </label>
-        </div>
+      {/* Consent checkbox */}
+      <div className="flex items-start gap-3 pt-1">
+        <input
+          type="checkbox"
+          id="consent"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-1 h-4 w-4 rounded border-brand-gray text-brand-purple focus:ring-brand-purple cursor-pointer"
+        />
+        <label htmlFor="consent" className="text-xs font-inter text-brand-secondary leading-relaxed cursor-pointer">
+          I consent to having Auro Perfect Vision securely store my inquiry details and contact me via email or phone regarding this request.
+        </label>
+      </div>
 
-        <div className="pt-3">
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            disabled={isSubmitting}
-            className="w-full gap-2 shadow-md"
-          >
-            {isSubmitting ? (
-              <span>Submitting Message...</span>
-            ) : (
-              <>
-                <span>Send Inquiry to Centre Desk</span>
-                <Send className="w-4 h-4" />
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-    </div>
+      {/* Submit Button */}
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-4 px-6 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all disabled:opacity-60 cursor-pointer"
+        >
+          {isSubmitting ? (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Sending Inquiry...</span>
+            </>
+          ) : (
+            <>
+              <span>Submit Message to Centre Desk</span>
+              <Send className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

@@ -1,8 +1,18 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Sun, ShieldCheck, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Eye,
+  Heart,
+  Activity,
+  Compass,
+} from "lucide-react";
 
 interface HeroProps {
   siteContent?: {
@@ -11,121 +21,144 @@ interface HeroProps {
     heroImageUrl?: string;
     primaryCtaText?: string;
     primaryCtaLink?: string;
+    heroSecondaryCtaLabel?: string;
   };
 }
 
 export function Hero({ siteContent }: HeroProps) {
-  const headline = siteContent?.heroHeadline || "A more mindful approach to natural vision.";
+  const headline = siteContent?.heroHeadline || "See Better. Live Brighter.";
   const subtitle =
     siteContent?.heroSubtitle ||
-    "Experience holistic ocular restoration amidst the serene forests of Auroville. Combining classical Eye Yoga, conscious relaxation, photobiomodulation, and digital screen recovery for children and adults worldwide.";
+    "Explore personalized vision therapy, eye yoga, and eye wellness programmes at Auro Perfect Vision, Auroville.";
   const heroImage =
     siteContent?.heroImageUrl ||
-    "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80";
-  const ctaText = siteContent?.primaryCtaText || "Explore Therapies & Book";
+    "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80";
+  const ctaText = siteContent?.primaryCtaText || "Book an Appointment";
   const ctaLink = siteContent?.primaryCtaLink || "/therapies";
+  const secondaryCta = siteContent?.heroSecondaryCtaLabel || "Explore Therapies";
 
   return (
-    <section className="relative overflow-hidden bg-canvas pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-ink-border/50">
-      {/* Subtle organic light gradient background */}
-      <div className="absolute top-0 right-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-gold-soft/60 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-sage/60 blur-3xl pointer-events-none" />
+    <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24 border-b border-brand-gray">
+      {/* Background radial gradient accents */}
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-brand-lavender/70 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-0 left-10 w-[350px] h-[350px] bg-brand-gray rounded-full blur-2xl pointer-events-none -z-10" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Editorial Headline & Value Prop */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2">
-              <Badge variant="gold" className="px-3 py-1 font-sans text-xs tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 mr-1 text-gold-dark inline" />
-                Auroville • Centre for Vision Beyond Glasses
-              </Badge>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Left Column: Bold Typography & CTAs */}
+          <div className="lg:col-span-7 space-y-6 text-left">
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-lavender border border-brand-purple/15 text-xs font-inter font-semibold text-brand-purple">
+              <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+              <span>Auroville International Sanctuary • Natural Eye Care</span>
             </div>
 
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink font-normal tracking-tight leading-[1.12]">
-              {headline}
+            {/* Main Bold Headline */}
+            <h1 className="font-sora hero-headline font-extrabold text-brand-charcoal tracking-tight">
+              See Better. <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-purple via-brand-violet to-brand-orange">
+                Live Brighter.
+              </span>
             </h1>
 
-            <p className="font-sans text-base sm:text-lg text-ink-muted max-w-xl leading-relaxed">
+            {/* Short Supporting Paragraph */}
+            <p className="font-inter text-base sm:text-lg text-brand-secondary max-w-xl leading-relaxed">
               {subtitle}
             </p>
 
-            {/* Action buttons */}
+            {/* Action Buttons */}
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <Link href={ctaLink}>
-                <Button variant="primary" size="lg" className="w-full sm:w-auto gap-2 group">
-                  <span>{ctaText}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
+              <Link
+                href="/therapies"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5 text-center"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>{ctaText}</span>
               </Link>
-              <Link href="/about">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  Our Holistic Methodology
-                </Button>
+
+              <Link
+                href="/therapies"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white hover:bg-brand-lavender/50 text-brand-purple border-2 border-brand-purple/20 hover:border-brand-purple font-sora text-sm font-bold tracking-wide transition-all duration-200 text-center"
+              >
+                <span>{secondaryCta}</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
-            {/* Credibility and reassurance metrics */}
-            <div className="pt-8 border-t border-ink-border/60 grid grid-cols-3 gap-6 text-left">
-              <div>
-                <span className="block font-serif text-2xl lg:text-3xl text-plum font-normal">
-                  1:1 & Group
-                </span>
-                <span className="text-xs text-ink-muted uppercase tracking-wider block mt-1">
-                  Individual Sessions & Retreats
+            {/* Reassurance Micro-Badges */}
+            <div className="pt-6 border-t border-brand-gray grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-xs font-inter font-medium text-brand-charcoal">
+                  Non-Surgical
                 </span>
               </div>
-              <div>
-                <span className="block font-serif text-2xl lg:text-3xl text-plum font-normal">
-                  Hybrid
-                </span>
-                <span className="text-xs text-ink-muted uppercase tracking-wider block mt-1">
-                  Auroville On-site & Global Online
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-xs font-inter font-medium text-brand-charcoal">
+                  1-on-1 & Retreats
                 </span>
               </div>
-              <div>
-                <span className="block font-serif text-2xl lg:text-3xl text-plum font-normal">
-                  No Login
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-xs font-inter font-medium text-brand-charcoal">
+                  Children & Adults
                 </span>
-                <span className="text-xs text-ink-muted uppercase tracking-wider block mt-1">
-                  Effortless Guest Booking
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-xs font-inter font-medium text-brand-charcoal">
+                  Instant Booking
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: High-End Editorial Photographic Art */}
+          {/* Right Column: Photography Presentation */}
           <div className="lg:col-span-5 relative">
             <div className="relative mx-auto max-w-md lg:max-w-none">
-              {/* Outer decorative border with rounded frame */}
-              <div className="relative rounded-3xl overflow-hidden shadow-elevated border-8 border-white bg-white">
+              {/* Main Photo Card */}
+              <div className="relative rounded-3xl overflow-hidden shadow-elevated border-4 border-white bg-brand-gray aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5] group">
                 <img
                   src={heroImage}
-                  alt="Mindful eye wellness practice in natural daylight"
-                  className="w-full h-[440px] sm:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
+                  alt="Auro Perfect Vision Eye Care Consultation"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="eager"
                 />
+                {/* Subtle gradient overlay at bottom for contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/60 via-transparent to-transparent pointer-events-none" />
 
-                {/* Floating organic card */}
-                <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md p-4 rounded-xl border border-ink-border/50 shadow-card">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-sage flex items-center justify-center text-sage-dark flex-shrink-0">
-                      <Sun className="w-5 h-5" />
-                    </div>
+                {/* Floating Bottom Card */}
+                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-white/40 shadow-card">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-serif text-sm font-medium text-ink">
-                        Gentle Bates & Yogic Palming
-                      </p>
-                      <p className="text-xs text-ink-muted">
-                        Restoring effortless blinking & natural ocular vitality.
-                      </p>
+                      <span className="text-[10px] font-inter uppercase tracking-wider text-brand-secondary block font-bold">
+                        Auroville Retreat & Clinic
+                      </span>
+                      <span className="text-sm font-sora font-bold text-brand-deep block mt-0.5">
+                        Vision Beyond Glasses
+                      </span>
                     </div>
+                    <span className="px-2.5 py-1 bg-brand-lavender text-brand-purple text-xs font-sora font-bold rounded-lg border border-brand-purple/15">
+                      4.9 ★ Rating
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Decorative corner tag */}
-              <div className="absolute -top-4 -right-4 bg-gold text-white text-xs font-sans font-medium px-4 py-1.5 rounded-full shadow-md hidden sm:block">
-                Rooted in Auroville
+              {/* Top Floating Badge */}
+              <div className="hidden sm:flex absolute -top-4 -left-6 bg-white p-3.5 rounded-2xl shadow-elevated border border-brand-gray items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange">
+                  <Eye className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div>
+                  <span className="text-xs font-sora font-bold text-brand-charcoal block">
+                    Bates Method & Yoga
+                  </span>
+                  <span className="text-[11px] font-inter text-brand-secondary block">
+                    Conscious Ocular Stillness
+                  </span>
+                </div>
               </div>
             </div>
           </div>

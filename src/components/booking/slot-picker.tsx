@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { format, addDays, startOfToday, isSameDay } from "date-fns";
+import { format, addDays, startOfToday } from "date-fns";
 import { Clock, Globe, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface SlotPickerProps {
   selectedDate: string; // YYYY-MM-DD
@@ -41,27 +40,27 @@ export function SlotPicker({
       {/* Date Picker Header */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block font-serif text-base text-ink font-medium">
+          <label className="block font-sora text-base text-brand-charcoal font-bold">
             Select Appointment Date
           </label>
-          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+          <div className="flex items-center gap-1.5 text-xs font-inter text-brand-secondary">
             <button
               type="button"
               disabled={weekOffset <= 0}
               onClick={() => setWeekOffset((p) => Math.max(0, p - 1))}
-              className="p-1.5 rounded border border-ink-border hover:bg-canvas-dark disabled:opacity-30 disabled:pointer-events-none"
+              className="p-1.5 rounded-xl border border-brand-gray hover:bg-brand-lavender/40 disabled:opacity-30 disabled:pointer-events-none transition-colors"
               aria-label="Previous week"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="font-medium text-ink">
+            <span className="font-semibold text-brand-charcoal">
               {format(days[0], "MMM d")} - {format(days[6], "MMM d, yyyy")}
             </span>
             <button
               type="button"
               disabled={weekOffset >= 4}
               onClick={() => setWeekOffset((p) => p + 1)}
-              className="p-1.5 rounded border border-ink-border hover:bg-canvas-dark disabled:opacity-30 disabled:pointer-events-none"
+              className="p-1.5 rounded-xl border border-brand-gray hover:bg-brand-lavender/40 disabled:opacity-30 disabled:pointer-events-none transition-colors"
               aria-label="Next week"
             >
               <ChevronRight className="w-4 h-4" />
@@ -85,18 +84,18 @@ export function SlotPicker({
                   onDateChange(dateStr);
                   onSlotChange(""); // reset selected slot when date changes
                 }}
-                className={`py-3 px-1 rounded-xl border text-center transition-all focus:outline-none focus:ring-2 focus:ring-plum ${
+                className={`py-3 px-1 rounded-2xl border text-center transition-all focus:outline-none focus:ring-2 focus:ring-brand-purple/50 ${
                   isSelected
-                    ? "bg-plum text-white border-plum shadow-md"
+                    ? "bg-brand-purple text-white border-brand-purple shadow-md font-bold"
                     : available
-                    ? "bg-white text-ink border-ink-border hover:border-plum/50 hover:bg-canvas-light"
-                    : "bg-canvas-dark/40 text-ink-faint border-transparent cursor-not-allowed opacity-40"
+                    ? "bg-white text-brand-charcoal border-brand-gray hover:border-brand-purple/40 hover:bg-[#FAF9FC]"
+                    : "bg-[#F3F5F8] text-brand-secondary/40 border-transparent cursor-not-allowed opacity-50"
                 }`}
               >
-                <span className="block text-[11px] font-sans uppercase tracking-wider mb-1">
+                <span className="block text-[11px] font-inter uppercase tracking-wider mb-1">
                   {format(day, "EEE")}
                 </span>
-                <span className="block font-serif text-lg font-medium">
+                <span className="block font-sora text-lg font-bold">
                   {format(day, "d")}
                 </span>
               </button>
@@ -106,14 +105,14 @@ export function SlotPicker({
       </div>
 
       {/* Timezone Indicator */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-ink-muted bg-canvas-dark/40 px-3.5 py-2.5 rounded-lg border border-ink-border/50 gap-2">
-        <span className="flex items-center gap-1.5">
-          <Globe className="w-4 h-4 text-plum" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-inter text-brand-secondary bg-[#FAF9FC] px-4 py-3 rounded-2xl border border-brand-gray/80 gap-2">
+        <span className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-brand-purple" />
           <span>Displayed in:</span>
           <select
             value={clientTimezone}
             onChange={(e) => onTimezoneChange(e.target.value)}
-            className="bg-white border border-ink-border text-ink rounded px-2 py-0.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-plum"
+            className="bg-white border border-brand-gray text-brand-charcoal rounded-xl px-2.5 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-purple/50 cursor-pointer"
           >
             <option value="Asia/Kolkata">Asia/Kolkata (IST • Centre Time)</option>
             <option value="UTC">UTC (Universal Time)</option>
@@ -124,29 +123,29 @@ export function SlotPicker({
             <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
           </select>
         </span>
-        <Badge variant="faint" className="text-[10px] self-start sm:self-auto">
-          Demo Availability Feed
-        </Badge>
+        <span className="text-[10px] uppercase font-bold tracking-wider text-brand-purple bg-brand-lavender px-2.5 py-1 rounded-full self-start sm:self-auto">
+          Live Centre Schedule
+        </span>
       </div>
 
       {/* Available Slots Grid */}
       <div>
-        <label className="block font-serif text-base text-ink font-medium mb-3">
+        <label className="block font-sora text-base text-brand-charcoal font-bold mb-3">
           Available Time Slots for {format(new Date(selectedDate), "EEEE, MMMM d")}
         </label>
 
         {availableSlots.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-xl border border-dashed border-ink-border text-ink-muted">
-            <AlertCircle className="w-6 h-6 mx-auto mb-2 text-gold-dark" />
-            <p className="text-sm font-medium text-ink">
+          <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-brand-gray text-brand-secondary space-y-2">
+            <AlertCircle className="w-6 h-6 mx-auto text-brand-orange" />
+            <p className="text-sm font-sora font-semibold text-brand-charcoal">
               No open appointments on this date.
             </p>
-            <p className="text-xs text-ink-muted mt-1">
+            <p className="text-xs font-inter text-brand-secondary">
               Practitioner may be on leave or fully booked. Please select an adjacent day.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {availableSlots.map((slot) => {
               const isSelected = selectedSlot === slot;
               return (
@@ -154,10 +153,10 @@ export function SlotPicker({
                   key={slot}
                   type="button"
                   onClick={() => onSlotChange(slot)}
-                  className={`py-2.5 px-3 rounded-lg border text-xs font-sans font-medium transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-plum ${
+                  className={`py-3 px-4 rounded-xl border text-xs font-inter font-semibold transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand-purple/50 ${
                     isSelected
-                      ? "bg-plum text-white border-plum shadow-sm"
-                      : "bg-white text-ink border-ink-border hover:border-ink-muted hover:bg-canvas-light"
+                      ? "bg-brand-purple text-white border-brand-purple shadow-sm"
+                      : "bg-white text-brand-charcoal border-brand-gray hover:border-brand-purple/40 hover:bg-[#FAF9FC]"
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5 opacity-70" />
