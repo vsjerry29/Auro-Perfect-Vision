@@ -21,10 +21,25 @@ export default function AdminIntakeBuilderPage() {
 
   const [fields, setFields] = useState<IntakeField[]>(activeTemplate.fields);
 
-  // Sync fields when selected offering changes
+  // Sync fields when selected offering changes or server templates arrive
   React.useEffect(() => {
-    setFields(activeTemplate.fields);
-  }, [activeTemplate]);
+    async function loadServerTemplate() {
+      try {
+        const res = await fetch(`/api/admin/intake-templates?offeringId=${encodeURIComponent(selectedOfferingId)}`);
+        if (res.ok) {
+          const tpl = await res.json();
+          if (tpl && Array.isArray(tpl.fields)) {
+            setFields(tpl.fields);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load server template:", err);
+      }
+      setFields(activeTemplate.fields);
+    }
+    loadServerTemplate();
+  }, [activeTemplate, selectedOfferingId]);
 
   const handleAddField = () => {
     const newField: IntakeField = {
@@ -61,8 +76,17 @@ export default function AdminIntakeBuilderPage() {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     saveIntakeFields(selectedOfferingId, fields);
+    try {
+      await fetch("/api/admin/intake-templates", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ offeringId: selectedOfferingId, fields }),
+      });
+    } catch (err) {
+      console.warn("Could not persist intake template to server:", err);
+    }
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 2500);
   };

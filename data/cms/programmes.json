@@ -1,0 +1,97 @@
+[
+  {
+    "id": "prog-1",
+    "slug": "auroville-7-day-mindful-vision-immersion",
+    "title": "Auroville 7-Day Mindful Vision Immersion Retreat",
+    "shortDescription": "A transformative residential retreat in Auroville. Daily Bates method sessions, ocular photobiomodulation, conscious breathing, and digital detox.",
+    "fullDescription": "Immerse yourself in seven days of focused ocular restoration amidst the serene forests of Auroville. This comprehensive programme is designed for individuals seeking to cultivate sustainable vision habits, dissolve chronic screen fatigue, and establish lifelong natural eye care practices under dedicated educator guidance.",
+    "durationLabel": "7 Days / 6 Nights",
+    "durationDays": 7,
+    "dailySessionMinutes": 180,
+    "format": "group",
+    "delivery": "onsite",
+    "priceINR": 28000,
+    "priceUSD": 420,
+    "leadFacilitatorIds": [
+      "therapist-1",
+      "therapist-2"
+    ],
+    "location": "Auro Perfect Vision Centre & Forest Pavilion, Auroville",
+    "maxCapacity": 12,
+    "imageUrl": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "Arrival & Individual Ocular Assessment",
+        "description": "Orientation, baseline eye ease evaluation, and evening conscious relaxation circle."
+      },
+      {
+        "day": 2,
+        "title": "Foundations of Palming & Shifting",
+        "description": "Deep dive into Bates palming techniques, saccadic movement, and natural blinking rhythm."
+      },
+      {
+        "day": 3,
+        "title": "Photobiomodulation & Sunning Rituals",
+        "description": "Controlled solar exposure, full-spectrum daylight therapy, and contrast baths."
+      },
+      {
+        "day": 4,
+        "title": "Peripheral Vision in Nature",
+        "description": "Forest walking meditation expanding visual fields and reducing central retinal fixation strain."
+      },
+      {
+        "day": 5,
+        "title": "Digital Fatigue Reversal & Breathwork",
+        "description": "Pranayama for ocular microcirculation, screen ergonomics, and blue light recovery."
+      },
+      {
+        "day": 6,
+        "title": "Movement, Accommodation & Near-Far Shifting",
+        "description": "Dynamic eye yoga drills, fusion charts, and relaxed accommodation games."
+      },
+      {
+        "day": 7,
+        "title": "Home Practice Blueprint & Closing Circle",
+        "description": "Personalized home routine design, follow-up schedule, and certificate of completion."
+      }
+    ],
+    "inclusions": [
+      "7 Days / 6 Nights peaceful Auroville guest house accommodation",
+      "All daily organic, eye-nourishing vegetarian meals and herbal infusions",
+      "Daily 3-hour guided clinical eye yoga & therapy workshops",
+      "Full photobiomodulation sessions and sunning practice",
+      "Personalized Home Vision Practice Kit & manual",
+      "1-on-1 progress reviews with Dr. Ananya Sen and educators"
+    ],
+    "preparationGuidelines": [
+      "Bring current glasses and recent prescription records",
+      "Comfortable loose clothing suitable for gentle floor yoga",
+      "Hat and water bottle for morning forest walking sessions",
+      "Commitment to digital device reduction during retreat hours"
+    ],
+    "cohorts": [
+      {
+        "id": "cohort-nov-2026",
+        "title": "Late Autumn Cohort (Nov 2026)",
+        "startDate": "2026-11-24",
+        "endDate": "2026-11-30",
+        "maxCapacity": 12,
+        "enrolledCount": 8,
+        "status": "upcoming"
+      },
+      {
+        "id": "cohort-dec-2026",
+        "title": "Solstice Immersive Cohort (Dec 2026)",
+        "startDate": "2026-12-15",
+        "endDate": "2026-12-21",
+        "maxCapacity": 12,
+        "enrolledCount": 4,
+        "status": "upcoming"
+      }
+    ],
+    "isPublished": true,
+    "createdAt": "2026-11-01T10:00:00Z",
+    "updatedAt": "2026-11-17T12:00:00Z"
+  }
+]

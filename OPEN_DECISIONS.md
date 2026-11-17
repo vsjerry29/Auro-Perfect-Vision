@@ -164,8 +164,17 @@ flowchart TD
 
 ---
 
-## 6. Next Steps for Project Stakeholders
+## 7. Current Implementation Status & Production Readiness
 
-1. **Review Tier 1 Decisions:** Schedule a dedicated alignment session with the client team to resolve Legal Entity, GST status, Gateway selection, and Offline Hold policies.
-2. **Asset Handover:** Secure official logo vectors and high-resolution photography.
-3. **Formal Approval:** Provide sign-off on the core architecture to authorize the commencement of Stage 1 (Technical Foundations & Schema Migration).
+| Functional Area | Architecture & Implementation Status | Production Deployment Prerequisite |
+|---|---|---|
+| **Public Website & Contact Page** | Fully implemented and verified with live CMS content and contact form inquiry pipeline. | Domain DNS pointing (`auroperfectvision.com`). |
+| **Authentication & RBAC** | Edge Middleware, PBKDF2 hashing, HMAC session tokens, and role separation (`super_admin`, `admin`, `therapist`). | Staff password change upon initial login. |
+| **Complete CRM / Clients 360** | Client 360 view, inquiries pipeline, task management, internal notes, manual bookings, duplicate detection, and CSV export. | None (persistent and verified). |
+| **Website CMS & Rollback** | Dynamic site editing with version snapshot history and rollback. | None. |
+| **Programmes & Retreats** | Multi-day residential retreat manager with cohort scheduling and daily syllabus. | Client sign-off on 2026/2027 retreat dates. |
+| **Payment Gateways** | Domestic & International checkout rails implemented in test/sandbox mode; offline payments fully functional. | Live Razorpay / PayPal KYC credentials. |
+| **Invoicing Engine** | Watermarked demo invoice generation complete. | Registered legal entity name & GSTIN if applicable. |
+| **WhatsApp / Email Delivery** | Outbound notification queue, template rendering, and preview drawers complete; external dispatch gated. | Meta WhatsApp Business API & Resend/SendGrid API keys. |
+| **Supabase PostgreSQL Migrations** | 4 migration scripts generated covering all 27 tables, indexes, and comprehensive Row Level Security (RLS) policies. | Supabase project creation & migration run. |
+

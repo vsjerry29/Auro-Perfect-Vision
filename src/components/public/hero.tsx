@@ -4,7 +4,27 @@ import { ArrowRight, Sparkles, Sun, ShieldCheck, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export function Hero() {
+interface HeroProps {
+  siteContent?: {
+    heroHeadline?: string;
+    heroSubtitle?: string;
+    heroImageUrl?: string;
+    primaryCtaText?: string;
+    primaryCtaLink?: string;
+  };
+}
+
+export function Hero({ siteContent }: HeroProps) {
+  const headline = siteContent?.heroHeadline || "A more mindful approach to natural vision.";
+  const subtitle =
+    siteContent?.heroSubtitle ||
+    "Experience holistic ocular restoration amidst the serene forests of Auroville. Combining classical Eye Yoga, conscious relaxation, photobiomodulation, and digital screen recovery for children and adults worldwide.";
+  const heroImage =
+    siteContent?.heroImageUrl ||
+    "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80";
+  const ctaText = siteContent?.primaryCtaText || "Explore Therapies & Book";
+  const ctaLink = siteContent?.primaryCtaLink || "/therapies";
+
   return (
     <section className="relative overflow-hidden bg-canvas pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-ink-border/50">
       {/* Subtle organic light gradient background */}
@@ -23,18 +43,18 @@ export function Hero() {
             </div>
 
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-ink font-normal tracking-tight leading-[1.12]">
-              A more mindful approach to <span className="italic font-normal text-plum">natural vision.</span>
+              {headline}
             </h1>
 
             <p className="font-sans text-base sm:text-lg text-ink-muted max-w-xl leading-relaxed">
-              Experience holistic ocular restoration amidst the serene forests of Auroville. Combining classical Eye Yoga, conscious relaxation, photobiomodulation, and digital screen recovery for children and adults worldwide.
+              {subtitle}
             </p>
 
             {/* Action buttons */}
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <Link href="/therapies">
+              <Link href={ctaLink}>
                 <Button variant="primary" size="lg" className="w-full sm:w-auto gap-2 group">
-                  <span>Explore Therapies & Book</span>
+                  <span>{ctaText}</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
@@ -80,7 +100,7 @@ export function Hero() {
               {/* Outer decorative border with rounded frame */}
               <div className="relative rounded-3xl overflow-hidden shadow-elevated border-8 border-white bg-white">
                 <img
-                  src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80"
+                  src={heroImage}
                   alt="Mindful eye wellness practice in natural daylight"
                   className="w-full h-[440px] sm:h-[500px] object-cover hover:scale-105 transition-transform duration-700"
                 />

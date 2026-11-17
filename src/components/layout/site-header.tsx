@@ -3,15 +3,16 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Eye, Menu, X, ArrowUpRight, ShieldCheck, UserCheck } from "lucide-react";
+import { Eye, Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // If in admin or therapist dashboard, show dedicated dashboard bar or minimal switcher
-  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/therapist");
+  // Do not render marketing header inside admin or therapist dashboards
+  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/therapist") || pathname.startsWith("/staff");
+  if (isDashboard) return null;
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -19,23 +20,15 @@ export function SiteHeader() {
     { label: "Therapies & Programmes", href: "/therapies" },
     { label: "Team", href: "/team" },
     { label: "Journal", href: "/blogs" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
     <>
       {/* Top Advisory Strip */}
-      <div className="bg-plum text-canvas-light text-xs py-1.5 px-4 text-center font-sans tracking-wide flex items-center justify-center gap-3">
-        <span>Auro Perfect Vision — Centre for Vision Beyond Glasses • Auroville</span>
-        <span className="hidden md:inline text-gold">•</span>
-        <div className="hidden md:flex items-center gap-2 text-gold-light">
-          <Link href="/admin" className="hover:underline flex items-center gap-1 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5" /> Admin Demo
-          </Link>
-          <span>/</span>
-          <Link href="/therapist" className="hover:underline flex items-center gap-1 font-medium">
-            <UserCheck className="w-3.5 h-3.5" /> Therapist Portal
-          </Link>
-        </div>
+      <div className="bg-plum text-canvas-light text-xs py-2 px-4 text-center font-sans tracking-wide flex items-center justify-center gap-2">
+        <Sparkles className="w-3.5 h-3.5 text-gold inline flex-shrink-0" />
+        <span>Auro Perfect Vision — Centre for Vision Beyond Glasses • Auroville, Tamil Nadu</span>
       </div>
 
       {/* Main Sticky Header */}
@@ -116,18 +109,6 @@ export function SiteHeader() {
                     Explore Therapies & Book
                   </Button>
                 </Link>
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full text-xs">
-                      Admin Console
-                    </Button>
-                  </Link>
-                  <Link href="/therapist" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full text-xs">
-                      Therapist Portal
-                    </Button>
-                  </Link>
-                </div>
               </div>
             </div>
           </div>

@@ -1,0 +1,54 @@
+[
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
+    "id": "audit-1794932806045",
+    "timestamp": "2026-11-17T16:26:46.045Z"
+  },
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
+    "id": "audit-1794932774750",
+    "timestamp": "2026-11-17T16:26:14.750Z"
+  },
+  {
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Auro Perfect Vision Admin",
+    "action": "CRM_CLIENTS_EXPORTED",
+    "entityType": "CRM",
+    "entityId": "all_clients",
+    "details": {
+      "format": "CSV"
+    },
+    "id": "audit-1794932714440",
+    "timestamp": "2026-11-17T16:25:14.440Z"
+  },
+  {
+    "id": "audit-init",
+    "staffId": "staff-admin-1",
+    "staffEmail": "admin@auroperfectvision.com",
+    "staffName": "Dr. Sivakumar (Admin)",
+    "action": "SYSTEM_INITIALIZED",
+    "entityType": "System",
+    "entityId": "system-init",
+    "details": {
+      "note": "Auro Perfect Vision Secure CMS Initialized"
+    },
+    "timestamp": "2026-11-17T16:25:14.440Z"
+  }
+]

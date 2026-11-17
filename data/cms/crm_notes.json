@@ -1,0 +1,50 @@
+[
+  {
+    "id": "note-1794932806029",
+    "clientContactId": "client-1794932806001",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T16:26:46.029Z",
+    "updatedAt": "2026-11-17T16:26:46.029Z"
+  },
+  {
+    "id": "note-1794932774736",
+    "clientContactId": "client-1794932774703",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T16:26:14.736Z",
+    "updatedAt": "2026-11-17T16:26:14.736Z"
+  },
+  {
+    "id": "note-1794932714420",
+    "clientContactId": "client-1794932714376",
+    "authorStaffId": "staff-admin-1",
+    "authorStaffName": "Auro Perfect Vision Admin",
+    "authorStaffRole": "admin",
+    "content": "Called guest on WhatsApp to confirm retreat room availability.",
+    "category": "call_log",
+    "isPinned": false,
+    "createdAt": "2026-11-17T16:25:14.420Z",
+    "updatedAt": "2026-11-17T16:25:14.420Z"
+  },
+  {
+    "id": "note-1",
+    "clientContactId": "client-1",
+    "authorStaffId": "staff-therapist-1",
+    "authorStaffName": "Dr. Ananya Sen",
+    "authorStaffRole": "therapist",
+    "content": "Client responded very well to 10-minute Bates palming and sunning. Noticed reduced tension in ciliary muscles. Recommended daily practice morning and evening.",
+    "category": "general",
+    "isPinned": true,
+    "createdAt": "2026-11-01T11:00:00Z",
+    "updatedAt": "2026-11-01T11:00:00Z"
+  }
+]

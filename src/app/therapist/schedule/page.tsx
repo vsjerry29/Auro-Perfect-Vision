@@ -2,33 +2,80 @@
 
 import React, { useState } from "react";
 import { useDemoStore } from "@/lib/store";
+import { RecurringScheduleDay } from "@/lib/types";
 import { Clock, Plus, Trash2, CheckCircle2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export default function TherapistSchedulePage() {
-  const { weeklySchedule, updateDaySchedule } = useDemoStore();
+  const { weeklySchedule: storeSchedule, updateDaySchedule } = useDemoStore();
+  const [schedule, setSchedule] = useState<RecurringScheduleDay[]>(storeSchedule);
   const [savedNotice, setSavedNotice] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  React.useEffect(() => {
+    async function loadSchedule() {
+      try {
+        const res = await fetch("/api/therapist/availability");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.schedule || []);
+          if (Array.isArray(list) && list.length > 0) {
+            setSchedule(list);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load therapist availability:", err);
+      }
+    }
+    loadSchedule();
+  }, []);
+
+  const persistSchedule = async (updated: RecurringScheduleDay[]) => {
+    setSchedule(updated);
+    showNotice();
+    try {
+      setIsSaving(true);
+      await fetch("/api/therapist/availability", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schedule: updated }),
+      });
+    } catch (err) {
+      console.warn("Could not save availability:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleToggleDay = (dayOfWeek: number, currentActive: boolean) => {
+    const updated = schedule.map((d) =>
+      d.dayOfWeek === dayOfWeek ? { ...d, active: !currentActive } : d
+    );
     updateDaySchedule(dayOfWeek, { active: !currentActive });
-    showNotice();
+    persistSchedule(updated);
   };
 
   const handleAddSlot = (dayOfWeek: number) => {
-    const day = weeklySchedule.find((d) => d.dayOfWeek === dayOfWeek);
+    const day = schedule.find((d) => d.dayOfWeek === dayOfWeek);
     if (!day) return;
     const newSlots = [...day.slots, { startTime: "14:00", endTime: "18:00" }];
+    const updated = schedule.map((d) =>
+      d.dayOfWeek === dayOfWeek ? { ...d, slots: newSlots, active: true } : d
+    );
     updateDaySchedule(dayOfWeek, { slots: newSlots, active: true });
-    showNotice();
+    persistSchedule(updated);
   };
 
   const handleRemoveSlot = (dayOfWeek: number, slotIndex: number) => {
-    const day = weeklySchedule.find((d) => d.dayOfWeek === dayOfWeek);
+    const day = schedule.find((d) => d.dayOfWeek === dayOfWeek);
     if (!day) return;
-    const newSlots = day.slots.filter((_, idx) => idx !== slotIndex);
+    const newSlots = day.slots.filter((_: any, idx: number) => idx !== slotIndex);
+    const updated = schedule.map((d) =>
+      d.dayOfWeek === dayOfWeek ? { ...d, slots: newSlots } : d
+    );
     updateDaySchedule(dayOfWeek, { slots: newSlots });
-    showNotice();
+    persistSchedule(updated);
   };
 
   const handleTimeChange = (
@@ -37,12 +84,15 @@ export default function TherapistSchedulePage() {
     field: "startTime" | "endTime",
     value: string
   ) => {
-    const day = weeklySchedule.find((d) => d.dayOfWeek === dayOfWeek);
+    const day = schedule.find((d) => d.dayOfWeek === dayOfWeek);
     if (!day) return;
     const newSlots = [...day.slots];
     newSlots[slotIndex] = { ...newSlots[slotIndex], [field]: value };
+    const updated = schedule.map((d) =>
+      d.dayOfWeek === dayOfWeek ? { ...d, slots: newSlots } : d
+    );
     updateDaySchedule(dayOfWeek, { slots: newSlots });
-    showNotice();
+    persistSchedule(updated);
   };
 
   const showNotice = () => {
@@ -75,7 +125,7 @@ export default function TherapistSchedulePage() {
 
       {/* Weekday Configuration Cards */}
       <div className="space-y-4">
-        {weeklySchedule.map((day) => (
+        {schedule.map((day) => (
           <div
             key={day.dayOfWeek}
             className={`p-5 rounded-xl border transition-all ${

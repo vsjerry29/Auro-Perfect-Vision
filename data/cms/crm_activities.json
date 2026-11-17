@@ -1,0 +1,128 @@
+[
+  {
+    "id": "act-1794932806059",
+    "clientContactId": "client-1794932806001",
+    "eventType": "clients_merged",
+    "title": "Duplicate Profiles Merged",
+    "description": "Merged with Jean-Paul Sartre (Alternate) (APV-CLI-1007) by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:46.059Z"
+  },
+  {
+    "id": "act-1794932806050",
+    "clientContactId": "client-1794932806049",
+    "eventType": "client_created",
+    "title": "Client Contact Created",
+    "description": "Manually created by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:46.050Z"
+  },
+  {
+    "id": "act-1794932806040",
+    "clientContactId": "client-1794932806001",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:46.040Z"
+  },
+  {
+    "id": "act-1794932806036",
+    "clientContactId": "client-1794932806001",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:46.036Z"
+  },
+  {
+    "id": "act-1794932806031",
+    "clientContactId": "client-1794932806001",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:46.031Z"
+  },
+  {
+    "id": "act-1794932774747",
+    "clientContactId": "client-1794932774703",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:14.747Z"
+  },
+  {
+    "id": "act-1794932774742",
+    "clientContactId": "client-1794932774703",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:14.742Z"
+  },
+  {
+    "id": "act-1794932774738",
+    "clientContactId": "client-1794932774703",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:26:14.738Z"
+  },
+  {
+    "id": "act-1794932714435",
+    "clientContactId": "client-1794932714376",
+    "eventType": "task_completed",
+    "title": "Task Completed",
+    "description": "Send intake questionnaire via WhatsApp by Auro Perfect Vision Admin",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:25:14.435Z"
+  },
+  {
+    "id": "act-1794932714430",
+    "clientContactId": "client-1794932714376",
+    "eventType": "task_created",
+    "title": "Follow-up Task Scheduled",
+    "description": "Send intake questionnaire via WhatsApp (Due: 2026-11-20)",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:25:14.430Z"
+  },
+  {
+    "id": "act-1794932714421",
+    "clientContactId": "client-1794932714376",
+    "eventType": "note_added",
+    "title": "Internal Note Added (call_log)",
+    "description": "Called guest on WhatsApp to confirm retreat room availability.",
+    "staffId": "staff-admin-1",
+    "staffName": "Auro Perfect Vision Admin",
+    "createdAt": "2026-11-17T16:25:14.421Z"
+  },
+  {
+    "id": "act-1",
+    "clientContactId": "client-1",
+    "eventType": "client_created",
+    "title": "Client Profile Created",
+    "description": "Profile created from initial booking APV-2026-X8Y2K.",
+    "createdAt": "2026-11-01T09:30:00Z"
+  },
+  {
+    "id": "act-2",
+    "clientContactId": "client-2",
+    "eventType": "inquiry_received",
+    "title": "Contact Inquiry Received",
+    "description": "Submitted 7-day retreat inquiry from contact form.",
+    "createdAt": "2026-11-09T11:20:00Z"
+  }
+]

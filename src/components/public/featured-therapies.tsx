@@ -8,8 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 
-export function FeaturedTherapies() {
-  const { offerings } = useDemoStore();
+import { Offering } from "@/lib/types";
+
+interface FeaturedTherapiesProps {
+  initialOfferings?: Offering[];
+}
+
+export function FeaturedTherapies({ initialOfferings }: FeaturedTherapiesProps) {
+  const { offerings: storeOfferings } = useDemoStore();
+  const offerings = initialOfferings && initialOfferings.length > 0 ? initialOfferings : storeOfferings;
   const [activeTab, setActiveTab] = useState<"all" | "individual" | "programmes">("all");
 
   const filteredOfferings = offerings.filter((item) => {
@@ -100,7 +107,11 @@ export function FeaturedTherapies() {
                   <div className="flex items-center gap-4 text-xs text-ink-muted mb-2.5">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
-                      {offering.durationMinutes} mins
+                      {offering.isFlagshipProgramme || offering.durationMinutes > 180 ? (
+                        <span>7-Day Retreat • {offering.durationMinutes} mins/session</span>
+                      ) : (
+                        <span>{offering.durationMinutes} mins</span>
+                      )}
                     </span>
                     <span className="flex items-center gap-1">
                       {offering.format === "individual" ? (
@@ -161,7 +172,7 @@ export function FeaturedTherapies() {
         <div className="mt-12 text-center">
           <Link href="/therapies">
             <Button variant="outline" size="lg" className="gap-2">
-              <span>View All 8+ Verified Services & Programmes</span>
+              <span>View All {offerings.length} Holistic Offerings & Programmes</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

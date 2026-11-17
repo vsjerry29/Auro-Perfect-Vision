@@ -1,14 +1,15 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
-import { useDemoStore } from "@/lib/store";
+import { getAllTherapists, getAllOfferings } from "@/lib/server/cms";
 import { ArrowRight, UserCheck, Shield, Sparkles, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default function TeamDirectoryPage() {
-  const { therapists, offerings } = useDemoStore();
+  const therapists = getAllTherapists(false); // published only
+  const offerings = getAllOfferings(false); // published only
 
   return (
     <div className="bg-canvas min-h-screen pb-24">

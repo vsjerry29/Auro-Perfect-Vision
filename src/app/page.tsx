@@ -7,17 +7,30 @@ import { AurovilleStory } from "@/components/public/auroville-story";
 import { TeamPreview } from "@/components/public/team-preview";
 import { ArticlesPreview } from "@/components/public/articles-preview";
 import { BookingCtaBanner } from "@/components/public/booking-cta-banner";
+import {
+  getSiteContent,
+  getAllOfferings,
+  getAllTherapists,
+  getAllBlogPosts,
+} from "@/lib/server/cms";
+
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
+  const siteContent = getSiteContent();
+  const offerings = getAllOfferings(false); // strictly published only
+  const therapists = getAllTherapists(false); // strictly published only
+  const blogs = getAllBlogPosts(false); // strictly published only
+
   return (
     <main className="flex-col">
-      <Hero />
+      <Hero siteContent={siteContent} />
       <PhilosophySection />
-      <FeaturedTherapies />
+      <FeaturedTherapies initialOfferings={offerings} />
       <ProcessSteps />
       <AurovilleStory />
-      <TeamPreview />
-      <ArticlesPreview />
+      <TeamPreview initialTherapists={therapists} />
+      <ArticlesPreview initialBlogs={blogs} />
       <BookingCtaBanner />
     </main>
   );

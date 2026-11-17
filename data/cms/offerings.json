@@ -1,0 +1,235 @@
+[
+  {
+    "id": "off-1",
+    "slug": "eye-yoga",
+    "title": "Eye Yoga for Children & Adults",
+    "category": "eye-yoga",
+    "shortDescription": "Gentle ocular muscular movement, conscious breathwork, and palming techniques designed to ease habitual strain and restore natural visual flexibility.",
+    "fullDescription": "Eye Yoga combines classical Bates relaxation principles with gentle yogic ocular exercises. Sessions focus on activating neglected eye muscle groups, releasing habitual tension patterns from prolonged close-up reading, and fostering effortless blinking habits. Suitable for both children adapting to screen-heavy schooling and adults seeking visual serenity.",
+    "durationMinutes": 60,
+    "format": "individual",
+    "delivery": "onsite",
+    "price": {
+      "inr": 2000,
+      "usd": 40,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-1",
+      "therapist-2"
+    ],
+    "maxCapacity": 1,
+    "isFlagshipProgramme": false,
+    "featured": true,
+    "suitableFor": [
+      "Frequent smartphone & digital device users",
+      "Children and students with early visual fatigue",
+      "Anyone seeking mindful, non-invasive eye wellness",
+      "Individuals experiencing end-of-day eye strain"
+    ],
+    "whatToExpect": [
+      "Initial assessment of current reading habits and ocular comfort",
+      "Guided somatic eye movements (directional tracking, smooth convergence)",
+      "Deep warmth palming and solarization relaxation practice",
+      "Take-home daily mindfulness exercises for eye relief"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "off-2",
+    "slug": "vision-stress-relief",
+    "title": "Vision Stress Relief Therapy",
+    "category": "stress-relief",
+    "shortDescription": "Integrative tension-release for the neck, temples, and ocular zone to dissolve computer vision fatigue and mental strain.",
+    "fullDescription": "In our screen-dominated lives, eye strain rarely stops at the eyeballs. It cascades into the suboccipital neck muscles, temples, and jaw. This specialized therapy combines acupressure, hot/cold hydrotherapy pads, and deep cranial calming routines to soothe the nervous system and refresh fatigued eyes.",
+    "durationMinutes": 75,
+    "format": "individual",
+    "delivery": "onsite",
+    "price": {
+      "inr": 2500,
+      "usd": 50,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-1"
+    ],
+    "maxCapacity": 1,
+    "isFlagshipProgramme": false,
+    "featured": true,
+    "suitableFor": [
+      "Professionals experiencing computer vision syndrome (CVS)",
+      "Tension headaches and neck stiffness linked to intense screen time",
+      "Mental overwhelm and visual exhaustion"
+    ],
+    "whatToExpect": [
+      "Gentle acupressure around orbital borders and temple trigger points",
+      "Warm compress herbal relaxation",
+      "Deep parasympathetic breathing guidance",
+      "Refreshed mental clarity and visual lightness"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "off-3",
+    "slug": "customized-vision-therapy",
+    "title": "Customized Vision Therapy (Online / On-site)",
+    "category": "specialized-therapy",
+    "shortDescription": "Personalized step-by-step guidance addressing specific visual patterns, binocular coordination, and accommodative ease.",
+    "fullDescription": "A bespoke 1-on-1 therapeutic consultation that designs a personalized regimen of eye exercises, shifting techniques, and environmental adjustments tailored to your lifestyle, visual demands, and personal wellness goals.",
+    "durationMinutes": 60,
+    "format": "individual",
+    "delivery": "hybrid",
+    "price": {
+      "inr": 3000,
+      "usd": 60,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-1",
+      "therapist-2"
+    ],
+    "maxCapacity": 1,
+    "isFlagshipProgramme": false,
+    "featured": true,
+    "suitableFor": [
+      "Clients seeking a structured individualised roadmap",
+      "Individuals wanting remote online guidance from anywhere in the world",
+      "Those experiencing tracking difficulties or subtle depth fatigue"
+    ],
+    "whatToExpect": [
+      "Comprehensive review of daily visual ergonomics and history",
+      "Targeted accommodation and vergence coordination routines",
+      "Customised weekly exercise charts and digital wellness protocols"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "off-4",
+    "slug": "visual-skill-enhancement",
+    "title": "Visual Skill Enhancement & Eye Relaxation",
+    "category": "vision-skills",
+    "shortDescription": "Fine-tune visual memory, peripheral awareness, rapid saccadic focus, and deep resting techniques.",
+    "fullDescription": "Explore the untapped agility of your visual system. Through interactive visual charts, Brock strings, peripheral awareness targets, and contrast stimulation, this therapy refines how swiftly and effortlessly your brain interprets visual data without muscular clenching.",
+    "durationMinutes": 60,
+    "format": "individual",
+    "delivery": "onsite",
+    "price": {
+      "inr": 2200,
+      "usd": 45,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-2"
+    ],
+    "maxCapacity": 1,
+    "isFlagshipProgramme": false,
+    "featured": false,
+    "suitableFor": [
+      "Artists, designers, and craftspeople requiring sustained visual sharpness",
+      "Readers wanting to reduce eye fatigue while studying",
+      "Anyone desiring improved depth perception and spatial comfort"
+    ],
+    "whatToExpect": [
+      "Peripheral expansion drills and dynamic gaze shifting",
+      "Saccadic rhythm training with optical targets",
+      "Integrated resting methods to prevent fatigue build-up"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "off-5",
+    "slug": "dry-eye-red-light-therapy",
+    "title": "Dry Eye & Red Light Photobiomodulation",
+    "category": "specialized-therapy",
+    "shortDescription": "Non-invasive low-level red light exposure and eyelid thermal care to support ocular comfort and tear film quality.",
+    "fullDescription": "Integrates certified therapeutic red light (670nm photobiomodulation) with meibomian gland thermal therapy and gentle eyelid hygiene guidance. Designed to soothe dry, gritty, irritated eyes exacerbated by air-conditioned offices and continuous monitor glare.",
+    "durationMinutes": 45,
+    "format": "individual",
+    "delivery": "onsite",
+    "price": {
+      "inr": 2800,
+      "usd": 55,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-1"
+    ],
+    "maxCapacity": 1,
+    "isFlagshipProgramme": false,
+    "featured": true,
+    "suitableFor": [
+      "Chronic screen users with dry, gritty, or watering eyes",
+      "Contact lens wearers experiencing end-of-day dryness",
+      "People sensitive to dry air and screen glare"
+    ],
+    "whatToExpect": [
+      "Soothing thermal compress therapy for meibomian glands",
+      "Safe, calibrated low-level red light session in relaxed posture",
+      "Personalized natural tear conservation guidance"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "off-6",
+    "slug": "retreat-holistic-vision-awakening",
+    "title": "Flagship 7-Day Holistic Vision Awakening Retreat",
+    "category": "programmes",
+    "shortDescription": "An immersive week in Auroville combining daily eye yoga, nature walks, nutritional guidance, and meditation.",
+    "fullDescription": "Our signature multi-session residential retreat held amidst the peaceful forests of Auroville. Over seven days, participants immerse themselves in daily eye yoga, mindful movement, suboccipital release, sunning routines, silent visual contemplation, and organic nutritional eye-care.",
+    "durationMinutes": 180,
+    "format": "group",
+    "delivery": "onsite",
+    "price": {
+      "inr": 18000,
+      "usd": 350,
+      "taxInclusive": true
+    },
+    "assignedTherapistIds": [
+      "therapist-1",
+      "therapist-2"
+    ],
+    "maxCapacity": 12,
+    "isFlagshipProgramme": true,
+    "featured": true,
+    "suitableFor": [
+      "Individuals wanting a deep, transformative visual reset away from screens",
+      "Seekers of holistic wellness immersed in the Auroville environment",
+      "Those looking to build sustainable lifelong eye-care rituals"
+    ],
+    "whatToExpect": [
+      "7 consecutive morning and evening guided group sessions",
+      "One-on-one personal visual assessment & bespoke home regimen",
+      "Dedicated eye nutrition workshops and organic herbal teas",
+      "Access to tranquil Auroville nature walking paths"
+    ],
+    "programmeSyllabus": [
+      {
+        "stepNumber": 1,
+        "title": "Day 1-2: Awareness & De-Stressing",
+        "description": "Unlearning ocular tension habits, introduction to palming, and natural light adaptation."
+      },
+      {
+        "stepNumber": 2,
+        "title": "Day 3-4: Muscle Flexibility & Coordination",
+        "description": "Ocular motor drills, peripheral awareness expansion, and suboccipital body release."
+      },
+      {
+        "stepNumber": 3,
+        "title": "Day 5-6: Accommodation & Integration",
+        "description": "Dynamic shifting drills, eye-brain integration, and herbal nutritional guidance."
+      },
+      {
+        "stepNumber": 4,
+        "title": "Day 7: Lifelong Vision Rituals",
+        "description": "Personalised daily practice chart handover and closing circle."
+      }
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  }
+]

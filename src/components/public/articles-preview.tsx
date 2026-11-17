@@ -7,8 +7,15 @@ import { useDemoStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function ArticlesPreview() {
-  const { blogs } = useDemoStore();
+import { BlogPost } from "@/lib/types";
+
+interface ArticlesPreviewProps {
+  initialBlogs?: BlogPost[];
+}
+
+export function ArticlesPreview({ initialBlogs }: ArticlesPreviewProps) {
+  const { blogs: storeBlogs } = useDemoStore();
+  const blogs = initialBlogs && initialBlogs.length > 0 ? initialBlogs : storeBlogs;
 
   return (
     <section className="py-20 lg:py-28 bg-canvas border-b border-ink-border/50">

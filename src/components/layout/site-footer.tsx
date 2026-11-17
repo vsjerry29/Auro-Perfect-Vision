@@ -1,8 +1,17 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Eye, Heart, MapPin, Mail, Phone, ExternalLink } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Eye, Heart, MapPin, Mail, Phone, Clock } from "lucide-react";
 
 export function SiteFooter() {
+  const pathname = usePathname();
+
+  // Do not render marketing footer inside admin or therapist dashboards
+  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/therapist") || pathname.startsWith("/staff");
+  if (isDashboard) return null;
+
   return (
     <footer className="bg-ink text-canvas-light border-t border-ink-muted/30 pt-16 pb-12 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,7 +27,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p className="text-xs text-canvas-dark/80 leading-relaxed">
-              Centre for Vision Beyond Glasses. Grounded in the conscious, holistic lifestyle of Auroville, dedicating our work to natural eye relaxation, visual motor skills, and mindful screen recovery.
+              Centre for Vision Beyond Glasses. Grounded in the conscious lifestyle of Auroville, dedicating our work to natural eye relaxation, visual motor skills, and mindful screen recovery.
             </p>
             <div className="text-xs text-gold-light/90 flex items-center gap-1.5 pt-1">
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -53,6 +62,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/contact" className="hover:text-gold-light transition-colors">
+                  Contact & Directions
+                </Link>
+              </li>
+              <li>
                 <Link href="/therapies" className="hover:text-gold-light transition-colors">
                   Book a Consultation
                 </Link>
@@ -60,7 +74,7 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Column 3: Verified Offerings */}
+          {/* Column 3: Core Offerings */}
           <div>
             <h4 className="font-serif text-sm font-semibold tracking-wider uppercase text-gold mb-4">
               Core Offerings
@@ -94,28 +108,26 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Column 4: Operational Portal & Legal Disclaimer */}
-          <div>
+          {/* Column 4: Contact & Responsible Health Notice */}
+          <div className="space-y-4">
             <h4 className="font-serif text-sm font-semibold tracking-wider uppercase text-gold mb-4">
-              Staff Portals
+              Visiting & Inquiries
             </h4>
-            <div className="flex flex-col gap-2 mb-5">
-              <Link
-                href="/admin"
-                className="inline-flex items-center justify-between text-xs bg-ink-muted/30 hover:bg-ink-muted/50 text-canvas-light px-3 py-2 rounded-lg transition-colors border border-ink-muted/40"
-              >
-                <span>Admin Management Console</span>
-                <ExternalLink className="w-3.5 h-3.5 text-gold" />
-              </Link>
-              <Link
-                href="/therapist"
-                className="inline-flex items-center justify-between text-xs bg-ink-muted/30 hover:bg-ink-muted/50 text-canvas-light px-3 py-2 rounded-lg transition-colors border border-ink-muted/40"
-              >
-                <span>Therapist Portal & Schedule</span>
-                <ExternalLink className="w-3.5 h-3.5 text-gold" />
-              </Link>
+            <div className="space-y-2 text-xs text-canvas-dark/90">
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-gold" />
+                <span>Mon - Sat: 9:00 AM - 5:30 PM IST</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-gold" />
+                <span>connect@auroperfectvision.com</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-gold" />
+                <span>+91 8012305151 / +91 9488005685</span>
+              </div>
             </div>
-            <p className="text-[11px] text-canvas-dark/60 leading-normal">
+            <p className="text-[11px] text-canvas-dark/60 leading-normal pt-2 border-t border-ink-muted/30">
               Educational & Complementary Notice: Natural vision exercises and eye yoga are designed for relaxation and visual hygiene. They are not a replacement for ophthalmological medical diagnosis or surgical care.
             </p>
           </div>

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "template-1",
+    "offeringId": "off-1",
+    "version": 1,
+    "isPublished": true,
+    "fields": [
+      {
+        "id": "f-1",
+        "fieldKey": "client_age",
+        "label": "Age of Participant",
+        "fieldType": "number",
+        "placeholder": "e.g. 34",
+        "helpText": "Helps tailor the motor exercises for children vs adults",
+        "isRequired": true,
+        "displayOrder": 1
+      },
+      {
+        "id": "f-2",
+        "fieldKey": "primary_eye_concern",
+        "label": "Primary Vision Concern or Reason for Session",
+        "fieldType": "select",
+        "options": [
+          "Screen Strain & Heavy Ocular Fatigue",
+          "Dry, Gritty or Burning Eyes",
+          "Myopia / Distance Blur Habits",
+          "Frequent Tension Headaches",
+          "Preventative Ocular Wellness & Relaxation",
+          "Other"
+        ],
+        "isRequired": true,
+        "displayOrder": 2
+      },
+      {
+        "id": "f-3",
+        "fieldKey": "daily_screen_hours",
+        "label": "Approximate Daily Screen Time (Hours)",
+        "fieldType": "select",
+        "options": [
+          "Less than 3 hours",
+          "3 to 6 hours",
+          "7 to 10 hours",
+          "10+ hours"
+        ],
+        "isRequired": true,
+        "displayOrder": 3
+      },
+      {
+        "id": "f-4",
+        "fieldKey": "medical_history_notes",
+        "label": "Past Eye Surgeries, Conditions, or Important Notes",
+        "fieldType": "textarea",
+        "placeholder": "e.g. LASIK in 2021, wear soft contact lenses, slight astigmatism",
+        "helpText": "Shared confidentially with your assigned practitioner only",
+        "isRequired": false,
+        "displayOrder": 4,
+        "onlyVisibleToTherapist": true
+      },
+      {
+        "id": "f-5",
+        "fieldKey": "referral_source",
+        "label": "How did you hear about Auro Perfect Vision?",
+        "fieldType": "radio",
+        "options": [
+          "Auroville Directory / Community",
+          "Friend or Family Recommendation",
+          "Web Search",
+          "Social Media"
+        ],
+        "isRequired": false,
+        "displayOrder": 5
+      }
+    ]
+  }
+]

@@ -1,13 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Calendar, Clock, UserCheck, ArrowLeft, Eye, ShieldAlert } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Calendar, Clock, UserCheck, ArrowLeft, Eye, LogOut } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function TherapistNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<{ fullName: string; email: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/staff/login");
+      router.refresh();
+    } catch {
+      window.location.href = "/staff/login";
+    }
+  };
 
   const links = [
     { label: "My Appointments", href: "/therapist", icon: Calendar },
@@ -16,7 +39,7 @@ export function TherapistNav() {
   ];
 
   return (
-    <aside className="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-ink-border p-6 flex flex-col justify-between">
+    <aside className="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-ink-border p-6 flex flex-col justify-between shrink-0">
       <div className="space-y-6">
         {/* Portal Identifier */}
         <div>
@@ -33,9 +56,14 @@ export function TherapistNav() {
               </span>
             </div>
           </div>
-          <Badge variant="sage" className="text-[10px] w-full justify-center mt-2">
-            Active: Dr. Ananya Sen
-          </Badge>
+          <div className="bg-sage/40 p-2.5 rounded-lg border border-sage-muted mt-3 text-[11px]">
+            <span className="font-semibold text-sage-dark block truncate">
+              {user?.fullName || "Dr. Ananya Sen"}
+            </span>
+            <span className="text-ink-muted text-[10px] block truncate">
+              {user?.email || "therapist@auroperfectvision.com"}
+            </span>
+          </div>
         </div>
 
         {/* Navigation Links */}
@@ -63,18 +91,22 @@ export function TherapistNav() {
 
       {/* Role Notice & Return Link */}
       <div className="pt-6 border-t border-ink-border/60 space-y-3">
-        <div className="bg-canvas p-2.5 rounded-lg border border-ink-border text-[11px] text-ink-muted">
-          <p className="font-medium text-ink">Demo Role Guard:</p>
-          <p className="text-[10px] text-ink-muted mt-0.5">
-            Therapists view assigned appointments only. Pricing and global settings stay with Admin.
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+        >
+          <span>Sign Out</span>
+          <LogOut className="w-3.5 h-3.5" />
+        </button>
+
         <Link
           href="/"
-          className="flex items-center gap-1.5 text-xs text-ink-muted hover:text-plum font-medium"
+          target="_blank"
+          className="flex items-center gap-1.5 text-xs text-ink-muted hover:text-plum font-medium px-1"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Exit to Public Website</span>
+          <span>View Public Site</span>
         </Link>
       </div>
     </aside>

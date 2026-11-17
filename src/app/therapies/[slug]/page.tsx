@@ -1,9 +1,7 @@
-"use client";
-
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
-import { useDemoStore } from "@/lib/store";
+import { notFound } from "next/navigation";
+import { getOfferingBySlug, getAllTherapists } from "@/lib/server/cms";
 import { formatCurrency } from "@/lib/utils";
 import {
   Clock,
@@ -20,20 +18,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export default function OfferingDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const { offerings, therapists } = useDemoStore();
+export const dynamic = "force-dynamic";
 
-  const offering = useMemo(() => {
-    return offerings.find((o) => o.slug === slug);
-  }, [offerings, slug]);
+interface OfferingDetailPageProps {
+  params: {
+    slug: string;
+  };
+}
 
-  if (!offering) {
+export default function OfferingDetailPage({ params }: OfferingDetailPageProps) {
+  const offering = getOfferingBySlug(params.slug);
+
+  if (!offering || !offering.isPublished) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4">
         <h2 className="font-serif text-3xl text-ink">Therapy Offering Not Found</h2>
-        <p className="text-sm text-ink-muted">The requested session or programme does not exist.</p>
+        <p className="text-sm text-ink-muted">The requested session or programme is either not available or currently in draft.</p>
         <Link href="/therapies">
           <Button variant="primary" size="md">
             Return to Catalogue
@@ -43,10 +43,15 @@ export default function OfferingDetailPage() {
     );
   }
 
-  // Get assigned therapists
-  const assignedTherapists = therapists.filter((t) =>
+  const allTherapists = getAllTherapists(true);
+  const assignedTherapists = allTherapists.filter((t) =>
     offering.assignedTherapistIds.includes(t.id)
   );
+
+  const durationDisplay =
+    offering.isFlagshipProgramme || offering.durationMinutes > 180
+      ? `7-Day Residential Retreat • ${offering.durationMinutes} mins/daily session`
+      : `${offering.durationMinutes} Minutes`;
 
   return (
     <div className="bg-canvas min-h-screen pb-24">
@@ -225,7 +230,7 @@ export default function OfferingDetailPage() {
                   <span className="text-ink-muted flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-plum" /> Duration
                   </span>
-                  <span className="font-medium text-ink">{offering.durationMinutes} Minutes</span>
+                  <span className="font-medium text-ink text-right max-w-[200px]">{durationDisplay}</span>
                 </div>
 
                 <div className="flex justify-between items-center">

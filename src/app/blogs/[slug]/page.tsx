@@ -1,27 +1,27 @@
-"use client";
-
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
-import { useDemoStore } from "@/lib/store";
+import { notFound } from "next/navigation";
+import { getBlogPostBySlug, getAllBlogPosts } from "@/lib/server/cms";
 import { Clock, ArrowLeft, ArrowRight, User, Calendar, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export default function BlogDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const { blogs } = useDemoStore();
+export const dynamic = "force-dynamic";
 
-  const post = useMemo(() => {
-    return blogs.find((b) => b.slug === slug);
-  }, [blogs, slug]);
+interface BlogDetailPageProps {
+  params: {
+    slug: string;
+  };
+}
 
-  if (!post) {
+export default function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const post = getBlogPostBySlug(params.slug);
+
+  if (!post || !post.isPublished) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4">
         <h2 className="font-serif text-3xl text-ink">Article Not Found</h2>
-        <p className="text-sm text-ink-muted">The requested journal entry does not exist.</p>
+        <p className="text-sm text-ink-muted">The requested journal entry does not exist or is still in draft.</p>
         <Link href="/blogs">
           <Button variant="primary" size="md">
             Return to Journal
@@ -31,7 +31,8 @@ export default function BlogDetailPage() {
     );
   }
 
-  const related = blogs.filter((b) => b.id !== post.id).slice(0, 2);
+  const allBlogs = getAllBlogPosts(false);
+  const related = allBlogs.filter((b) => b.id !== post.id).slice(0, 2);
 
   return (
     <article className="bg-canvas min-h-screen pb-24">

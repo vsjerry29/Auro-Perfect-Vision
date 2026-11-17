@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { useDemoStore } from "@/lib/store";
+import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { FileText, Download, Eye, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 
 export default function AdminInvoicesPage() {
-  const { bookings } = useDemoStore();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/bookings")
+      .then((res) => (res.ok ? res.json() : { bookings: [] }))
+      .then((data) => setBookings(data.bookings || []))
+      .finally(() => setLoading(false));
+  }, []);
 
   // Invoices are issued for bookings with status confirmed & invoiceIssued: true
   const invoicedBookings = bookings.filter((b) => b.invoiceIssued);
@@ -32,55 +39,61 @@ export default function AdminInvoicesPage() {
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white rounded-xl border border-ink-border shadow-subtle overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-ink">
-            <thead className="bg-canvas-light border-b border-ink-border uppercase tracking-wider text-[10px] text-ink-muted font-semibold">
-              <tr>
-                <th className="px-5 py-3">Invoice Number</th>
-                <th className="px-5 py-3">Booking Reference</th>
-                <th className="px-5 py-3">Client</th>
-                <th className="px-5 py-3">Offering</th>
-                <th className="px-5 py-3">Total Amount</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-border/50">
-              {invoicedBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-canvas-light/50 transition-colors">
-                  <td className="px-5 py-3.5 font-mono font-bold text-plum">
-                    {b.invoiceNumber || "APV-2026-0001"}
-                  </td>
-                  <td className="px-5 py-3.5 font-mono text-ink-muted">
-                    {b.bookingReference}
-                  </td>
-                  <td className="px-5 py-3.5 font-medium">{b.clientName}</td>
-                  <td className="px-5 py-3.5">{b.offeringTitle}</td>
-                  <td className="px-5 py-3.5 font-bold text-ink">
-                    {formatCurrency(b.totalAmount, b.currency)}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <Badge variant="success" className="text-[10px]">
-                      Issued (PDF Available)
-                    </Badge>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedInvoiceBooking(b)}
-                      className="text-[11px] h-7 px-2.5 gap-1"
-                    >
-                      <Eye className="w-3 h-3 text-plum" />
-                      <span>Preview</span>
-                    </Button>
-                  </td>
+      <div className="bg-white rounded-2xl border border-ink-border shadow-subtle overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center text-xs text-ink-muted">Loading invoice records...</div>
+        ) : invoicedBookings.length === 0 ? (
+          <div className="p-16 text-center text-xs text-ink-muted">No invoices generated yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-ink">
+              <thead className="bg-canvas-light border-b border-ink-border uppercase tracking-wider text-[10px] text-ink-muted font-semibold">
+                <tr>
+                  <th className="px-5 py-3">Invoice Number</th>
+                  <th className="px-5 py-3">Booking Reference</th>
+                  <th className="px-5 py-3">Client</th>
+                  <th className="px-5 py-3">Offering</th>
+                  <th className="px-5 py-3">Total Amount</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-ink-border/50">
+                {invoicedBookings.map((b) => (
+                  <tr key={b.id} className="hover:bg-canvas-light/50 transition-colors">
+                    <td className="px-5 py-3.5 font-mono font-bold text-plum">
+                      {b.invoiceNumber || "APV-2026-0001"}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-ink-muted">
+                      {b.bookingReference}
+                    </td>
+                    <td className="px-5 py-3.5 font-medium">{b.clientName}</td>
+                    <td className="px-5 py-3.5">{b.offeringTitle}</td>
+                    <td className="px-5 py-3.5 font-bold text-ink">
+                      {formatCurrency(b.totalAmount, b.currency)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <Badge variant="success" className="text-[10px]">
+                        Issued (PDF Available)
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedInvoiceBooking(b)}
+                        className="text-[11px] h-7 px-2.5 gap-1"
+                      >
+                        <Eye className="w-3 h-3 text-plum" />
+                        <span>Preview</span>
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Watermarked Modal */}

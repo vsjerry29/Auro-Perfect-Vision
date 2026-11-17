@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { useDemoStore } from "@/lib/store";
+import React, { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,23 +8,66 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 
 export default function AdminPaymentsPage() {
-  const { bookings, markOfflineBookingPaid } = useDemoStore();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeOfflineBooking, setActiveOfflineBooking] = useState<any>(null);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const fetchBookings = async () => {
+    try {
+      const res = await fetch("/api/admin/bookings");
+      if (res.ok) {
+        const data = await res.json();
+        setBookings(data.bookings || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(""), 3500);
+  };
 
   const pendingOffline = bookings.filter(
     (b) => b.status === "pending_offline_confirmation"
   );
   const paidBookings = bookings.filter((b) => b.status === "confirmed");
 
-  const handleConfirm = () => {
-    if (activeOfflineBooking) {
-      markOfflineBookingPaid(activeOfflineBooking.id);
-      setActiveOfflineBooking(null);
+  const handleConfirm = async () => {
+    if (!activeOfflineBooking) return;
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_paid", bookingId: activeOfflineBooking.id }),
+      });
+      if (res.ok) {
+        showToast(`Offline payment for ${activeOfflineBooking.clientName} confirmed!`);
+        setActiveOfflineBooking(null);
+        fetchBookings();
+      } else {
+        alert("Failed to confirm payment.");
+      }
+    } catch {
+      alert("Network error.");
     }
   };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-plum text-white px-5 py-3 rounded-2xl shadow-elevated text-xs flex items-center gap-2 border border-gold/40">
+          <CheckCircle2 className="w-4 h-4 text-gold" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ink-border">
         <div>
           <span className="text-xs uppercase font-sans tracking-wider text-gold-dark font-semibold">
@@ -41,7 +83,7 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Pending Offline Approvals Section */}
-      <div className="bg-white rounded-xl border border-amber-200 shadow-subtle p-6 space-y-4">
+      <div className="bg-white rounded-2xl border border-amber-200 shadow-subtle p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-ink-border/50 pb-3">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-amber-700" />
@@ -96,7 +138,7 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Confirmed Transactions Ledger */}
-      <div className="bg-white rounded-xl border border-ink-border shadow-subtle overflow-hidden">
+      <div className="bg-white rounded-2xl border border-ink-border shadow-subtle overflow-hidden">
         <div className="p-5 border-b border-ink-border">
           <h3 className="font-serif text-lg font-medium text-ink">
             Confirmed Captured Transactions ({paidBookings.length})

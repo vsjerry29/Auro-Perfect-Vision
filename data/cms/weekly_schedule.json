@@ -1,0 +1,104 @@
+[
+  {
+    "dayOfWeek": 1,
+    "dayName": "Monday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:00",
+        "endTime": "13:00"
+      },
+      {
+        "startTime": "14:30",
+        "endTime": "17:30"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 2,
+    "dayName": "Tuesday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:00",
+        "endTime": "13:00"
+      },
+      {
+        "startTime": "14:30",
+        "endTime": "17:30"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 3,
+    "dayName": "Wednesday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:00",
+        "endTime": "13:00"
+      },
+      {
+        "startTime": "14:30",
+        "endTime": "17:30"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 4,
+    "dayName": "Thursday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:00",
+        "endTime": "13:00"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 5,
+    "dayName": "Friday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:00",
+        "endTime": "13:00"
+      },
+      {
+        "startTime": "14:30",
+        "endTime": "17:30"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 6,
+    "dayName": "Saturday",
+    "active": true,
+    "slots": [
+      {
+        "startTime": "09:30",
+        "endTime": "13:30"
+      }
+    ],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  },
+  {
+    "dayOfWeek": 0,
+    "dayName": "Sunday",
+    "active": false,
+    "slots": [],
+    "slotDurationMinutes": 60,
+    "bufferMinutes": 15
+  }
+]

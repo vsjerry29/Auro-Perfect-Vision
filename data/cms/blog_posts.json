@@ -1,0 +1,41 @@
+[
+  {
+    "id": "blog-1",
+    "slug": "understanding-digital-eye-strain-and-recovery",
+    "title": "Understanding Digital Eye Strain: Why Your Eyes Need More Than Blue Light Glasses",
+    "excerpt": "True visual relaxation comes not from passive filters, but from restoring natural blinking reflexes, dynamic distance shifting, and conscious palming.",
+    "content": "When we look at screens, our natural blink rate drops by more than 60%. The eye's ciliary muscle remains contracted in a fixed near-point lock for hours at a time, resulting in suboccipital stiffness, dry ocular surfaces, and end-of-day blur.\n\n### The Illusion of Passive Protection\nMany rely exclusively on blue light blocking spectacles, hoping a tinted lens will negate eight hours of static muscular fixation. While high-energy visible light management has its place, the core root of digital fatigue is physical: muscular stagnation.\n\n### Restoring the Natural Blink\nA natural blink spreads the precorneal tear film evenly across the cornea. During screen sessions, practice conscious complete blinks every 20 minutes.\n\n### The Power of Palming\nPalming is one of the most effective non-invasive ways to relax the optic nerve and orbital musculature. Cup warm hands over closed eyes without pressing the eyeballs. Breathe deeply into the abdomen and allow complete darkness to soothe retinal photoreceptors.",
+    "category": "Ocular Wellness",
+    "readTime": "4 min read",
+    "publishedDate": "November 14, 2026",
+    "authorName": "Dr. Ananya Sen",
+    "coverImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "blog-2",
+    "slug": "gentle-art-of-palming-and-sunning",
+    "title": "The Gentle Art of Palming & Sunning: Classical Techniques for Modern Vision",
+    "excerpt": "Explore the profound parasympathetic benefits of natural daylight exposure combined with deep ocular warmth.",
+    "content": "For decades, vision educators across Auroville have shared simple, grounding practices that realign the visual system with the rhythms of nature. Sunning and palming are two pillars of this mindful approach.\n\n### Sunning: Awakening Retinal Light Sensitivity\nSunning involves closing your eyes and gently rotating your head from shoulder to shoulder facing the morning sun. The gentle warmth passes through the eyelids, encouraging relaxed pupil dilation and contraction without any glare or direct optical strain.\n\n### Transition to Palming\nDirectly following sunning, step into the shade and cup your palms over your eyes. The contrast between warm golden light and deep velvety darkness provides profound neurological relief to fatigued eyes.",
+    "category": "Eye Yoga & Practices",
+    "readTime": "5 min read",
+    "publishedDate": "November 08, 2026",
+    "authorName": "Rajesh Kannan",
+    "coverImage": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  },
+  {
+    "id": "blog-3",
+    "slug": "nutrition-for-the-retina-and-tear-film",
+    "title": "Nourishing Your Sight: Holistic Nutrition for the Retina and Tear Film",
+    "excerpt": "A guide to clean, anti-inflammatory dietary habits that support macular pigment density and prevent tear evaporation.",
+    "content": "The eye is one of the highest metabolic consumers of oxygen in the human body. Providing it with rich antioxidant defense is essential for lifelong visual vitality.\n\n### Lutein and Zeaxanthin: The Internal Sunglasses\nThese two carotenoids concentrate specifically in the macula, filtering harmful blue wavelengths and neutralizing free radicals. Dark leafy greens like moringa, spinach, and kale are rich organic sources.\n\n### Healthy Fats for Tear Stability\nThe outermost layer of your tear film is lipid-based. Omega-3 fatty acids, cold-pressed flaxseed oil, and walnuts support the meibomian glands, preventing tears from evaporating prematurely in air-conditioned spaces.",
+    "category": "Holistic Nutrition",
+    "readTime": "6 min read",
+    "publishedDate": "October 29, 2026",
+    "authorName": "Dr. Ananya Sen",
+    "coverImage": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80",
+    "isPublished": true
+  }
+]

@@ -154,3 +154,7 @@ export interface BlogPost {
   coverImage: string;
   isPublished: boolean;
 }
+
+export type StaffRole = 'super_admin' | 'admin' | 'therapist';
+
+export * from './crm';

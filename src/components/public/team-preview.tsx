@@ -7,8 +7,15 @@ import { useDemoStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function TeamPreview() {
-  const { therapists } = useDemoStore();
+import { Therapist } from "@/lib/types";
+
+interface TeamPreviewProps {
+  initialTherapists?: Therapist[];
+}
+
+export function TeamPreview({ initialTherapists }: TeamPreviewProps) {
+  const { therapists: storeTherapists } = useDemoStore();
+  const therapists = initialTherapists && initialTherapists.length > 0 ? initialTherapists : storeTherapists;
 
   return (
     <section className="py-20 lg:py-28 bg-canvas-light border-b border-ink-border/50">

@@ -93,44 +93,30 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from LocalStorage
+  // Sync from server-side persistent CMS store
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.offerings) setOfferings(parsed.offerings);
-        if (parsed.therapists) setTherapists(parsed.therapists);
-        if (parsed.weeklySchedule) setWeeklySchedule(parsed.weeklySchedule);
-        if (parsed.leaveExceptions) setLeaveExceptions(parsed.leaveExceptions);
-        if (parsed.intakeTemplates) setIntakeTemplates(parsed.intakeTemplates);
-        if (parsed.bookings) setBookings(parsed.bookings);
-        if (parsed.blogs) setBlogs(parsed.blogs);
+    async function syncFromServer() {
+      try {
+        const res = await fetch("/api/public/content");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.offerings) && data.offerings.length > 0) {
+            setOfferings(data.offerings);
+          }
+          if (Array.isArray(data.therapists) && data.therapists.length > 0) {
+            setTherapists(data.therapists);
+          }
+          if (Array.isArray(data.blogs) && data.blogs.length > 0) {
+            setBlogs(data.blogs);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not sync public content from server:", err);
       }
-    } catch (e) {
-      console.warn("Could not parse saved demo store:", e);
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
+    syncFromServer();
   }, []);
-
-  // Save to LocalStorage
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      const state = {
-        offerings,
-        therapists,
-        weeklySchedule,
-        leaveExceptions,
-        intakeTemplates,
-        bookings,
-        blogs,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.warn("Could not save demo store to localStorage:", e);
-    }
-  }, [offerings, therapists, weeklySchedule, leaveExceptions, intakeTemplates, bookings, blogs, isLoaded]);
 
   const addOffering = (newOff: Omit<Offering, "id">) => {
     const id = `off-${Date.now()}`;
@@ -350,6 +336,14 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     setBookings((prev) => [newBooking, ...prev]);
+
+    // Persist to server store asynchronously
+    fetch("/api/public/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newBooking),
+    }).catch((err) => console.warn("Failed to persist booking to server:", err));
+
     return newBooking;
   };
 

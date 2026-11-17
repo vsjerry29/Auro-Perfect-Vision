@@ -8,12 +8,33 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 
 export default function TherapistDashboardPage() {
-  const { bookings } = useDemoStore();
+  const { bookings: fallbackBookings } = useDemoStore();
+  const [serverBookings, setServerBookings] = useState<any[] | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // In demo, show bookings assigned to therapist-1 (Dr. Ananya Sen)
-  const myBookings = bookings.filter((b) => b.therapistId === "therapist-1");
+  React.useEffect(() => {
+    async function loadBookings() {
+      try {
+        const res = await fetch("/api/therapist/bookings");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.bookings || []);
+          setServerBookings(list);
+        }
+      } catch (err) {
+        console.warn("Could not fetch therapist bookings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadBookings();
+  }, []);
+
+  const myBookings = Array.isArray(serverBookings)
+    ? serverBookings
+    : (Array.isArray(fallbackBookings) ? fallbackBookings.filter((b) => b.therapistId === "therapist-1") : []);
 
   const filteredBookings = myBookings.filter((b) => {
     if (statusFilter === "confirmed") return b.status === "confirmed";

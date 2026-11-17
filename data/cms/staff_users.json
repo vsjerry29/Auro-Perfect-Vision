@@ -1,0 +1,25 @@
+[
+  {
+    "id": "staff-admin-1",
+    "email": "admin@auroperfectvision.com",
+    "fullName": "Auro Perfect Vision Admin",
+    "role": "admin",
+    "passwordHash": "3db54782022121ee07e47f0de90616438663792dfe946e40bf2d0b0e9c6949346f7573dcf26c6a5ff4f8a217a6861dbe25849a3d6fbbbc37171ffa6fae0ec94b",
+    "salt": "e1b7aedc36d16ebb0a30ecb54853829e",
+    "isActive": true,
+    "createdAt": "2026-11-17T15:26:49.107Z",
+    "updatedAt": "2026-11-17T15:26:49.107Z"
+  },
+  {
+    "id": "staff-therapist-1",
+    "email": "therapist@auroperfectvision.com",
+    "fullName": "Dr. Ananya Sen",
+    "role": "therapist",
+    "therapistId": "therapist-1",
+    "passwordHash": "1a7e83646defd7667e5bd4117de7ddceab457dceb9fb162567fcc708215379ed44bcb37921e69311819b3ff12e6c0425303d451f47ad9dfabb4c406d4b3ca257",
+    "salt": "f0b8dca5d2c0c30d1ebd137f94c632dc",
+    "isActive": true,
+    "createdAt": "2026-11-17T15:26:49.107Z",
+    "updatedAt": "2026-11-17T15:26:49.107Z"
+  }
+]

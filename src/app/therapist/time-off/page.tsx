@@ -7,19 +7,67 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export default function TherapistTimeOffPage() {
-  const { leaveExceptions, addLeaveException, removeLeaveException } = useDemoStore();
+  const { leaveExceptions: storeLeaves, addLeaveException, removeLeaveException } = useDemoStore();
+  const [leaves, setLeaves] = useState<any[]>(storeLeaves);
   const [newDate, setNewDate] = useState("");
   const [reason, setReason] = useState("");
   const [notice, setNotice] = useState(false);
 
-  const handleAdd = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    async function loadLeaves() {
+      try {
+        const res = await fetch("/api/therapist/leave");
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.leaves || []);
+          if (Array.isArray(list)) {
+            setLeaves(list);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load leave exceptions:", err);
+      }
+    }
+    loadLeaves();
+  }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDate) return;
-    addLeaveException(newDate, reason || "Personal Leave / Time Off");
+    const leaveReason = reason || "Personal Leave / Time Off";
+    addLeaveException(newDate, leaveReason);
+    
+    try {
+      const res = await fetch("/api/therapist/leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: newDate, reason: leaveReason }),
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        const created = resData.leave || resData;
+        setLeaves((prev) => [...prev, created]);
+      }
+    } catch (err) {
+      console.warn("Could not post leave to server:", err);
+    }
+
     setNewDate("");
     setReason("");
     setNotice(true);
     setTimeout(() => setNotice(false), 2500);
+  };
+
+  const handleRemove = async (id: string) => {
+    removeLeaveException(id);
+    setLeaves((prev) => prev.filter((l) => l.id !== id));
+    try {
+      await fetch(`/api/therapist/leave?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.warn("Could not delete leave on server:", err);
+    }
   };
 
   return (
@@ -93,13 +141,13 @@ export default function TherapistTimeOffPage() {
           Currently Scheduled Time Off
         </h3>
 
-        {leaveExceptions.length === 0 ? (
+        {leaves.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-xl border border-dashed border-ink-border text-ink-muted">
             <p className="text-xs">No active leave dates scheduled.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {leaveExceptions.map((leave) => (
+            {leaves.map((leave) => (
               <div
                 key={leave.id}
                 className="bg-white p-4 rounded-xl border border-ink-border shadow-subtle flex items-center justify-between gap-4"
@@ -118,7 +166,7 @@ export default function TherapistTimeOffPage() {
                 </div>
 
                 <button
-                  onClick={() => removeLeaveException(leave.id)}
+                  onClick={() => handleRemove(leave.id)}
                   className="p-2 text-ink-muted hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                   title="Remove leave block"
                 >

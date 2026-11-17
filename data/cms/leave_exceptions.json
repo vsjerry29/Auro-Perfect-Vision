@@ -1,0 +1,16 @@
+[
+  {
+    "id": "leave-1",
+    "therapistId": "therapist-1",
+    "date": "2026-11-25",
+    "reason": "Auroville Community Wellness Conference",
+    "allDay": true
+  },
+  {
+    "id": "leave-2",
+    "therapistId": "therapist-2",
+    "date": "2026-12-04",
+    "reason": "Personal Leave",
+    "allDay": true
+  }
+]

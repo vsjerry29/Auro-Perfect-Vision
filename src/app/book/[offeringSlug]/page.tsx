@@ -1,31 +1,31 @@
-"use client";
-
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useDemoStore } from "@/lib/store";
+import { notFound } from "next/navigation";
+import { getOfferingBySlug } from "@/lib/server/cms";
 import { BookingWizard } from "@/components/booking/booking-wizard";
-import { ArrowLeft, ShieldCheck, Heart } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export default function BookOfferingPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const offeringSlug = params?.offeringSlug as string;
-  const initialTherapistId = searchParams?.get("therapist") || undefined;
+export const dynamic = "force-dynamic";
 
-  const { offerings } = useDemoStore();
+interface BookOfferingPageProps {
+  params: {
+    offeringSlug: string;
+  };
+  searchParams?: {
+    therapist?: string;
+  };
+}
 
-  const offering = useMemo(() => {
-    return offerings.find((o) => o.slug === offeringSlug);
-  }, [offerings, offeringSlug]);
+export default function BookOfferingPage({ params, searchParams }: BookOfferingPageProps) {
+  const offering = getOfferingBySlug(params.offeringSlug);
 
-  if (!offering) {
+  if (!offering || !offering.isPublished) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center space-y-4">
         <h2 className="font-serif text-3xl text-ink">Therapy Offering Not Found</h2>
-        <p className="text-sm text-ink-muted">The requested session or programme does not exist.</p>
+        <p className="text-sm text-ink-muted">The requested session or programme does not exist or is in draft.</p>
         <Link href="/therapies">
           <Button variant="primary" size="md">
             Return to Catalogue
@@ -34,6 +34,8 @@ export default function BookOfferingPage() {
       </div>
     );
   }
+
+  const initialTherapistId = searchParams?.therapist;
 
   return (
     <div className="bg-canvas min-h-screen py-10">
