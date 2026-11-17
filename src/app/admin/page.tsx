@@ -1,0 +1,220 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { useDemoStore } from "@/lib/store";
+import { formatCurrency } from "@/lib/utils";
+import {
+  CalendarCheck,
+  CreditCard,
+  Clock,
+  Layers,
+  ArrowUpRight,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  User,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+export default function AdminOverviewPage() {
+  const { bookings, offerings, therapists } = useDemoStore();
+
+  const totalBookings = bookings.length;
+  const confirmedBookings = bookings.filter((b) => b.status === "confirmed").length;
+  const pendingOffline = bookings.filter(
+    (b) => b.status === "pending_offline_confirmation"
+  ).length;
+
+  const totalRevenueINR = bookings
+    .filter((b) => b.status === "confirmed" && b.currency === "INR")
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+
+  const totalRevenueUSD = bookings
+    .filter((b) => b.status === "confirmed" && b.currency === "USD")
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+
+  const recentBookings = bookings.slice(0, 5);
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-200">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ink-border">
+        <div>
+          <span className="text-xs uppercase font-sans tracking-wider text-gold-dark font-semibold">
+            Administrative Management
+          </span>
+          <h1 className="font-serif text-2xl sm:text-3xl text-ink font-normal">
+            Platform Overview
+          </h1>
+          <p className="text-xs text-ink-muted mt-1">
+            Live operational dashboard for Auro Perfect Vision bookings, offline confirmations, and dynamic intake forms.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link href="/admin/bookings">
+            <Button variant="primary" size="sm" className="gap-1.5 text-xs">
+              <CalendarCheck className="w-3.5 h-3.5" />
+              <span>Manage Bookings</span>
+            </Button>
+          </Link>
+          <Link href="/book/eye-yoga" target="_blank">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+              <span>Test Guest Flow</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Bookings */}
+        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
+          <div className="flex items-center justify-between text-ink-muted mb-2">
+            <span className="text-xs uppercase tracking-wider font-medium">Total Bookings</span>
+            <CalendarCheck className="w-4 h-4 text-plum" />
+          </div>
+          <div>
+            <span className="font-serif text-3xl font-bold text-ink">{totalBookings}</span>
+            <span className="text-[11px] text-emerald-700 block mt-1 font-medium">
+              {confirmedBookings} Confirmed Active
+            </span>
+          </div>
+        </div>
+
+        {/* Pending Offline Payments */}
+        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
+          <div className="flex items-center justify-between text-ink-muted mb-2">
+            <span className="text-xs uppercase tracking-wider font-medium">Pending Offline</span>
+            <Clock className="w-4 h-4 text-amber-600" />
+          </div>
+          <div>
+            <span className="font-serif text-3xl font-bold text-amber-700">
+              {pendingOffline}
+            </span>
+            <span className="text-[11px] text-amber-800 block mt-1">
+              Awaiting Front Desk Approval
+            </span>
+          </div>
+        </div>
+
+        {/* Confirmed Domestic Revenue */}
+        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
+          <div className="flex items-center justify-between text-ink-muted mb-2">
+            <span className="text-xs uppercase tracking-wider font-medium">Domestic (INR)</span>
+            <CreditCard className="w-4 h-4 text-gold-dark" />
+          </div>
+          <div>
+            <span className="font-serif text-3xl font-bold text-plum">
+              {formatCurrency(totalRevenueINR, "INR")}
+            </span>
+            <span className="text-[11px] text-ink-muted block mt-1">
+              Paid Domestic Bookings
+            </span>
+          </div>
+        </div>
+
+        {/* Confirmed International Revenue */}
+        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
+          <div className="flex items-center justify-between text-ink-muted mb-2">
+            <span className="text-xs uppercase tracking-wider font-medium">International</span>
+            <CreditCard className="w-4 h-4 text-emerald-700" />
+          </div>
+          <div>
+            <span className="font-serif text-3xl font-bold text-emerald-800">
+              ${totalRevenueUSD}
+            </span>
+            <span className="text-[11px] text-ink-muted block mt-1">
+              Paid International Bookings
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Offline Pending Action Alert */}
+      {pendingOffline > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-700 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-semibold text-amber-900">
+                Action Required: {pendingOffline} offline reservation(s) awaiting payment confirmation.
+              </p>
+              <p className="text-[11px] text-amber-800 mt-0.5">
+                Confirm payment when guests pay cash at the centre or send bank wire reference to trigger automatic PDF invoice generation.
+              </p>
+            </div>
+          </div>
+          <Link href="/admin/payments">
+            <Button variant="outline" size="sm" className="bg-white text-xs border-amber-300">
+              Go to Offline Queue
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* Recent Bookings Table */}
+      <div className="bg-white rounded-xl border border-ink-border shadow-subtle overflow-hidden">
+        <div className="p-5 border-b border-ink-border flex items-center justify-between">
+          <div>
+            <h3 className="font-serif text-lg font-medium text-ink">Recent Bookings Ledger</h3>
+            <p className="text-xs text-ink-muted">Latest client transactions across all therapists</p>
+          </div>
+          <Link href="/admin/bookings">
+            <Button variant="ghost" size="sm" className="text-xs">
+              View All
+            </Button>
+          </Link>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-ink">
+            <thead className="bg-canvas-light border-b border-ink-border uppercase tracking-wider text-[10px] text-ink-muted font-semibold">
+              <tr>
+                <th className="px-5 py-3">Reference</th>
+                <th className="px-5 py-3">Client</th>
+                <th className="px-5 py-3">Offering</th>
+                <th className="px-5 py-3">Date & Time</th>
+                <th className="px-5 py-3">Practitioner</th>
+                <th className="px-5 py-3">Amount</th>
+                <th className="px-5 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink-border/50">
+              {recentBookings.map((b) => (
+                <tr key={b.id} className="hover:bg-canvas-light/50 transition-colors">
+                  <td className="px-5 py-3.5 font-mono font-medium text-plum">
+                    {b.bookingReference}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="font-medium block text-ink">{b.clientName}</span>
+                    <span className="text-[11px] text-ink-muted block">{b.clientPhone}</span>
+                  </td>
+                  <td className="px-5 py-3.5 font-medium">{b.offeringTitle}</td>
+                  <td className="px-5 py-3.5 text-ink-muted">
+                    {b.date} • {b.timeSlot}
+                  </td>
+                  <td className="px-5 py-3.5">{b.therapistName}</td>
+                  <td className="px-5 py-3.5 font-medium">
+                    {formatCurrency(b.totalAmount, b.currency)}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <Badge
+                      variant={b.status === "confirmed" ? "success" : "warning"}
+                      className="text-[10px]"
+                    >
+                      {b.status === "confirmed" ? "Confirmed" : "Pending Offline"}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
