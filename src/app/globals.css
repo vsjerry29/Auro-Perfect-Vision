@@ -97,3 +97,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     scroll-behavior: auto !important;
   }
 }
+
+.truncate{
+  white-space: break-spaces;
+    text-align: center;
+}
