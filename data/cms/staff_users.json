@@ -3,10 +3,12 @@
     "id": "staff-admin-1",
     "email": "admin@auroperfectvision.com",
     "fullName": "Auro Perfect Vision Admin",
-    "role": "admin",
+    "role": "super_admin",
+    "phone": "+91 8012305151",
     "passwordHash": "3db54782022121ee07e47f0de90616438663792dfe946e40bf2d0b0e9c6949346f7573dcf26c6a5ff4f8a217a6861dbe25849a3d6fbbbc37171ffa6fae0ec94b",
     "salt": "e1b7aedc36d16ebb0a30ecb54853829e",
     "isActive": true,
+    "status": "active",
     "createdAt": "2026-11-17T15:26:49.107Z",
     "updatedAt": "2026-11-17T15:26:49.107Z"
   },
