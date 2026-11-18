@@ -68,7 +68,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   const session = await getCurrentStaffSession();
-  if (!session || session.role !== "admin") {
+  if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,0 +1,1435 @@
+<USER_REQUEST>
+# AURO PERFECT VISION — COMPLETE CMS REPAIR, HERO CAROUSEL REFINEMENT & PLATFORM-WIDE FUNCTIONAL AUDIT
+
+## CRITICAL OBJECTIVE
+
+You are working on the existing Auro Perfect Vision platform in `D:\Aurokiya`.
+
+The Platform v2 implementation reportedly completed the hero carousel, CMS, CRM, EMR, booking system, staff management and database integrations.
+
+However, the latest screenshots reveal significant unfinished functionality.
+
+**The Website Editor still shows an outdated single-image hero editor, the homepage heading does not update when edited through the CMS, and the carousel needs an improved Instagram Stories-style progress indicator.**
+
+You must fix these issues and then perform a complete feature-by-feature functional audit of the entire application.
+
+This must be a **comprehensive implementation, repair and verification milestone**, not a superficial UI update.
+
+Do not stop after correcting the carousel.
+
+Do not assume functionality works because a test script passes or a page renders.
+
+Do not deploy to production without authorization.
+
+Do not inspect the public live Vercel website. Work against the local project and an authorized staging environment.
+
+---
+
+# PART 1 — IDENTIFY AND FIX THE CMS ROOT CAUSE
+
+## 1.1. Investigate the current Website Editor
+
+The latest screenshot shows:
+
+**Admin → Website Editor → Homepage & Settings**
+
+The editor still contains:
+
+- Homepage Hero Section
+- Hero Photographic Art
+- Upload New Hero Photo
+- Hero Editorial Headline
+- Hero Philosophical Subtitle
+- Primary CTA Button Label
+- Secondary CTA Label
+
+This is the old single-image design.
+
+Meanwhile, the public homepage now displays a four-image therapy carousel.
+
+**These two interfaces are not properly synchronized.**
+
+Investigate why the redesigned homepage and the CMS are using inconsistent content structures.
+
+Inspect:
+
+- `src/app/admin/cms/page.tsx`
+- `src/components/public/hero-carousel.tsx`
+- Homepage components
+- CMS API routes
+- CMS data-access utilities
+- `data/cms/site_content.json`
+- `heroCarouselSlides` configuration
+- Supabase persistence services
+- CMS revision services
+- Public content-loading functions
+- Next.js caching and revalidation behavior
+
+Identify whether the problem is caused by:
+
+1. Separate data sources.
+2. Hardcoded homepage content.
+3. Old CMS form fields.
+4. Incorrect API payloads.
+5. Missing database persistence.
+6. Stale Next.js cache.
+7. Failed content validation.
+8. Incorrect field-name mapping.
+9. Draft content being confused with published content.
+10. Client state being disconnected from server responses.
+
+Find and fix the actual root causes.
+
+Do not add another layer of temporary UI state to hide the problem.
+
+## 1.2. Establish one authoritative source of content
+
+The CMS and public website must use a consistent persistent content model.
+
+Ensure:
+
+- Admin edits update the correct database records.
+- Public pages read from the same published content.
+- Drafts remain separate from published content.
+- Publishing triggers appropriate cache invalidation.
+- Changes persist after refresh.
+- Changes persist across different authenticated sessions.
+- Changes survive application restarts.
+- No production operation depends on writing local JSON files.
+- No production content silently falls back to outdated browser memory.
+
+Existing JSON files may remain as development seed fixtures, but not as the production source of truth.
+
+Use the existing database and storage architecture wherever possible.
+
+Do not duplicate CMS tables or create conflicting content models.
+
+If Supabase configuration is missing, fail safely and report the exact dependency. Never show a false successful save.
+
+## 1.3. Fix homepage heading updates
+
+This is a confirmed user-reported defect.
+
+When the administrator changes the homepage heading:
+
+1. Open Website Editor.
+2. Change "See Better. Live Brighter." to a new test heading.
+3. Click Save Draft.
+4. Refresh the admin page.
+5. Confirm the draft remains.
+6. Preview the unpublished changes.
+7. Click Publish.
+8. Open the public homepage in a separate browser session.
+9. Verify the heading displays the published text.
+10. Reload the homepage.
+11. Verify the heading remains correct.
+12. Restore the original heading.
+13. Verify restoration works.
+
+Repeat this workflow for:
+
+- Hero subtitle.
+- Primary CTA label.
+- Secondary CTA label.
+- CTA destinations.
+- Hero images.
+- Featured therapy selections.
+- Section headings.
+
+Do not consider this issue resolved until the complete workflow passes.
+
+## 1.4. Fix Next.js content caching
+
+Inspect the installed Next.js version and the application's actual caching strategy.
+
+After successful publishing, invalidate the affected content using the appropriate supported mechanisms.
+
+Use `updateTag` in Server Actions when immediate read-after-write consistency is required, and appropriate `revalidateTag` or `revalidatePath` operations for other supported server contexts.
+
+Do not invoke cache functions in unsupported contexts.
+
+Ensure a published change is visible on the next verified public-page request.
+
+Do not require a new Vercel deployment for ordinary CMS editing.
+
+---
+
+# PART 2 — REBUILD THE HERO CAROUSEL CMS EDITOR
+
+The current single-image hero editor is no longer suitable.
+
+Replace it with a proper carousel-management interface.
+
+## 2.1. Updated Website Editor navigation
+
+Restructure the CMS into clearer management areas.
+
+Suggested organization:
+
+**Website Editor**
+
+- Homepage
+- Hero Carousel
+- About Page
+- Therapies Page
+- Programmes Page
+- Team Page
+- Contact Page
+- Header & Footer
+- Global Settings
+- Revisions & Rollback
+
+Keep blog/article management accessible without making the entire Website Editor feel like an editorial publishing platform.
+
+Use the existing design system.
+
+Avoid unnecessary changes to working admin navigation.
+
+## 2.2. Dedicated Hero Carousel Manager
+
+Create a proper interface under:
+
+**Website Editor → Homepage → Hero Carousel**
+
+Display all existing carousel slides as editable cards.
+
+Each card should show:
+
+- Image thumbnail.
+- Therapy title.
+- Subtitle.
+- Linked therapy.
+- Publication status.
+- Display order.
+- Edit action.
+- Duplicate action.
+- Remove action.
+
+Support the four current photographs:
+
+1. Vision Therapy.
+2. Sports Vision Training.
+3. Eye Yoga.
+4. Visual Skill Enhancement.
+
+Do not combine these into one image.
+
+Do not return to the old doctor-with-phone hero image.
+
+## 2.3. Slide editing
+
+When Edit Slide is selected, open a well-designed form with:
+
+- Slide image upload.
+- Replace image.
+- Image preview.
+- Desktop/mobile focal point.
+- Image alt text.
+- Therapy label.
+- Main title.
+- Description.
+- CTA text.
+- CTA destination.
+- Associated therapy selection.
+- Enable/disable toggle.
+- Display order.
+- Save Draft.
+- Preview.
+- Publish.
+
+Validate links and data.
+
+Allow links to existing published therapies.
+
+If a therapy is unpublished or deleted, prevent broken CTA destinations.
+
+## 2.4. Add and remove slides
+
+The administrator must be able to:
+
+- Add a fifth slide.
+- Upload its image.
+- Enter title and subtitle.
+- Link it to a published therapy.
+- Publish it.
+- See it appear in the carousel.
+- Reorder it.
+- Disable it.
+- Remove it.
+
+When Remove is clicked, open a confirmation dialog.
+
+Example:
+
+**Remove this carousel slide?**
+
+"This slide will no longer appear on the homepage. The original image will remain in the Media Library unless separately removed."
+
+Buttons:
+
+- Cancel.
+- Remove Slide.
+
+Do not immediately delete the underlying media asset when removing a slide.
+
+## 2.5. Live preview
+
+Provide an accurate preview using the same carousel components and content model as the public website.
+
+The preview should support:
+
+- Desktop layout.
+- Mobile layout.
+- Manual slide navigation.
+- Visible overlay text.
+- Correct image cropping.
+- Draft preview.
+- Published preview.
+
+Do not render an inaccurate static preview that differs from the actual homepage.
+
+---
+
+# PART 3 — INSTAGRAM STORIES-STYLE CAROUSEL PROGRESS
+
+The current carousel displays:
+
+- Thin progress bars at the top.
+- Previous button.
+- Pause/play button.
+- Next button.
+- A numerical counter showing `1 / 4`.
+
+The numerical counter is unnecessary.
+
+**Remove the `1 / 4` counter completely.**
+
+The top progress indicators should work like Instagram Stories.
+
+## 3.1. Required progress design
+
+At the top of the carousel image, display thin horizontal segments.
+
+If there are four active slides, display four segments.
+
+Each segment represents one slide.
+
+For example:
+
+Slide 1:
+
+- First segment gradually fills from left to right.
+- Other segments remain unfilled.
+
+Slide 2:
+
+- First segment remains fully filled.
+- Second segment starts filling.
+- Third and fourth remain unfilled.
+
+Slide 3:
+
+- First and second segments remain filled.
+- Third segment gradually fills.
+- Fourth remains unfilled.
+
+Slide 4:
+
+- First three segments remain filled.
+- Fourth segment gradually fills.
+
+After the last slide finishes, return to the first slide and reset the progress sequence.
+
+Use the brand's bright orange as the active progress color.
+
+Use subtle translucent white/gray for the inactive tracks.
+
+The result should feel refined and modern.
+
+## 3.2. Timing
+
+Default slide duration:
+
+**5.5 seconds**
+
+Progress duration must match slide duration exactly.
+
+The progress bar must advance smoothly, not in obvious jumps.
+
+The slide must transition only when the current progress reaches completion.
+
+Use one coordinated timing mechanism for slide progression and visual progress.
+
+Avoid multiple competing timers that cause desynchronization.
+
+## 3.3. Manual navigation
+
+When a visitor clicks Next:
+
+- Move to the next slide immediately.
+- Reset the current slide's progress to zero.
+- Mark earlier segments appropriately.
+- Begin progression from the newly selected slide when rotation is active.
+
+When clicking Previous:
+
+- Move to the previous slide.
+- Update completed segments appropriately.
+- Reset active progress.
+
+When selecting a specific progress segment:
+
+- Navigate to that slide.
+- Update its active state.
+- Reset timing appropriately.
+
+Avoid delayed transitions after manual navigation.
+
+Rapid clicking must not cause multiple overlapping animations.
+
+## 3.4. Pause behavior
+
+When the user pauses:
+
+- Freeze the current progress at its exact position.
+- Keep the current slide visible.
+- Do not reset its progress.
+- Resume from the same position when explicitly restarted.
+
+Also handle:
+
+- Mouse hover.
+- Keyboard focus.
+- Browser tab visibility.
+- Reduced-motion preferences.
+
+Follow the accessible carousel behavior specified by the W3C.
+
+When focus enters an automatically rotating carousel, stop automatic rotation and do not restart it without an explicit user action.
+
+Provide a clearly labeled rotation control for accessibility.
+
+Keep the visual controls minimal.
+
+## 3.5. Carousel presentation
+
+Maintain the premium 4:5 photographic card.
+
+Improve:
+
+- Crossfade quality.
+- Image loading.
+- Text transition.
+- Progress animation.
+- Responsive cropping.
+- Contrast.
+- Control placement.
+
+Avoid:
+
+- Screen flashes.
+- Excessive image zooming.
+- Layout shifts.
+- Unnecessary animation.
+- Incorrect progress timing.
+- Stale slide content.
+- Hardcoded slide counts.
+- Multiple animation intervals.
+- Animating the entire hero section when only the photograph needs to change.
+
+Keep the left-side hero content stable while the right-side carousel rotates.
+
+## 3.6. Dynamic slide count
+
+Do not hardcode four progress indicators.
+
+If the administrator publishes five slides, show five segments.
+
+If the administrator disables a slide, omit its corresponding segment.
+
+If only one slide is published:
+
+- Display the image correctly.
+- Hide unnecessary carousel navigation.
+- Do not run autoplay.
+
+Handle zero published slides with an approved fallback state rather than a broken image.
+
+---
+
+# PART 4 — VERIFY EVERY WEBSITE EDITOR FUNCTION
+
+The client must be able to maintain the complete website without developer assistance.
+
+Inspect and verify all CMS modules.
+
+## 4.1. Homepage
+
+Test:
+
+- Hero heading editing.
+- Hero subtitle editing.
+- CTA labels.
+- CTA destinations.
+- Carousel image replacement.
+- Carousel slide creation.
+- Slide deletion.
+- Slide reordering.
+- Featured therapies.
+- Featured programmes.
+- Team preview.
+- Homepage section content.
+- Section images.
+- Section visibility.
+- Footer CTA.
+
+## 4.2. About Page
+
+Test:
+
+- Main heading.
+- Introduction.
+- Mission.
+- Approach.
+- Images.
+- Section descriptions.
+- Content publishing.
+
+## 4.3. Therapies Catalogue
+
+Test:
+
+- Add therapy.
+- Edit therapy.
+- Upload therapy image.
+- Replace therapy image.
+- Change therapy title.
+- Change description.
+- Change price.
+- Change duration.
+- Assign therapist.
+- Update category.
+- Publish therapy.
+- Unpublish therapy.
+- Archive therapy.
+- Restore therapy.
+- Search/filter.
+- View public therapy page.
+- Open booking page.
+
+The public catalogue, therapy detail page and booking interface must all display consistent published information.
+
+## 4.4. Programmes
+
+Test:
+
+- Add programme.
+- Edit programme.
+- Change programme image.
+- Update description.
+- Set programme duration.
+- Manage schedules.
+- Assign linked sessions.
+- Update capacity.
+- Publish.
+- Archive.
+- Restore.
+
+Ensure multi-day programmes aren't incorrectly treated as individual appointments measured only in minutes.
+
+## 4.5. Practitioners
+
+Test:
+
+- Add practitioner.
+- Edit profile.
+- Upload photo.
+- Replace photo.
+- Assign therapies.
+- Change qualifications.
+- Update specialties.
+- Change public visibility.
+- Remove/archive practitioner.
+- Confirm removal.
+- Reassign future appointments.
+- Reactivate practitioner.
+
+Ensure archived practitioners cannot receive new bookings.
+
+Historical bookings and medical records must remain intact.
+
+## 4.6. Contact Page
+
+Test:
+
+- Change phone number.
+- Change WhatsApp number.
+- Change email.
+- Change address.
+- Change business hours.
+- Update Google Maps destination.
+- Edit headings.
+- Update FAQs.
+- Edit images.
+- Publish changes.
+- Submit contact inquiry.
+- Verify CRM inquiry creation.
+
+Ensure contact details remain consistent across the header, footer, Contact page and other affected sections.
+
+## 4.7. Blogs
+
+Test:
+
+- Create article.
+- Edit article.
+- Upload image.
+- Save Draft.
+- Preview.
+- Publish.
+- Unpublish.
+- Archive.
+- Restore version.
+- Category selection.
+- SEO metadata.
+- Public article rendering.
+
+## 4.8. Header and Footer
+
+Test:
+
+- Logo changes.
+- Navigation links.
+- Footer text.
+- Social links.
+- Contact information.
+- CTA destinations.
+- Mobile menu.
+
+Changes must be reflected consistently across every relevant public page.
+
+---
+
+# PART 5 — FULL MEDIA LIBRARY VERIFICATION
+
+The existing image-upload and replacement features need comprehensive testing.
+
+Inspect the complete upload implementation.
+
+Verify:
+
+- File selection.
+- Upload progress.
+- Image preview.
+- Image replacement.
+- Persistent storage.
+- Public asset access where appropriate.
+- Private storage protection.
+- Image optimization.
+- Valid image dimensions.
+- File format validation.
+- File size validation.
+- Alt-text editing.
+- Media reuse.
+- Duplicate handling.
+- Failed upload recovery.
+- Removal confirmation.
+
+## Mandatory image-upload workflow
+
+Run this complete test:
+
+1. Log in as Admin.
+2. Open Media Library.
+3. Upload a valid image.
+4. Verify upload success.
+5. Refresh the page.
+6. Verify the image still exists.
+7. Select it for a therapy.
+8. Publish the therapy.
+9. Open the public therapy page.
+10. Verify the image appears.
+11. Replace the image.
+12. Publish again.
+13. Verify the new image appears.
+14. Open another authorized browser session.
+15. Verify persistence.
+16. Test an invalid file.
+17. Verify validation errors.
+18. Test a failed upload.
+19. Verify the UI handles failure without falsely reporting success.
+
+Repeat this workflow for hero-carousel images and relevant page images.
+
+Do not depend on local filesystem storage for production uploads.
+
+---
+
+# PART 6 — COMPLETE ADMIN FEATURE AUDIT
+
+Inspect every administrative page and every user-facing control.
+
+Do not limit the review to the CMS.
+
+The existing platform contains multiple management systems.
+
+Verify all of them.
+
+## Required modules
+
+### Core Administration
+
+- Dashboard overview.
+- Manage Staff Users.
+- Practitioner Management.
+- System Settings.
+- Compliance & Audit.
+
+### Website Management
+
+- Website Editor.
+- Hero Carousel.
+- Media Library.
+- Blogs.
+- Public content publishing.
+- CMS revisions and rollback.
+
+### Services & Booking
+
+- Therapies Catalogue.
+- Flagship Programmes.
+- Booking Manager.
+- Master Calendar.
+- Intake Form Builder.
+- Availability.
+- Cancellations.
+- Rescheduling where supported.
+
+### CRM
+
+- Clients Directory.
+- Individual client profiles.
+- Inquiries & Leads.
+- Follow-up Tasks.
+- Communication history.
+- Internal notes.
+- Duplicate detection.
+- Import/export.
+
+### EMR
+
+- Patient Directory.
+- Patient registration.
+- Medical History.
+- Clinical Encounters.
+- SOAP Notes.
+- Vision Assessments.
+- Treatment Plans.
+- Progress Tracking.
+- Documents.
+- Consent Records.
+- Signed notes and amendments.
+
+### Financial & Communications
+
+- Payments.
+- Invoices.
+- Offline payment confirmation.
+- Notification templates.
+- Email configuration.
+- WhatsApp configuration.
+- Delivery logs.
+
+For each module, inspect every available:
+
+- Button.
+- Form.
+- Modal.
+- Dropdown.
+- Filter.
+- Search.
+- Table action.
+- Create action.
+- Edit action.
+- Archive action.
+- Remove action.
+- Upload action.
+- Save action.
+- Publish action.
+- Export action.
+- Navigation link.
+
+Do not leave controls that appear clickable but do nothing.
+
+---
+
+# PART 7 — AUDIT ALL CRUD OPERATIONS
+
+Every major entity should support the appropriate create, read, update and archive/delete workflow.
+
+Create a feature matrix with:
+
+- Entity.
+- Create.
+- Read.
+- Update.
+- Archive/Delete.
+- Permissions.
+- Persistence.
+- UI feedback.
+- Test result.
+
+Include at least:
+
+- Therapies.
+- Programmes.
+- Practitioners.
+- Staff users.
+- CRM contacts.
+- CRM inquiries.
+- Follow-up tasks.
+- Blogs.
+- Media assets.
+- Carousel slides.
+- CMS page content.
+- Bookings.
+- EMR patient records.
+- Clinical notes.
+- Treatment plans.
+- Consent records.
+
+Do not implement unsafe hard deletion of historical bookings, signed clinical records, invoices or other records that must be retained.
+
+Use archiving, cancellation, revocation or amendments where appropriate.
+
+## Confirmation dialogs
+
+Apply clear confirmation dialogs to destructive actions.
+
+For example:
+
+**Remove Practitioner?**
+
+"This practitioner will be removed from public listings and will no longer receive new bookings. Historical appointments and clinical records will be preserved."
+
+Buttons:
+
+- Cancel.
+- Remove Practitioner.
+
+Ensure confirmation dialogs actually work and cannot bypass server authorization.
+
+---
+
+# PART 8 — VERIFY DATABASE PERSISTENCE ACROSS THE PLATFORM
+
+This is mandatory.
+
+Inspect the existing storage engine, especially:
+
+`src/lib/server/storage-engine.ts`
+
+The previous implementation reportedly introduced persistent Supabase storage with an in-memory fallback for local/test environments.
+
+Confirm how it behaves in every environment.
+
+Production must never silently fall back to in-memory storage when the database is unavailable.
+
+Ensure:
+
+- All production writes go to durable storage.
+- Database failures return proper errors.
+- Data persists after refresh.
+- Data persists across sessions.
+- Data persists after process restart.
+- No client-specific data is isolated accidentally to one server instance.
+- Different authorized users see consistent shared state.
+- Public content uses published records only.
+- Drafts remain private.
+- Image references are durable.
+- CMS revisions are stored correctly.
+- Audit records persist correctly.
+
+Review existing migrations and RLS policies.
+
+Verify that the application actually uses the intended database tables.
+
+Do not assume migration files have been applied simply because they exist in the repository.
+
+## Cache consistency
+
+Test whether any content appears outdated after publishing.
+
+Identify all relevant caching layers:
+
+- Next.js server data cache.
+- Full-route cache where applicable.
+- Client-side state.
+- API caching.
+- Browser cache.
+- CDN cache where applicable.
+- Image caching.
+
+Implement controlled cache invalidation so changes reliably become visible.
+
+Do not solve stale data by disabling caching across the entire application without justification.
+
+---
+
+# PART 9 — VERIFY CRM AND EMR
+
+The recent Platform v2 report says EMR was implemented.
+
+Now verify it thoroughly.
+
+## CRM testing
+
+Test:
+
+- Add client.
+- Edit client.
+- Search client.
+- Archive client.
+- Create inquiry.
+- Link inquiry to client.
+- Update lead stage.
+- Add note.
+- Create follow-up task.
+- Complete task.
+- Merge duplicate contacts safely.
+- Export authorized information.
+
+Ensure sensitive clinical information does not leak into ordinary CRM exports.
+
+## EMR testing
+
+Test:
+
+- Create patient.
+- Link patient to CRM identity.
+- Edit medical history.
+- Create clinical encounter.
+- Create draft SOAP note.
+- Save and refresh.
+- Reopen draft.
+- Sign and lock note.
+- Attempt to edit locked note.
+- Verify modification is rejected.
+- Add signed amendment.
+- Verify original note remains unchanged.
+- Upload private clinical document.
+- View authorized document.
+- Attempt unauthorized document access.
+- Create vision assessment.
+- Create treatment plan.
+- Record progress.
+- View clinical timeline.
+- Verify audit history.
+
+## Clinical permissions
+
+Test with separate accounts:
+
+- Super Admin.
+- Administrator.
+- Authorized therapist.
+- Unassigned therapist.
+- Anonymous user.
+
+Do not assume Super Admin automatically needs access to confidential medical content.
+
+Respect the application's approved clinical-access model.
+
+Verify all sensitive reads and writes server-side.
+
+Do not expose EMR information through public APIs, browser logs or public object-storage URLs.
+
+---
+
+# PART 10 — VERIFY BOOKING AND THERAPIST WORKFLOWS
+
+Inspect the complete booking process.
+
+Verify:
+
+1. Select therapy.
+2. Select therapist.
+3. Choose available date.
+4. Choose available time.
+5. Complete intake form.
+6. Review details.
+7. Select payment method.
+8. Complete the appropriate booking state.
+9. Receive correct confirmation information.
+
+Test:
+
+- Therapist leave.
+- Unavailable slots.
+- Booking conflicts.
+- Group capacity.
+- Booking cancellation.
+- Booking rescheduling where supported.
+- Manual booking.
+- Guest booking.
+- Therapist assignment.
+- CRM contact linking.
+- EMR patient linking.
+- Offline payment status.
+- Invoice eligibility.
+
+A pre-insert availability check alone does not establish race-safe booking concurrency.
+
+Verify atomic conflict protection at the database level and run concurrent booking tests.
+
+Keep unapproved payment and notification integrations disabled rather than pretending they succeeded.
+
+---
+
+# PART 11 — AUTHENTICATION AND SECURITY REGRESSION
+
+Verify existing security after all fixes.
+
+Required cases:
+
+- Anonymous access to `/admin`.
+- Anonymous access to `/therapist`.
+- Anonymous access to CRM APIs.
+- Anonymous access to EMR APIs.
+- Therapist access to admin-only endpoints.
+- Unassigned therapist access to another patient's records.
+- Administrator attempting Super Admin privilege escalation.
+- Suspended staff account access.
+- Session revocation.
+- Unauthorized CMS publishing.
+- Unauthorized media upload.
+- Unauthorized clinical document access.
+- Unauthorized financial exports.
+
+Verify authorization inside server actions and API handlers, not only in navigation or middleware.
+
+Confirm production credentials and secrets are not embedded in client bundles.
+
+Do not use real patient information in testing.
+
+---
+
+# PART 12 — FULL BROWSER-BASED TESTING
+
+Use Playwright or the existing browser automation framework.
+
+Build tests around real user workflows.
+
+Test across:
+
+- Desktop Chromium.
+- Firefox or WebKit where available.
+- Mobile viewport.
+- Tablet viewport.
+
+Use separate authenticated test sessions for relevant roles.
+
+## Mandatory CMS tests
+
+Create automated coverage for:
+
+1. Homepage heading update.
+2. Homepage subtitle update.
+3. Hero slide image replacement.
+4. Carousel slide creation.
+5. Carousel slide removal.
+6. Carousel reordering.
+7. Therapy creation and publication.
+8. Therapy price editing.
+9. Therapist creation and editing.
+10. Therapist safe archiving.
+11. Contact information update.
+12. Contact inquiry submission.
+13. Blog publishing.
+14. CMS rollback.
+15. Media upload persistence.
+
+Each test must verify that saved changes persist after a reload.
+
+For public content, verify the actual public-facing page displays the published value.
+
+Use an authorized staging database and synthetic test data.
+
+Restore or clean up test-created records.
+
+Do not damage legitimate content.
+
+## Mandatory carousel tests
+
+Verify:
+
+- Correct slides load.
+- No numerical `1 / 4` counter.
+- Four Instagram-style progress segments initially.
+- Active segment fills smoothly.
+- Previous segments remain filled.
+- Slide changes at the correct duration.
+- Last slide cycles to first.
+- Previous/next work.
+- Manual selection works.
+- Pause freezes progress.
+- Resume continues correctly.
+- Hover behavior works.
+- Keyboard focus stops autoplay.
+- Tab visibility is handled.
+- Reduced-motion preference is respected.
+- Dynamic slide count works.
+- Single-slide configuration works.
+- No timer leaks.
+- No layout shifts.
+- Mobile image crop is correct.
+
+## Regression testing
+
+After implementing fixes, rerun all existing Platform v2 verification scripts.
+
+Add new tests without deleting useful previous tests.
+
+Do not treat a previously reported 11/11 pass as proof that the current implementation works.
+
+Run the actual updated tests.
+
+---
+
+# PART 13 — IMPROVE ERROR HANDLING THROUGHOUT
+
+The client should never see raw server errors or internal file paths.
+
+Standardize:
+
+- Loading states.
+- Save progress.
+- Upload progress.
+- Success notifications.
+- Validation errors.
+- Retry options.
+- Empty states.
+- Network errors.
+- Database errors.
+- Permission errors.
+- Unsaved-changes warnings.
+
+Do not close an editing modal when a save fails.
+
+Do not display "Saved Successfully" until the server confirms the durable operation.
+
+Avoid silent failures.
+
+Create consistent toast and modal behavior across the admin system.
+
+---
+
+# PART 14 — INDEPENDENT FEATURE-GAP DISCOVERY
+
+You must also identify problems that have not been explicitly listed in this prompt.
+
+Inspect the application like a senior QA engineer and product engineer.
+
+Look for:
+
+- Incomplete workflows.
+- Missing editing functionality.
+- Missing archive/remove actions.
+- Disconnected forms.
+- Duplicate functionality.
+- Broken links.
+- Inconsistent public/admin data.
+- Old components still being used.
+- Hardcoded placeholders.
+- Incorrect loading states.
+- Stale content.
+- Unsafe destructive actions.
+- Missing permissions.
+- Unnecessary UI complexity.
+- Inaccessible controls.
+- Mobile layout defects.
+- Missing error boundaries.
+- Nonfunctional buttons.
+- Incorrect feature descriptions.
+- Misleading success messages.
+
+When an important issue is discovered:
+
+1. Record it.
+2. Identify the root cause.
+3. Fix it if within the approved platform scope.
+4. Add regression coverage.
+5. Verify the actual workflow.
+
+Do not add unrelated new products or experimental features merely to expand the scope.
+
+For business-policy-dependent features, keep behavior safely disabled or configurable and record the required decision.
+
+---
+
+# PART 15 — QUALITY AND ACCESSIBILITY
+
+Maintain the approved modern Auro Perfect Vision design.
+
+Public design:
+
+- Modern Sora and Inter typography.
+- Purple-and-orange identity.
+- Strong photography.
+- Premium card styling.
+- Responsive layouts.
+- Clear booking actions.
+
+Admin design:
+
+- Practical forms.
+- Easy navigation.
+- Consistent labels.
+- Clean tables.
+- Clear feedback.
+- Efficient editing.
+- Accessible dialogs.
+- Reliable previews.
+
+Audit:
+
+- Responsive behavior.
+- Keyboard accessibility.
+- Color contrast.
+- Focus indicators.
+- Image alt text.
+- Screen-reader labels.
+- Reduced motion.
+- Form validation.
+- Semantic structure.
+
+Do not redesign the entire public website again.
+
+Make targeted improvements where necessary.
+
+---
+
+# PART 16 — IMPLEMENTATION EXECUTION
+
+Execute this as one comprehensive milestone with internal stages.
+
+### Stage A — Inspect and diagnose
+
+- Read existing reports and documentation.
+- Inspect the current source code.
+- Map all routes, API endpoints and editable models.
+- Identify why CMS changes are not reaching the homepage.
+- Create an issue inventory.
+- Preserve existing changes.
+
+### Stage B — Fix CMS architecture
+
+- Resolve data-source inconsistencies.
+- Fix form submissions.
+- Fix persistence.
+- Fix cache invalidation.
+- Fix images.
+- Verify actual publishing.
+
+### Stage C — Carousel redesign
+
+- Implement Instagram Stories-style progress.
+- Remove numerical counter.
+- Improve pause/resume behavior.
+- Rebuild CMS carousel manager.
+- Verify responsive and accessible operation.
+
+### Stage D — Complete editing workflows
+
+- Fix Homepage, About, Therapies, Programmes, Team, Contact, Blogs and Global Settings.
+- Complete missing create/edit/archive actions.
+- Verify every save and publish workflow.
+
+### Stage E — Platform-wide audit and repair
+
+- Admin.
+- Therapist portal.
+- Manage Users.
+- CRM.
+- EMR.
+- Booking.
+- Payments.
+- Invoices.
+- Notifications.
+- Security.
+
+### Stage F — Full regression testing
+
+- Automated tests.
+- Database persistence tests.
+- Browser-based functional tests.
+- Permission tests.
+- Responsive testing.
+- Production build.
+- Documentation and final handoff.
+
+Do not request approval between these internal stages.
+
+Do not repeatedly run builds without diagnosing failures.
+
+Do not claim completion based only on a TypeScript check or production build.
+
+---
+
+# PART 17 — REQUIRED FEATURE CHECKLIST
+
+Create this file:
+
+`COMPLETE_PLATFORM_FEATURE_CHECKLIST.md`
+
+It must inventory every feature currently present in the codebase.
+
+Use a status system:
+
+- PASS — verified working.
+- FAIL — tested and broken.
+- FIXED — defect repaired and verified.
+- BLOCKED — external configuration or client decision required.
+- NOT TESTED — verification not completed.
+- NOT APPLICABLE — intentionally excluded with explanation.
+
+For each feature, record:
+
+| Module | Feature | Route | Test Performed | Result | Evidence |
+|---|---|---|---|---|---|
+
+Do not mark a feature PASS simply because it has a component or API implementation.
+
+A successful test must demonstrate the expected behavior.
+
+Create additional documents:
+
+`CMS_PERSISTENCE_AUDIT.md`
+
+Include exact data sources, save flows and cache invalidation.
+
+`PLATFORM_BUG_FIX_REPORT.md`
+
+Include every significant issue found, root cause, changed files and verification result.
+
+`PLATFORM_FINAL_VERIFICATION.md`
+
+Include executed commands, browser test results, screenshots, environment restrictions and unresolved dependencies.
+
+---
+
+# PART 18 — FINAL ACCEPTANCE CRITERIA
+
+Do not declare the milestone complete unless the following conditions are satisfied or explicitly documented as blocked.
+
+## Homepage & Carousel
+
+- [ ] The old static hero editor is replaced by a proper carousel editor.
+- [ ] All four current therapy photographs are present.
+- [ ] Images remain free of embedded text.
+- [ ] Slide text is dynamically editable.
+- [ ] Changing the homepage heading works.
+- [ ] Changes persist after refreshing.
+- [ ] Published content appears on the homepage.
+- [ ] Instagram-style segmented progress works.
+- [ ] No `1 / 4` numerical counter remains.
+- [ ] Autoplay is synchronized with progress.
+- [ ] Pause/resume works.
+- [ ] Manual navigation works.
+- [ ] Mobile responsiveness is correct.
+- [ ] Carousel slides can be added, edited, reordered, disabled and removed.
+
+## CMS
+
+- [ ] Image uploads persist.
+- [ ] Image replacement works.
+- [ ] Text editing works.
+- [ ] Drafts work.
+- [ ] Preview works.
+- [ ] Publishing works.
+- [ ] Cache invalidation works.
+- [ ] Revision rollback works.
+- [ ] Public pages display updated content.
+- [ ] No false success notifications.
+- [ ] No production filesystem writes.
+
+## Services & Staff
+
+- [ ] Therapies can be created, edited and archived.
+- [ ] Prices and images update correctly.
+- [ ] Programmes can be managed.
+- [ ] Therapists can be added.
+- [ ] Therapist profiles can be edited.
+- [ ] Therapist removal works with confirmation.
+- [ ] Future bookings are handled safely.
+- [ ] Archived therapists can be reactivated.
+- [ ] Staff permissions are enforced.
+
+## CRM & EMR
+
+- [ ] CRM CRUD operations function.
+- [ ] Inquiries and tasks persist.
+- [ ] Clinical notes save correctly.
+- [ ] Signed notes remain locked.
+- [ ] Amendments preserve originals.
+- [ ] Clinical documents remain private.
+- [ ] Unauthorized patient access is blocked.
+- [ ] Audit events are recorded.
+
+## Booking & Operations
+
+- [ ] Booking selections work.
+- [ ] Availability respects schedules.
+- [ ] Concurrent bookings cannot create duplicates.
+- [ ] Booking records persist.
+- [ ] Offline payment statuses work.
+- [ ] Invoice access rules work.
+- [ ] Notifications report genuine delivery states.
+
+## Overall Quality
+
+- [ ] Every public page is checked.
+- [ ] Every admin module is checked.
+- [ ] Every therapist page is checked.
+- [ ] Critical user workflows are browser-tested.
+- [ ] TypeScript checks pass.
+- [ ] Lint passes.
+- [ ] Production build passes.
+- [ ] No known unresolved critical or high-severity defect remains in the completed scope.
+- [ ] Unverified features are clearly identified.
+- [ ] External integration blockers are documented.
+- [ ] No production deployment occurs without authorization.
+
+A production build alone is not proof that the application works.
+
+A visually successful carousel alone is not proof that the CMS works.
+
+**You must verify real save, reload, publish, access-control and persistence workflows.**
+
+## FINAL INSTRUCTION
+
+Take full ownership of the existing Auro Perfect Vision platform's functional quality within this defined scope.
+
+Repair the CMS-to-homepage synchronization issue at its source.
+
+Replace the outdated single-image editor with a proper CMS-managed hero carousel.
+
+Implement Instagram Stories-style segmented progress without numerical slide counters.
+
+Then systematically inspect, test and repair all existing modules and features, including Content Management, Therapies, Programmes, Staff Management, CRM, EMR, Booking, Payments, Invoices and Notifications.
+
+Work independently across the entire milestone without stopping after a single improvement.
+
+Preserve existing legitimate data and working functionality.
+
+Do not fabricate test results.
+
+Do not claim absolute bug-free status.
+
+Provide an evidence-backed completion report showing what actually works, what was fixed, and what remains blocked.
+
+**Begin the complete audit, repair, implementation and end-to-end verification now.**
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-18T21:14:57+05:30.
+</ADDITIONAL_METADATA>

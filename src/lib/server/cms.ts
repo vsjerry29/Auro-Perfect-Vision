@@ -12,6 +12,8 @@ import {
   MediaAsset,
   CmsRevision,
   AuditLogEntry,
+  HeroCarouselSlide,
+  SiteContent,
 } from "@/lib/types";
 import {
   INITIAL_OFFERINGS,
@@ -21,63 +23,86 @@ import {
   INITIAL_INTAKE_TEMPLATES,
   INITIAL_BOOKINGS,
   INITIAL_BLOGS,
+  DEFAULT_HERO_CAROUSEL_SLIDES,
 } from "@/lib/demo-data";
 
-const DATA_DIR = path.join(process.cwd(), "data", "cms");
+import { isSupabaseConfigured, getSupabaseAdminClient } from "./supabase";
+import { isTestMode } from "./storage-engine";
+import * as db from "./supabase-db";
 
-function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+const cmsMemoryStore: Map<string, any> = new Map();
+
+async function syncCmsToSupabase(filename: string, data: any): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  try {
+    if (filename === "site_content.json") {
+      await db.dbSaveSiteContent(data);
+    } else if (filename === "offerings.json" && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveOffering(item);
+      }
+    } else if (filename === "therapists.json" && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveTherapist(item);
+      }
+    } else if (filename === "blog_posts.json" && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveBlogPost(item);
+      }
+    } else if (filename === "audit_logs.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) {
+        await db.dbLogAuditEvent(latest);
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[Supabase CMS Sync Notice (${filename})]:`, err.message);
   }
-}
-
-function getFilePath(filename: string): string {
-  ensureDir();
-  return path.join(DATA_DIR, filename);
 }
 
 function readJsonFile<T>(filename: string, defaultData: T): T {
-  const file = getFilePath(filename);
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify(defaultData, null, 2), "utf-8");
-    return defaultData;
+  if (cmsMemoryStore.has(filename)) {
+    return cmsMemoryStore.get(filename);
   }
+
   try {
-    const raw = fs.readFileSync(file, "utf-8");
-    return JSON.parse(raw);
+    const filePath = path.join(process.cwd(), "data", "cms", filename);
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const parsed = JSON.parse(raw);
+      cmsMemoryStore.set(filename, parsed);
+      return parsed;
+    }
   } catch (err) {
-    console.error(`Error reading ${filename}:`, err);
-    return defaultData;
+    // Non-fatal read failure, fallback to defaultData
   }
+
+  cmsMemoryStore.set(filename, defaultData);
+  return defaultData;
 }
 
 function writeJsonFile<T>(filename: string, data: T): void {
-  const file = getFilePath(filename);
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf-8");
+  cmsMemoryStore.set(filename, data);
+
+  if (isSupabaseConfigured()) {
+    syncCmsToSupabase(filename, data).catch(() => {});
+    return;
+  }
+
+  if (isTestMode()) {
+    return;
+  }
+
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    throw new Error(
+      "DATABASE_NOT_CONFIGURED: Supabase PostgreSQL is not connected. " +
+        "Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to save changes."
+    );
+  }
 }
 
-export interface SiteContent {
-  heroHeadline: string;
-  heroSubtitle: string;
-  heroImageUrl: string;
-  primaryCtaText: string;
-  primaryCtaLink: string;
-  aboutHeading: string;
-  aboutSummary: string;
-  phone: string;
-  contactPhone?: string;
-  contactPhoneSecondary?: string;
-  contactWhatsApp?: string;
-  email: string;
-  contactEmail?: string;
-  address: string;
-  physicalAddress?: string;
-  whatsappLink: string;
-  openingHours: string;
-  heroCtaLabel?: string;
-  heroSecondaryCtaLabel?: string;
-  updatedAt: string;
-}
+export { DEFAULT_HERO_CAROUSEL_SLIDES };
+export type { SiteContent };
 
 const DEFAULT_SITE_CONTENT: SiteContent = {
   heroHeadline: "A more mindful approach to natural vision.",
@@ -85,6 +110,7 @@ const DEFAULT_SITE_CONTENT: SiteContent = {
     "Experience holistic ocular restoration amidst the serene forests of Auroville. Combining classical Eye Yoga, conscious relaxation, photobiomodulation, and digital screen recovery for children and adults worldwide.",
   heroImageUrl:
     "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80",
+  heroCarouselSlides: DEFAULT_HERO_CAROUSEL_SLIDES,
   primaryCtaText: "Explore Therapies & Book",
   primaryCtaLink: "/therapies",
   aboutHeading: "Nurturing sight as a conscious, living sense.",
@@ -241,7 +267,7 @@ export function saveTherapist(therapistData: Partial<Therapist> & { displayName:
     }
   }
 
-  const id = `therapist-${Date.now()}`;
+  const id = therapistData.id || `therapist-${Date.now()}`;
   const slug = therapistData.slug || therapistData.displayName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
   const newTherapist: Therapist = {
@@ -264,6 +290,116 @@ export function saveTherapist(therapistData: Partial<Therapist> & { displayName:
   therapists.push(newTherapist);
   writeJsonFile("therapists.json", therapists);
   return newTherapist;
+}
+
+export function getTherapistUpcomingBookings(therapistId: string): Booking[] {
+  const bookings = getAllBookings();
+  const today = new Date().toISOString().split("T")[0];
+  return bookings.filter(
+    (b) =>
+      b.therapistId === therapistId &&
+      b.status !== "cancelled" &&
+      b.date >= today
+  );
+}
+
+export function reassignTherapistBookings(
+  fromTherapistId: string,
+  toTherapistId: string
+): { count: number } {
+  const targetTherapist = getTherapistById(toTherapistId);
+  if (!targetTherapist) {
+    throw new Error("Target therapist not found for reassignment.");
+  }
+
+  const bookings = getAllBookings();
+  const today = new Date().toISOString().split("T")[0];
+  let reassignedCount = 0;
+
+  for (const b of bookings) {
+    if (b.therapistId === fromTherapistId && b.status !== "cancelled" && b.date >= today) {
+      b.therapistId = targetTherapist.id;
+      b.therapistName = targetTherapist.displayName;
+      reassignedCount++;
+    }
+  }
+
+  if (reassignedCount > 0) {
+    writeJsonFile("bookings.json", bookings);
+  }
+
+  return { count: reassignedCount };
+}
+
+export function archiveTherapist(
+  therapistId: string,
+  options?: { force?: boolean; reassignToTherapistId?: string }
+): {
+  success: boolean;
+  blockedByBookings?: boolean;
+  upcomingCount?: number;
+  upcomingBookings?: Booking[];
+  therapist?: Therapist;
+  message?: string;
+} {
+  const therapists = getAllTherapists(true);
+  const idx = therapists.findIndex((t) => t.id === therapistId);
+  if (idx < 0) {
+    return { success: false, message: "Therapist not found" };
+  }
+
+  const upcoming = getTherapistUpcomingBookings(therapistId);
+
+  // If therapist has active future appointments, prevent accidental removal
+  if (upcoming.length > 0 && !options?.force && !options?.reassignToTherapistId) {
+    return {
+      success: false,
+      blockedByBookings: true,
+      upcomingCount: upcoming.length,
+      upcomingBookings: upcoming,
+      message: `Therapist has ${upcoming.length} upcoming appointments. Please reassign or cancel them before archiving.`,
+    };
+  }
+
+  // If reassign requested
+  if (options?.reassignToTherapistId) {
+    reassignTherapistBookings(therapistId, options.reassignToTherapistId);
+  }
+
+  // Safe soft-archive: preserve historical records, mark archived and unpublish from public site
+  const updated: Therapist = {
+    ...therapists[idx],
+    isArchived: true,
+    status: "archived",
+    isPublished: false,
+  };
+  therapists[idx] = updated;
+  writeJsonFile("therapists.json", therapists);
+
+  return { success: true, therapist: updated };
+}
+
+export function reactivateTherapist(therapistId: string): {
+  success: boolean;
+  therapist?: Therapist;
+  message?: string;
+} {
+  const therapists = getAllTherapists(true);
+  const idx = therapists.findIndex((t) => t.id === therapistId);
+  if (idx < 0) {
+    return { success: false, message: "Therapist not found" };
+  }
+
+  const updated: Therapist = {
+    ...therapists[idx],
+    isArchived: false,
+    status: "active",
+    isPublished: true,
+  };
+  therapists[idx] = updated;
+  writeJsonFile("therapists.json", therapists);
+
+  return { success: true, therapist: updated };
 }
 
 // ==================== BLOGS ====================

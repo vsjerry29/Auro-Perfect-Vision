@@ -194,7 +194,7 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
             </div>
             <h3 className="font-sora text-lg font-bold text-brand-charcoal">No sessions match your search</h3>
             <p className="font-inter text-xs text-brand-secondary leading-relaxed">
-              We couldn't find any vision therapies with the current filter combination. Try clearing your search query or selecting "All Categories".
+              We couldn&apos;t find any vision therapies with the current filter combination. Try clearing your search query or selecting &quot;All Categories&quot;.
             </p>
             <button
               onClick={handleResetFilters}

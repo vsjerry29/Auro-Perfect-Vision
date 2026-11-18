@@ -6,7 +6,7 @@ import {
   updateStaffUser,
   deleteStaffUser,
 } from "@/lib/server/auth";
-import { saveTherapist, getAllTherapists, logAuditEvent } from "@/lib/server/cms";
+import { saveTherapist, logAuditEvent } from "@/lib/server/cms";
 
 export async function GET() {
   const session = await getCurrentStaffSession();
@@ -14,9 +14,16 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const users = getStaffUsers();
-  const sanitized = users.map(({ passwordHash, salt, ...safe }) => safe);
-  return NextResponse.json({ users: sanitized });
+  try {
+    const users = await getStaffUsers();
+    const sanitized = users.map(({ passwordHash, salt, ...safe }) => safe);
+    return NextResponse.json({ users: sanitized });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message || "Failed to load staff roster" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -30,14 +37,25 @@ export async function POST(request: Request) {
     const { email, fullName, role, phone, therapistProfile } = body;
 
     if (!email || !fullName || !role) {
-      return NextResponse.json({ error: "Email, Full Name, and Role are required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email, Full Name, and Role are required." },
+        { status: 400 }
+      );
+    }
+
+    // Privilege escalation prevention: only super_admin can create another super_admin
+    if (role === "super_admin" && session.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "Forbidden: Only Super Administrators can invite new Super Administrators." },
+        { status: 403 }
+      );
     }
 
     let therapistId: string | undefined = undefined;
 
     // If role is therapist, create matching therapist public profile
     if (role === "therapist") {
-      const savedProfile = saveTherapist({
+      const savedProfile = await saveTherapist({
         displayName: therapistProfile?.displayName || fullName,
         roleTitle: therapistProfile?.roleTitle || "Vision Wellness Guide",
         bio: therapistProfile?.bio || "",
@@ -46,12 +64,15 @@ export async function POST(request: Request) {
         photoUrl: therapistProfile?.photoUrl,
         email,
         phone: phone || "",
-        isPublished: therapistProfile?.isPublished !== undefined ? therapistProfile.isPublished : true,
+        isPublished:
+          therapistProfile?.isPublished !== undefined
+            ? therapistProfile.isPublished
+            : true,
       });
       therapistId = savedProfile.id;
     }
 
-    const newUser = createStaffUser({
+    const newUser = await createStaffUser({
       email,
       fullName,
       role,
@@ -60,7 +81,7 @@ export async function POST(request: Request) {
       initialPassword: body.initialPassword,
     });
 
-    logAuditEvent({
+    await logAuditEvent({
       staffId: session.userId,
       staffEmail: session.email,
       staffName: session.fullName,
@@ -73,7 +94,10 @@ export async function POST(request: Request) {
     const { passwordHash, salt, ...safe } = newUser;
     return NextResponse.json({ success: true, user: safe });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to create staff user" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to create staff user" },
+      { status: 500 }
+    );
   }
 }
 
@@ -91,7 +115,46 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Staff User ID is required" }, { status: 400 });
     }
 
-    const updated = updateStaffUser(id, {
+    // Check target user existing role to enforce privilege escalation rules
+    const users = await getStaffUsers();
+    const targetUser = users.find((u) => u.id === id);
+    if (!targetUser) {
+      return NextResponse.json({ error: "Staff user not found" }, { status: 404 });
+    }
+
+    // Rule: Admin cannot edit a Super Admin
+    if (targetUser.role === "super_admin" && session.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "Forbidden: Only Super Administrators can modify Super Administrator accounts." },
+        { status: 403 }
+      );
+    }
+
+    // Rule: Admin cannot promote anyone (including themselves) to Super Admin
+    if (role === "super_admin" && session.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "Forbidden: Only Super Administrators can grant Super Administrator privileges." },
+        { status: 403 }
+      );
+    }
+
+    // Check if there are actual changes
+    const roleChanged = role !== undefined && role !== targetUser.role;
+    const statusChanged = status !== undefined && status !== targetUser.status;
+    const activeChanged = isActive !== undefined && isActive !== targetUser.isActive;
+    const nameChanged = fullName !== undefined && fullName !== targetUser.fullName;
+    const phoneChanged = phone !== undefined && phone !== targetUser.phone;
+
+    if (!roleChanged && !statusChanged && !activeChanged && !nameChanged && !phoneChanged) {
+      const { passwordHash, salt, ...safe } = targetUser;
+      return NextResponse.json({
+        success: true,
+        user: safe,
+        message: "No changes detected.",
+      });
+    }
+
+    const updated = await updateStaffUser(id, {
       role,
       isActive,
       status,
@@ -103,7 +166,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Staff user not found" }, { status: 404 });
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       staffId: session.userId,
       staffEmail: session.email,
       staffName: session.fullName,
@@ -116,14 +179,20 @@ export async function PUT(request: Request) {
     const { passwordHash, salt, ...safe } = updated;
     return NextResponse.json({ success: true, user: safe });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to update staff user" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to update staff user" },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: Request) {
   const session = await getCurrentStaffSession();
   if (!session || session.role !== "super_admin") {
-    return NextResponse.json({ error: "Only Super Admin can remove staff users" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Forbidden: Only Super Administrators can remove staff accounts." },
+      { status: 403 }
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -133,12 +202,12 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const deleted = deleteStaffUser(id);
+    const deleted = await deleteStaffUser(id);
     if (!deleted) {
       return NextResponse.json({ error: "Staff user not found" }, { status: 404 });
     }
 
-    logAuditEvent({
+    await logAuditEvent({
       staffId: session.userId,
       staffEmail: session.email,
       staffName: session.fullName,
@@ -149,6 +218,9 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to delete staff user" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Failed to delete staff user" },
+      { status: 500 }
+    );
   }
 }

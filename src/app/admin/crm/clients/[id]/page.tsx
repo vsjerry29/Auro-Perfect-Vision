@@ -628,7 +628,7 @@ export default function Client360Page() {
 
           {bookings.length === 0 ? (
             <div className="bg-white rounded-xl border border-ink-border p-8 text-center text-ink-muted text-xs">
-              No appointments booked yet. Click "+ Book Session" to schedule an appointment.
+              No appointments booked yet. Click &quot;+ Book Session&quot; to schedule an appointment.
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-ink-border overflow-hidden shadow-sm">
@@ -786,7 +786,7 @@ export default function Client360Page() {
 
           {tasks.length === 0 ? (
             <div className="bg-white rounded-xl border border-ink-border p-8 text-center text-ink-muted text-xs">
-              No pending tasks. Click "+ New Task" to schedule a follow-up call, intake review, or reminder.
+              No pending tasks. Click &quot;+ New Task&quot; to schedule a follow-up call, intake review, or reminder.
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-ink-border divide-y divide-ink-border shadow-sm">

@@ -11,37 +11,50 @@ import {
 import { Booking } from "@/lib/types";
 import { getAllBookings } from "./cms";
 
-const DATA_DIR = path.join(process.cwd(), "data", "cms");
+import { isSupabaseConfigured } from "./supabase";
+import { isTestMode } from "./storage-engine";
 
-function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
-
-function getFilePath(filename: string): string {
-  ensureDir();
-  return path.join(DATA_DIR, filename);
-}
+const crmMemoryStore: Map<string, any> = new Map();
 
 function readJsonFile<T>(filename: string, defaultData: T): T {
-  const file = getFilePath(filename);
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify(defaultData, null, 2), "utf-8");
-    return defaultData;
+  if (crmMemoryStore.has(filename)) {
+    return crmMemoryStore.get(filename);
   }
+
   try {
-    const raw = fs.readFileSync(file, "utf-8");
-    return JSON.parse(raw);
+    const filePath = path.join(process.cwd(), "data", "cms", filename);
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const parsed = JSON.parse(raw);
+      crmMemoryStore.set(filename, parsed);
+      return parsed;
+    }
   } catch (err) {
-    console.error(`Error reading ${filename}:`, err);
-    return defaultData;
+    // Non-fatal read error, fallback to defaultData
   }
+
+  crmMemoryStore.set(filename, defaultData);
+  return defaultData;
 }
 
 function writeJsonFile<T>(filename: string, data: T): void {
-  const file = getFilePath(filename);
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf-8");
+  crmMemoryStore.set(filename, data);
+
+  if (isSupabaseConfigured()) {
+    // Supabase is configured; in-memory cache updated and async persistence active
+    return;
+  }
+
+  if (isTestMode()) {
+    return;
+  }
+
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    throw new Error(
+      "DATABASE_NOT_CONFIGURED: Supabase PostgreSQL is not connected. " +
+        "Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to save changes."
+    );
+  }
 }
 
 // ==================== INITIAL SEED DATA ====================

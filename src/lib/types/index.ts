@@ -47,6 +47,8 @@ export interface Therapist {
   email: string;
   phone: string;
   isPublished: boolean;
+  isArchived?: boolean;
+  status?: 'active' | 'archived';
 }
 
 export interface RecurringScheduleDay {
@@ -157,4 +159,58 @@ export interface BlogPost {
 
 export type StaffRole = 'super_admin' | 'admin' | 'therapist';
 
+export interface StaffUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: "super_admin" | "admin" | "therapist";
+  therapistId?: string;
+  phone?: string;
+  passwordHash: string;
+  salt: string;
+  isActive: boolean;
+  status?: "active" | "invited" | "suspended";
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HeroCarouselSlide {
+  id: string;
+  title: string;
+  badge: string;
+  subtitle: string;
+  imageUrl: string;
+  linkUrl: string;
+  linkText: string;
+  order: number;
+  active: boolean;
+}
+
+export interface SiteContent {
+  heroHeadline: string;
+  heroSubtitle: string;
+  heroImageUrl: string;
+  heroCarouselSlides?: HeroCarouselSlide[];
+  primaryCtaText: string;
+  primaryCtaLink: string;
+  aboutHeading: string;
+  aboutSummary: string;
+  phone: string;
+  contactPhone?: string;
+  contactPhoneSecondary?: string;
+  contactWhatsApp?: string;
+  email: string;
+  contactEmail?: string;
+  address: string;
+  physicalAddress?: string;
+  whatsappLink: string;
+  openingHours: string;
+  heroCtaLabel?: string;
+  heroSecondaryCtaLabel?: string;
+  secondaryCtaLink?: string;
+  updatedAt: string;
+}
+
 export * from './crm';
+export * from './emr';

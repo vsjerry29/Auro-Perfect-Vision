@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const staff = findStaffByEmail(email);
+    const staff = await findStaffByEmail(email);
 
     // Generic error message to prevent account enumeration
     if (!staff || !verifyPassword(password, staff.passwordHash, staff.salt)) {
@@ -34,7 +34,10 @@ export async function POST(request: Request) {
       expiresAt,
     });
 
-    const redirectPath = staff.role === "admin" ? "/admin" : "/therapist";
+    const redirectPath =
+      staff.role === "admin" || staff.role === "super_admin"
+        ? "/admin"
+        : "/therapist";
 
     const response = NextResponse.json({
       success: true,
@@ -58,7 +61,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Login error:", err);
     return NextResponse.json(
-      { error: "Internal server error during authentication." },
+      { error: "Authentication system error. Please try again." },
       { status: 500 }
     );
   }

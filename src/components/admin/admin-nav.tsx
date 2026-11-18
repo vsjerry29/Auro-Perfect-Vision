@@ -22,6 +22,8 @@ import {
   Settings,
   Eye,
   LogOut,
+  Activity,
+  FileText,
 } from "lucide-react";
 
 interface NavGroup {
@@ -66,6 +68,12 @@ export function AdminNav() {
         { label: "Overview", href: "/admin", icon: LayoutDashboard },
         { label: "Bookings", href: "/admin/bookings", icon: CalendarCheck },
         { label: "Master Calendar", href: "/admin/calendar", icon: Calendar },
+      ],
+    },
+    {
+      group: "Clinical EMR",
+      items: [
+        { label: "Patient Records & EMR", href: "/admin/emr", icon: FileText },
       ],
     },
     {

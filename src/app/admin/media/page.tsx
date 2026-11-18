@@ -14,6 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { MediaAsset } from "@/lib/types/crm";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export default function AdminMediaPage() {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
@@ -24,6 +25,8 @@ export default function AdminMediaPage() {
   // Uploading state
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchAssets = async () => {
     try {
@@ -98,16 +101,20 @@ export default function AdminMediaPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      const res = await fetch(`/api/admin/media?id=${id}`, {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/media?id=${deleteTarget.id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete asset");
+      setDeleteTarget(null);
       await fetchAssets();
     } catch (err: any) {
       alert(err.message || "Failed to delete");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -228,7 +235,7 @@ export default function AdminMediaPage() {
                       <ExternalLink className="w-4 h-4" />
                     </a>
                     <button
-                      onClick={() => handleDelete(asset.id, asset.fileName)}
+                      onClick={() => setDeleteTarget({ id: asset.id, name: asset.fileName })}
                       className="p-1.5 bg-white text-red-600 rounded hover:bg-red-50 shadow"
                       title="Delete Asset"
                     >
@@ -258,6 +265,20 @@ export default function AdminMediaPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <ConfirmModal
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDelete}
+          title={`Delete Image: "${deleteTarget.name}"?`}
+          variant="danger"
+          isLoading={deleting}
+          confirmText="Delete Media Asset"
+          description="Are you sure you want to permanently delete this media asset? Any pages or therapies referencing this file may display a missing image."
+        />
       )}
     </div>
   );

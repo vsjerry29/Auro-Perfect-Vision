@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getCurrentStaffSession } from "@/lib/server/auth";
 import {
   getSiteContent,
@@ -46,6 +47,9 @@ export async function PUT(request: Request) {
         entityType: "SiteContent",
         entityId: body.revisionId,
       });
+      try {
+        revalidatePath("/", "page");
+      } catch {}
       return NextResponse.json({ success: true, content: getSiteContent() });
     }
 
@@ -59,6 +63,15 @@ export async function PUT(request: Request) {
     );
 
     const updated = saveSiteContent(body);
+
+    try {
+      revalidatePath("/", "page");
+      revalidatePath("/about", "page");
+      revalidatePath("/contact", "page");
+      revalidatePath("/therapies", "page");
+    } catch {
+      // In testing contexts without request context, continue cleanly
+    }
 
     logAuditEvent({
       staffId: session.userId,

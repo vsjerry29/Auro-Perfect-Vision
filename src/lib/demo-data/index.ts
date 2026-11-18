@@ -1,4 +1,4 @@
-import { Offering, Therapist, RecurringScheduleDay, LeaveException, IntakeTemplate, Booking, BlogPost } from "../types";
+import { Offering, Therapist, RecurringScheduleDay, LeaveException, IntakeTemplate, Booking, BlogPost, HeroCarouselSlide } from "../types";
 
 export const INITIAL_OFFERINGS: Offering[] = [
   {
@@ -486,4 +486,51 @@ export const INITIAL_BLOGS: BlogPost[] = [
     coverImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=80",
     isPublished: true,
   }
+];
+
+export const DEFAULT_HERO_CAROUSEL_SLIDES: HeroCarouselSlide[] = [
+  {
+    id: "slide-vision-therapy",
+    title: "Vision Therapy",
+    badge: "Clinical Therapy",
+    subtitle: "Customized neuro-visual retraining for amblyopia, convergence, and binocular coordination.",
+    imageUrl: "/images/hero-carousel/vision-therapy.webp",
+    linkUrl: "/therapies",
+    linkText: "Explore Vision Therapy",
+    order: 1,
+    active: true,
+  },
+  {
+    id: "slide-sports-vision",
+    title: "Sports Vision Training",
+    badge: "Athletic Performance",
+    subtitle: "Dynamic visual tracking, peripheral reaction speed, and hand-eye coordination for peak athletic response.",
+    imageUrl: "/images/hero-carousel/sports-vision.webp",
+    linkUrl: "/therapies",
+    linkText: "Explore Sports Vision",
+    order: 2,
+    active: true,
+  },
+  {
+    id: "slide-eye-yoga",
+    title: "Conscious Eye Yoga",
+    badge: "Holistic Wellness",
+    subtitle: "Classical Bates ocular relaxation, mindful palming, and digital screen recovery for eye strain.",
+    imageUrl: "/images/hero-carousel/eye-yoga.webp",
+    linkUrl: "/therapies",
+    linkText: "Explore Eye Yoga",
+    order: 3,
+    active: true,
+  },
+  {
+    id: "slide-visual-skills",
+    title: "Visual Skill Enhancement",
+    badge: "Foundational Vision",
+    subtitle: "Pediatric & adult therapies to strengthen stereopsis, depth perception, and Brock string fixation.",
+    imageUrl: "/images/hero-carousel/visual-skills.webp",
+    linkUrl: "/therapies",
+    linkText: "Explore Visual Skills",
+    order: 4,
+    active: true,
+  },
 ];
