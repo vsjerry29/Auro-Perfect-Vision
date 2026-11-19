@@ -125,30 +125,29 @@ export function SiteHeader() {
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md shadow-card border-b border-brand-gray py-2.5"
-            : "bg-white border-b border-brand-gray/80 py-3.5"
+            ? "bg-white/95 backdrop-blur-md shadow-card border-b border-brand-gray py-1.5 sm:py-2"
+            : "bg-white border-b border-brand-gray/80 py-2 sm:py-2.5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Official Brand Logo */}
           <Link
             href="/"
-            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-purple rounded-xl p-1"
+            className="flex items-center group focus:outline-none focus:ring-2 focus:ring-brand-purple rounded-xl p-0.5 sm:p-1"
+            aria-label="Auro Perfect Vision"
           >
-            <div className="relative w-12 h-10 sm:w-14 sm:h-11 shrink-0 overflow-hidden flex items-center justify-center">
+            <div
+              className={`relative shrink-0 flex items-center justify-center transition-all duration-300 ${
+                scrolled
+                  ? "h-12 sm:h-14 lg:h-16 w-auto"
+                  : "h-14 sm:h-16 lg:h-[78px] w-auto"
+              }`}
+            >
               <img
                 src="/images/logo.webp"
-                alt="Auro Perfect Vision Logo"
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                alt="Auro Perfect Vision"
+                className="h-full w-auto max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
               />
-            </div>
-            <div>
-              <span className="font-sora text-lg sm:text-xl font-bold tracking-tight text-brand-deep block leading-tight">
-                Auro Perfect <span className="text-brand-orange">Vision</span>
-              </span>
-              <span className="text-[10px] sm:text-[11px] font-inter uppercase tracking-widest text-brand-secondary block font-semibold">
-                Auroville • Natural Eye Care
-              </span>
             </div>
           </Link>
 

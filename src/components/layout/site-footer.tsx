@@ -34,11 +34,11 @@ export function SiteFooter() {
           {/* Column 1: Brand & Logo (2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="inline-flex items-center gap-3 group">
-              <div className="w-12 h-10 bg-white rounded-xl p-1 shadow-sm shrink-0 flex items-center justify-center">
+              <div className="h-14 w-auto bg-white rounded-xl px-2.5 py-1.5 shadow-sm shrink-0 flex items-center justify-center">
                 <img
                   src="/images/logo.webp"
-                  alt="Auro Perfect Vision Logo"
-                  className="w-full h-full object-contain"
+                  alt="Auro Perfect Vision"
+                  className="h-full w-auto object-contain"
                 />
               </div>
               <div>
