@@ -61,8 +61,8 @@ export default function AdminUsersPage() {
   // Sanitize any internal path leaks
   const cleanErrorMessage = (msg: string) => {
     if (!msg) return "An unexpected error occurred.";
-    if (msg.includes("EROFS") || msg.includes("/var/task")) {
-      return "Database persistence error: Please ensure Supabase production database is configured in deployment settings.";
+    if (msg.includes("EROFS") || msg.includes("/var/task") || msg.includes("DATABASE_NOT_CONFIGURED")) {
+      return "Database persistence error: Please ensure Hostinger MySQL database is configured in deployment settings.";
     }
     return msg;
   };

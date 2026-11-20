@@ -4,8 +4,9 @@ import { amendSoapNote } from "@/lib/server/emr";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,7 +23,7 @@ export async function POST(
       );
     }
 
-    const updated = await amendSoapNote(params.id, {
+    const updated = await amendSoapNote(id, {
       staffId: session.userId,
       staffName: session.fullName,
       reasonForAmendment,

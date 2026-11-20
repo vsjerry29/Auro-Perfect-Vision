@@ -9,21 +9,22 @@ import {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const chart = await getPatientChart(params.id);
+    const chart = await getPatientChart(id);
     if (!chart.patient) {
       return NextResponse.json({ error: "Patient record not found" }, { status: 404 });
     }
 
     logClinicalAuditEvent({
-      patientId: params.id,
+      patientId: id,
       staffId: session.userId,
       staffName: session.fullName,
       action: "VIEWED_PATIENT_CHART",
@@ -37,8 +38,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,15 +54,15 @@ export async function PUT(
     let updatedHistory = null;
 
     if (patientData) {
-      updatedPatient = await updatePatient(params.id, patientData);
+      updatedPatient = await updatePatient(id, patientData);
     }
 
     if (medicalHistoryData) {
-      updatedHistory = await updateMedicalHistory(params.id, medicalHistoryData);
+      updatedHistory = await updateMedicalHistory(id, medicalHistoryData);
     }
 
     logClinicalAuditEvent({
-      patientId: params.id,
+      patientId: id,
       staffId: session.userId,
       staffName: session.fullName,
       action: "VIEWED_PATIENT_CHART",

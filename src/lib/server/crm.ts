@@ -11,10 +11,35 @@ import {
 import { Booking } from "@/lib/types";
 import { getAllBookings } from "./cms";
 
-import { isSupabaseConfigured } from "./supabase";
+import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
+import * as db from "./mysql-db";
 
 const crmMemoryStore: Map<string, any> = new Map();
+
+async function syncCrmToMySQL(filename: string, data: any): Promise<void> {
+  if (!isMySQLConfigured()) return;
+  try {
+    if (filename === "clients.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) await db.dbSaveClient(latest);
+    } else if (filename === "inquiries.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) await db.dbSaveInquiry(latest);
+    } else if (filename === "tasks.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) await db.dbSaveTask(latest);
+    } else if (filename === "notes.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) await db.dbAddClientNote(latest);
+    } else if (filename === "activities.json" && Array.isArray(data)) {
+      const latest = data[data.length - 1];
+      if (latest) await db.dbLogCrmActivity(latest);
+    }
+  } catch (err: any) {
+    console.warn(`[MySQL CRM Sync Notice (${filename})]:`, err.message);
+  }
+}
 
 function readJsonFile<T>(filename: string, defaultData: T): T {
   if (crmMemoryStore.has(filename)) {
@@ -40,8 +65,8 @@ function readJsonFile<T>(filename: string, defaultData: T): T {
 function writeJsonFile<T>(filename: string, data: T): void {
   crmMemoryStore.set(filename, data);
 
-  if (isSupabaseConfigured()) {
-    // Supabase is configured; in-memory cache updated and async persistence active
+  if (isMySQLConfigured()) {
+    syncCrmToMySQL(filename, data).catch(() => {});
     return;
   }
 
@@ -49,10 +74,10 @@ function writeJsonFile<T>(filename: string, data: T): void {
     return;
   }
 
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "DATABASE_NOT_CONFIGURED: Supabase PostgreSQL is not connected. " +
-        "Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to save changes."
+      "DATABASE_NOT_CONFIGURED: Hostinger MySQL is not connected. " +
+        "Please configure DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD (or DATABASE_URL) to save changes."
     );
   }
 }

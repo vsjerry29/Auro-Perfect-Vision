@@ -7,13 +7,14 @@ import { Clock, ArrowLeft, ArrowRight, User, Calendar, ShieldCheck, Sparkles } f
 export const dynamic = "force-dynamic";
 
 interface BlogDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export default function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const post = getBlogPostBySlug(params.slug);
+export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { slug } = await params;
+  const post = getBlogPostBySlug(slug);
 
   if (!post || !post.isPublished) {
     return (

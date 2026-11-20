@@ -1,0 +1,449 @@
+// AURO PERFECT VISION — PRISMA SCHEMA FOR HOSTINGER MYSQL
+// Datasource: MySQL 5.7+ / 8.0+ / MariaDB 10.3+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum StaffRole {
+  super_admin
+  admin
+  therapist
+}
+
+enum AccountStatus {
+  active
+  invited
+  suspended
+}
+
+enum TherapistStatus {
+  active
+  archived
+}
+
+model StaffProfile {
+  id               String        @id @db.VarChar(64)
+  email            String        @unique @db.VarChar(255)
+  fullName         String        @map("full_name") @db.VarChar(255)
+  role             StaffRole     @default(admin)
+  phone            String?       @default("") @db.VarChar(64)
+  passwordHash     String        @map("password_hash") @db.VarChar(255)
+  salt             String        @db.VarChar(128)
+  isActive         Boolean       @default(true) @map("is_active")
+  status           AccountStatus @default(active)
+  therapistId      String?       @map("therapist_id") @db.VarChar(64)
+  invitationToken  String?       @map("invitation_token") @db.VarChar(255)
+  invitationSentAt DateTime?     @map("invitation_sent_at")
+  lastLoginAt      DateTime?     @map("last_login_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("staff_profiles")
+}
+
+model TherapistProfile {
+  id                  String          @id @db.VarChar(64)
+  staffId             String?         @map("staff_id") @db.VarChar(64)
+  slug                String          @unique @db.VarChar(255)
+  displayName         String          @map("display_name") @db.VarChar(255)
+  roleTitle           String          @default("Vision Wellness Guide") @map("role_title") @db.VarChar(255)
+  bio                 String?         @db.Text
+  specialties         Json?
+  qualifications      String?         @default("") @db.VarChar(255)
+  photoUrl            String?         @map("photo_url") @db.Text
+  phone               String?         @default("") @db.VarChar(64)
+  email               String?         @default("") @db.VarChar(255)
+  assignedOfferingIds Json?           @map("assigned_offering_ids")
+  isPublished         Boolean         @default(true) @map("is_published")
+  isArchived          Boolean         @default(false) @map("is_archived")
+  status              TherapistStatus @default(active)
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([status])
+  @@map("therapist_profiles")
+}
+
+model Offering {
+  id                  String   @id @db.VarChar(64)
+  slug                String   @unique @db.VarChar(255)
+  title               String   @db.VarChar(255)
+  category            String   @default("eye-yoga") @db.VarChar(64)
+  shortDescription    String   @map("short_description") @db.Text
+  fullDescription     String   @map("full_description") @db.MediumText
+  durationMinutes     Int      @default(60) @map("duration_minutes")
+  format              String   @default("individual") @db.VarChar(32)
+  delivery            String   @default("onsite") @db.VarChar(32)
+  priceInr            Int      @default(2000) @map("price_inr")
+  priceUsd            Int      @default(40) @map("price_usd")
+  taxInclusive        Boolean  @default(true) @map("tax_inclusive")
+  assignedTherapistIds Json?   @map("assigned_therapist_ids")
+  maxCapacity         Int      @default(1) @map("max_capacity")
+  isFlagshipProgramme Boolean  @default(false) @map("is_flagship_programme")
+  featured            Boolean  @default(false)
+  suitableFor         Json?    @map("suitable_for")
+  whatToExpect        Json?    @map("what_to_expect")
+  programmeSyllabus   Json?    @map("programme_syllabus")
+  imageUrl            String?  @map("image_url") @db.Text
+  isPublished         Boolean  @default(true) @map("is_published")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isPublished])
+  @@index([category])
+  @@map("offerings")
+}
+
+model WeeklySchedule {
+  id                  String   @id @db.VarChar(64)
+  therapistId         String   @default("global") @map("therapist_id") @db.VarChar(64)
+  dayOfWeek           Int      @map("day_of_week")
+  dayName             String   @map("day_name") @db.VarChar(32)
+  active              Boolean  @default(true)
+  slots               Json
+  slotDurationMinutes Int      @default(60) @map("slot_duration_minutes")
+  bufferMinutes       Int      @default(15) @map("buffer_minutes")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([therapistId])
+  @@index([dayOfWeek])
+  @@map("weekly_schedules")
+}
+
+model LeaveException {
+  id            String   @id @db.VarChar(64)
+  therapistId   String   @map("therapist_id") @db.VarChar(64)
+  exceptionDate DateTime @map("exception_date") @db.Date
+  reason        String   @default("Scheduled Leave") @db.VarChar(255)
+  allDay        Boolean  @default(true) @map("all_day")
+  startTime     String?  @map("start_time") @db.VarChar(16)
+  endTime       String?  @map("end_time") @db.VarChar(16)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([therapistId])
+  @@index([exceptionDate])
+  @@map("leave_exceptions")
+}
+
+model IntakeTemplate {
+  id          String   @id @db.VarChar(64)
+  offeringId  String   @map("offering_id") @db.VarChar(64)
+  version     Int      @default(1)
+  fields      Json
+  isPublished Boolean  @default(true) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([offeringId])
+  @@map("intake_templates")
+}
+
+model Booking {
+  id                      String    @id @db.VarChar(64)
+  bookingReference        String    @unique @map("booking_reference") @db.VarChar(64)
+  offeringId              String    @map("offering_id") @db.VarChar(64)
+  offeringTitle           String    @map("offering_title") @db.VarChar(255)
+  therapistId             String    @map("therapist_id") @db.VarChar(64)
+  therapistName           String    @map("therapist_name") @db.VarChar(255)
+  bookingDate             DateTime  @map("booking_date") @db.Date
+  timeSlot                String    @map("time_slot") @db.VarChar(64)
+  clientTimezone          String    @default("Asia/Kolkata") @map("client_timezone") @db.VarChar(64)
+  clientName              String    @map("client_name") @db.VarChar(255)
+  clientEmail             String    @map("client_email") @db.VarChar(255)
+  clientPhone             String    @map("client_phone") @db.VarChar(64)
+  seatsBooked             Int       @default(1) @map("seats_booked")
+  currency                String    @default("INR") @db.VarChar(8)
+  totalAmount             Decimal   @default(0.00) @map("total_amount") @db.Decimal(10, 2)
+  status                  String    @default("confirmed") @db.VarChar(32)
+  paymentMethod           String    @default("offline_cash") @map("payment_method") @db.VarChar(32)
+  paymentStatus           String    @default("pending") @map("payment_status") @db.VarChar(32)
+  intakeAnswers           Json?     @map("intake_answers")
+  offlineConfirmedByStaff String?   @map("offline_confirmed_by_staff") @db.VarChar(255)
+  offlineConfirmedAt      DateTime? @map("offline_confirmed_at")
+  invoiceIssued           Boolean   @default(false) @map("invoice_issued")
+  invoiceNumber           String?   @map("invoice_number") @db.VarChar(64)
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  @@index([bookingReference])
+  @@index([therapistId, bookingDate])
+  @@index([status])
+  @@index([clientEmail])
+  @@index([bookingDate])
+  @@map("bookings")
+}
+
+model BookingHold {
+  id           String   @id @db.VarChar(64)
+  offeringId   String   @map("offering_id") @db.VarChar(64)
+  therapistId  String   @map("therapist_id") @db.VarChar(64)
+  holdDate     DateTime @map("hold_date") @db.Date
+  timeSlot     String   @map("time_slot") @db.VarChar(64)
+  sessionToken String   @map("session_token") @db.VarChar(255)
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([therapistId, holdDate, timeSlot])
+  @@index([expiresAt])
+  @@map("booking_holds")
+}
+
+model BlogPost {
+  id            String   @id @db.VarChar(64)
+  slug          String   @unique @db.VarChar(255)
+  title         String   @db.VarChar(255)
+  excerpt       String?  @db.Text
+  content       String   @db.MediumText
+  category      String   @default("Ocular Wellness") @db.VarChar(64)
+  readTime      String   @default("5 min read") @map("read_time") @db.VarChar(32)
+  publishedDate String   @map("published_date") @db.VarChar(64)
+  authorName    String   @default("Auro Perfect Vision Team") @map("author_name") @db.VarChar(255)
+  coverImage    String?  @map("cover_image") @db.Text
+  isPublished   Boolean  @default(true) @map("is_published")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isPublished])
+  @@map("blog_posts")
+}
+
+model SiteContent {
+  id        String   @id @default("global_settings") @db.VarChar(64)
+  content   Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_content")
+}
+
+model AuditLog {
+  id         String   @id @db.VarChar(64)
+  staffId    String?  @map("staff_id") @db.VarChar(64)
+  staffEmail String?  @map("staff_email") @db.VarChar(255)
+  staffName  String?  @map("staff_name") @db.VarChar(255)
+  action     String   @db.VarChar(64)
+  entityType String   @map("entity_type") @db.VarChar(64)
+  entityId   String   @map("entity_id") @db.VarChar(64)
+  details    Json?
+  ipAddress  String?  @map("ip_address") @db.VarChar(64)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([staffId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model ClientContact {
+  id               String    @id @db.VarChar(64)
+  clientReference  String    @unique @map("client_reference") @db.VarChar(64)
+  fullName         String    @map("full_name") @db.VarChar(255)
+  email            String    @db.VarChar(255)
+  phone            String?   @default("") @db.VarChar(64)
+  countryCode      String?   @default("+91") @map("country_code") @db.VarChar(16)
+  locality         String?   @default("") @db.VarChar(255)
+  preferredChannel String?   @default("email") @map("preferred_channel") @db.VarChar(32)
+  source           String?   @default("website_booking") @db.VarChar(32)
+  status           String?   @default("active") @db.VarChar(32)
+  tags             Json?
+  assignedStaffId  String?   @map("assigned_staff_id") @db.VarChar(64)
+  assignedStaffName String?  @default("") @map("assigned_staff_name") @db.VarChar(255)
+  notesCount       Int       @default(0) @map("notes_count")
+  totalBookings    Int       @default(0) @map("total_bookings")
+  totalSpentINR    Decimal   @default(0.00) @map("total_spent_inr") @db.Decimal(12, 2)
+  totalSpentUSD    Decimal   @default(0.00) @map("total_spent_usd") @db.Decimal(12, 2)
+  firstBookingDate DateTime? @map("first_booking_date") @db.Date
+  lastBookingDate  DateTime? @map("last_booking_date") @db.Date
+  consentGiven     Boolean   @default(true) @map("consent_given")
+  consentDate      DateTime? @map("consent_date")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([clientReference])
+  @@index([phone])
+  @@index([status])
+  @@map("client_contacts")
+}
+
+model CrmInquiry {
+  id                String   @id @db.VarChar(64)
+  reference         String   @unique @db.VarChar(64)
+  clientContactId   String?  @map("client_contact_id") @db.VarChar(64)
+  name              String   @db.VarChar(255)
+  email             String   @db.VarChar(255)
+  phone             String?  @default("") @db.VarChar(64)
+  subject           String   @db.VarChar(255)
+  category          String   @default("General Inquiry") @db.VarChar(64)
+  message           String   @db.Text
+  source            String   @default("contact_form") @db.VarChar(32)
+  stage             String   @default("new") @db.VarChar(32)
+  priority          String   @default("medium") @db.VarChar(32)
+  assignedStaffId   String?  @map("assigned_staff_id") @db.VarChar(64)
+  assignedStaffName String?  @default("") @map("assigned_staff_name") @db.VarChar(255)
+  linkedBookingId   String?  @map("linked_booking_id") @db.VarChar(64)
+  internalNotes     String?  @map("internal_notes") @db.Text
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([reference])
+  @@index([stage])
+  @@index([clientContactId])
+  @@map("crm_inquiries")
+}
+
+model CrmTask {
+  id                String    @id @db.VarChar(64)
+  clientContactId   String?   @map("client_contact_id") @db.VarChar(64)
+  clientName        String?   @default("") @map("client_name") @db.VarChar(255)
+  inquiryId         String?   @map("inquiry_id") @db.VarChar(64)
+  bookingId         String?   @map("booking_id") @db.VarChar(64)
+  title             String    @db.VarChar(255)
+  description       String?   @db.Text
+  priority          String    @default("medium") @db.VarChar(32)
+  dueDate           DateTime  @map("due_date") @db.Date
+  status            String    @default("pending") @db.VarChar(32)
+  assignedStaffId   String?   @map("assigned_staff_id") @db.VarChar(64)
+  assignedStaffName String?   @default("") @map("assigned_staff_name") @db.VarChar(255)
+  createdById       String?   @map("created_by_id") @db.VarChar(64)
+  createdByName     String?   @default("") @map("created_by_name") @db.VarChar(255)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  completedAt       DateTime? @map("completed_at")
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([assignedStaffId])
+  @@map("crm_tasks")
+}
+
+model CrmNote {
+  id              String   @id @db.VarChar(64)
+  clientContactId String   @map("client_contact_id") @db.VarChar(64)
+  authorStaffId   String?  @map("author_staff_id") @db.VarChar(64)
+  authorStaffName String   @map("author_staff_name") @db.VarChar(255)
+  authorStaffRole String   @map("author_staff_role") @db.VarChar(64)
+  content         String   @db.Text
+  category        String   @default("general") @db.VarChar(32)
+  isPinned        Boolean  @default(false) @map("is_pinned")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([clientContactId])
+  @@map("crm_notes")
+}
+
+model CrmActivity {
+  id              String   @id @db.VarChar(64)
+  clientContactId String   @map("client_contact_id") @db.VarChar(64)
+  eventType       String   @map("event_type") @db.VarChar(64)
+  title           String   @db.VarChar(255)
+  description     String   @db.Text
+  staffId         String?  @map("staff_id") @db.VarChar(64)
+  staffName       String?  @default("") @map("staff_name") @db.VarChar(255)
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([clientContactId])
+  @@map("crm_activities")
+}
+
+model Programme {
+  id                    String   @id @db.VarChar(64)
+  slug                  String   @unique @db.VarChar(255)
+  title                 String   @db.VarChar(255)
+  shortDescription      String   @map("short_description") @db.Text
+  fullDescription       String   @map("full_description") @db.MediumText
+  durationLabel         String   @default("7 Days / 6 Nights") @map("duration_label") @db.VarChar(64)
+  durationDays          Int      @default(7) @map("duration_days")
+  dailySessionMinutes   Int      @default(180) @map("daily_session_minutes")
+  format                String   @default("group") @db.VarChar(32)
+  delivery              String   @default("onsite") @db.VarChar(32)
+  priceInr              Decimal  @default(28000.00) @map("price_inr") @db.Decimal(10, 2)
+  priceUsd              Decimal  @default(420.00) @map("price_usd") @db.Decimal(10, 2)
+  leadFacilitatorIds    Json?    @map("lead_facilitator_ids")
+  location              String   @default("Auroville International Township, Tamil Nadu, India") @db.VarChar(255)
+  maxCapacity           Int      @default(12) @map("max_capacity")
+  imageUrl              String?  @map("image_url") @db.Text
+  itinerary             Json?
+  inclusions            Json?
+  preparationGuidelines Json?    @map("preparation_guidelines")
+  cohorts               Json?
+  isPublished           Boolean  @default(true) @map("is_published")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@map("programmes")
+}
+
+model MediaAsset {
+  id                  String   @id @db.VarChar(64)
+  fileName            String   @map("file_name") @db.VarChar(255)
+  originalName        String   @map("original_name") @db.VarChar(255)
+  publicUrl           String   @map("public_url") @db.Text
+  fileSizeBytes       Int      @default(0) @map("file_size_bytes")
+  mimeType            String   @default("image/webp") @map("mime_type") @db.VarChar(64)
+  dimensions          Json?
+  altText             String?  @default("") @map("alt_text") @db.VarChar(255)
+  uploadedByStaffId   String?  @map("uploaded_by_staff_id") @db.VarChar(64)
+  uploadedByStaffName String?  @default("") @map("uploaded_by_staff_name") @db.VarChar(255)
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@index([fileName])
+  @@map("media_assets")
+}
+
+model CmsRevision {
+  id              String   @id @db.VarChar(64)
+  sectionKey      String   @map("section_key") @db.VarChar(64)
+  title           String   @db.VarChar(255)
+  snapshotJson    Json     @map("snapshot_json")
+  authorStaffId   String?  @map("author_staff_id") @db.VarChar(64)
+  authorStaffName String?  @default("") @map("author_staff_name") @db.VarChar(255)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([sectionKey])
+  @@map("cms_revisions")
+}
+
+model PatientRecord {
+  id                     String    @id @db.VarChar(64)
+  mrn                    String    @unique @db.VarChar(64)
+  crmContactId           String?   @map("crm_contact_id") @db.VarChar(64)
+  fullName               String    @map("full_name") @db.VarChar(255)
+  dateOfBirth            DateTime? @map("date_of_birth") @db.Date
+  age                    Int?
+  gender                 String?   @db.VarChar(32)
+  phone                  String    @db.VarChar(64)
+  email                  String    @db.VarChar(255)
+  address                String?   @db.Text
+  occupation             String?   @db.VarChar(255)
+  emergencyContactName   String?   @map("emergency_contact_name") @db.VarChar(255)
+  emergencyContactPhone  String?   @map("emergency_contact_phone") @db.VarChar(64)
+  bloodGroup             String?   @map("blood_group") @db.VarChar(16)
+  allergies              Json?
+  clinicalAlerts         Json?     @map("clinical_alerts")
+  primaryTherapistId     String?   @map("primary_therapist_id") @db.VarChar(64)
+  primaryTherapistName   String?   @map("primary_therapist_name") @db.VarChar(255)
+  status                 String    @default("active") @db.VarChar(32)
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  @@index([mrn])
+  @@index([phone])
+  @@index([email])
+  @@map("patient_records")
+}

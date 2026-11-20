@@ -8,16 +8,18 @@ import { ArrowLeft, Clock, MapPin, Sparkles } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 interface BookOfferingPageProps {
-  params: {
+  params: Promise<{
     offeringSlug: string;
-  };
-  searchParams?: {
+  }>;
+  searchParams?: Promise<{
     therapist?: string;
-  };
+  }>;
 }
 
-export default function BookOfferingPage({ params, searchParams }: BookOfferingPageProps) {
-  const offering = getOfferingBySlug(params.offeringSlug);
+export default async function BookOfferingPage({ params, searchParams }: BookOfferingPageProps) {
+  const { offeringSlug } = await params;
+  const sp = await searchParams;
+  const offering = getOfferingBySlug(offeringSlug);
 
   if (!offering || !offering.isPublished) {
     return (
@@ -34,7 +36,7 @@ export default function BookOfferingPage({ params, searchParams }: BookOfferingP
     );
   }
 
-  const initialTherapistId = searchParams?.therapist;
+  const initialTherapistId = sp?.therapist;
 
   return (
     <div className="bg-[#FAF9FC] min-h-screen py-10">

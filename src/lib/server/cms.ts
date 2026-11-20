@@ -26,14 +26,14 @@ import {
   DEFAULT_HERO_CAROUSEL_SLIDES,
 } from "@/lib/demo-data";
 
-import { isSupabaseConfigured, getSupabaseAdminClient } from "./supabase";
+import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
-import * as db from "./supabase-db";
+import * as db from "./mysql-db";
 
 const cmsMemoryStore: Map<string, any> = new Map();
 
-async function syncCmsToSupabase(filename: string, data: any): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+async function syncCmsToMySQL(filename: string, data: any): Promise<void> {
+  if (!isMySQLConfigured()) return;
   try {
     if (filename === "site_content.json") {
       await db.dbSaveSiteContent(data);
@@ -54,9 +54,14 @@ async function syncCmsToSupabase(filename: string, data: any): Promise<void> {
       if (latest) {
         await db.dbLogAuditEvent(latest);
       }
+    } else if (filename === "media_assets.json" && Array.isArray(data)) {
+      const latest = data[0];
+      if (latest) {
+        await db.dbSaveMediaAsset(latest);
+      }
     }
   } catch (err: any) {
-    console.warn(`[Supabase CMS Sync Notice (${filename})]:`, err.message);
+    console.warn(`[MySQL CMS Sync Notice (${filename})]:`, err.message);
   }
 }
 
@@ -84,8 +89,8 @@ function readJsonFile<T>(filename: string, defaultData: T): T {
 function writeJsonFile<T>(filename: string, data: T): void {
   cmsMemoryStore.set(filename, data);
 
-  if (isSupabaseConfigured()) {
-    syncCmsToSupabase(filename, data).catch(() => {});
+  if (isMySQLConfigured()) {
+    syncCmsToMySQL(filename, data).catch(() => {});
     return;
   }
 
@@ -93,10 +98,10 @@ function writeJsonFile<T>(filename: string, data: T): void {
     return;
   }
 
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "DATABASE_NOT_CONFIGURED: Supabase PostgreSQL is not connected. " +
-        "Please configure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to save changes."
+      "DATABASE_NOT_CONFIGURED: Hostinger MySQL is not connected. " +
+        "Please configure DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD (or DATABASE_URL) to save changes."
     );
   }
 }

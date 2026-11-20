@@ -21,13 +21,14 @@ import {
 export const dynamic = "force-dynamic";
 
 interface OfferingDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export default function OfferingDetailPage({ params }: OfferingDetailPageProps) {
-  const offering = getOfferingBySlug(params.slug);
+export default async function OfferingDetailPage({ params }: OfferingDetailPageProps) {
+  const { slug } = await params;
+  const offering = getOfferingBySlug(slug);
 
   if (!offering || !offering.isPublished) {
     return (

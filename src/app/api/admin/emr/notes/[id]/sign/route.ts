@@ -4,15 +4,16 @@ import { signAndLockSoapNote } from "@/lib/server/emr";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const signed = await signAndLockSoapNote(params.id, {
+    const signed = await signAndLockSoapNote(id, {
       id: session.userId,
       fullName: session.fullName,
     });

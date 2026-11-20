@@ -4,14 +4,15 @@ import { getClient360, saveClient, archiveClient } from "@/lib/server/crm";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const bundle = getClient360(params.id);
+  const bundle = getClient360(id);
   if (!bundle) {
     return NextResponse.json({ error: "Client not found" }, { status: 404 });
   }
@@ -21,8 +22,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,7 +33,7 @@ export async function PUT(
   try {
     const body = await request.json();
     const updated = saveClient(
-      { ...body, id: params.id },
+      { ...body, id },
       { id: session.userId, fullName: session.fullName }
     );
     return NextResponse.json({ success: true, client: updated });
@@ -42,13 +44,14 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await getCurrentStaffSession();
   if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const archived = archiveClient(params.id, { id: session.userId, fullName: session.fullName });
+  const archived = archiveClient(id, { id: session.userId, fullName: session.fullName });
   return NextResponse.json({ success: archived });
 }

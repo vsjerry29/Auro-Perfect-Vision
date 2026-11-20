@@ -1,6 +1,6 @@
 /**
  * AURO PERFECT VISION — ELECTRONIC MEDICAL RECORDS (EMR) DATA LAYER
- * Safe persistence engine supporting Supabase PostgreSQL and memory fallback.
+ * Safe persistence engine supporting Hostinger MySQL and memory fallback.
  * Strictly adheres to healthcare data integrity:
  * - Immutable signed SOAP notes
  * - Addendum / amendment tracking
@@ -19,8 +19,9 @@ import {
   ClinicalConsent,
   ClinicalAuditEvent,
 } from "@/lib/types/emr";
-import { isSupabaseConfigured, getSupabaseAdminClient } from "./supabase";
+import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
+import * as db from "./mysql-db";
 
 // In-Memory Data Store for resilient offline / local dev / unit testing
 const emrStore: {
@@ -271,51 +272,30 @@ export async function getAllPatients(filters?: {
 }): Promise<PatientRecord[]> {
   initializeBaselineEmrSeed();
 
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     try {
-      const supabase = getSupabaseAdminClient();
-      let query = supabase.from("patient_records").select("*").order("created_at", { ascending: false });
-
-      if (filters?.status) {
-        query = query.eq("status", filters.status);
-      }
-      if (filters?.therapistId) {
-        query = query.eq("primary_therapist_id", filters.therapistId);
-      }
-      if (filters?.search) {
-        query = query.or(
-          `full_name.ilike.%${filters.search}%,mrn.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`
-        );
-      }
-
-      const { data, error } = await query;
-      if (!error && data && data.length > 0) {
-        return data.map((d) => ({
-          id: d.id,
-          mrn: d.mrn,
-          crmContactId: d.crm_contact_id,
-          fullName: d.full_name,
-          dateOfBirth: d.date_of_birth,
-          age: d.age,
-          gender: d.gender,
-          phone: d.phone,
-          email: d.email,
-          address: d.address,
-          occupation: d.occupation,
-          emergencyContactName: d.emergency_contact_name,
-          emergencyContactPhone: d.emergency_contact_phone,
-          bloodGroup: d.blood_group,
-          allergies: d.allergies || [],
-          clinicalAlerts: d.clinical_alerts || [],
-          primaryTherapistId: d.primary_therapist_id,
-          primaryTherapistName: d.primary_therapist_name,
-          status: d.status,
-          createdAt: d.created_at,
-          updatedAt: d.updated_at,
-        }));
+      const records = await db.dbGetAllPatients();
+      if (records && records.length > 0) {
+        let filtered = records;
+        if (filters?.status) {
+          filtered = filtered.filter((r) => r.status === filters.status);
+        }
+        if (filters?.therapistId) {
+          filtered = filtered.filter((r) => r.primaryTherapistId === filters.therapistId);
+        }
+        if (filters?.search) {
+          const q = filters.search.toLowerCase();
+          filtered = filtered.filter(
+            (r) =>
+              r.fullName.toLowerCase().includes(q) ||
+              r.mrn.toLowerCase().includes(q) ||
+              r.phone.toLowerCase().includes(q)
+          );
+        }
+        return filtered;
       }
     } catch (err: any) {
-      console.warn("[Supabase EMR Read Fallback]:", err.message);
+      console.warn("[MySQL EMR Read Fallback]:", err.message);
     }
   }
 

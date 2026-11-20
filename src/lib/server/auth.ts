@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { isSupabaseConfigured } from "./supabase";
-import * as db from "./supabase-db";
+import { isMySQLConfigured } from "./mysql";
+import * as db from "./mysql-db";
 import { readStore, writeStore } from "./storage-engine";
 import { StaffUser } from "@/lib/types";
 
@@ -23,17 +23,124 @@ const SESSION_SECRET =
   process.env.SESSION_SECRET ||
   "auro_perfect_vision_secure_staff_secret_2026_auroville_holistic_eye_care";
 
-export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {
-  const generatedSalt = salt || crypto.randomBytes(16).toString("hex");
+// OWASP recommended iteration standards for PBKDF2-HMAC-SHA512
+export const PBKDF2_ITERATIONS = 220000;
+export const INTERMEDIATE_PBKDF2_ITERATIONS = 210000;
+export const LEGACY_PBKDF2_ITERATIONS = 10000;
+
+export function hashPassword(
+  password: string,
+  salt?: string,
+  iterations: number = PBKDF2_ITERATIONS
+): { hash: string; salt: string; iterations: number } {
+  const generatedSalt = salt || crypto.randomBytes(32).toString("hex");
   const hash = crypto
-    .pbkdf2Sync(password, generatedSalt, 10000, 64, "sha512")
+    .pbkdf2Sync(password, generatedSalt, iterations, 64, "sha512")
     .toString("hex");
-  return { hash, salt: generatedSalt };
+  return { hash, salt: generatedSalt, iterations };
 }
 
 export function verifyPassword(password: string, hash: string, salt: string): boolean {
-  const { hash: calculatedHash } = hashPassword(password, salt);
-  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(calculatedHash));
+  if (!password || !hash || !salt) return false;
+
+  try {
+    // 1. Check with modern standard (>= 220,000 iterations)
+    const modernHash = crypto
+      .pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, "sha512")
+      .toString("hex");
+
+    if (
+      hash.length === modernHash.length &&
+      crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(modernHash))
+    ) {
+      return true;
+    }
+
+    // 2. Check with intermediate baseline (210,000 iterations)
+    const intermediateHash = crypto
+      .pbkdf2Sync(password, salt, INTERMEDIATE_PBKDF2_ITERATIONS, 64, "sha512")
+      .toString("hex");
+
+    if (
+      hash.length === intermediateHash.length &&
+      crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(intermediateHash))
+    ) {
+      return true;
+    }
+
+    // 3. Check with legacy baseline (10,000 iterations) for backward compatibility
+    const legacyHash = crypto
+      .pbkdf2Sync(password, salt, LEGACY_PBKDF2_ITERATIONS, 64, "sha512")
+      .toString("hex");
+
+    if (
+      hash.length === legacyHash.length &&
+      crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(legacyHash))
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
+/**
+ * Verifies credentials and seamlessly upgrades legacy or intermediate hashes
+ * to the modern 220,000 OWASP standard in MySQL on successful login.
+ */
+export async function verifyAndUpgradeStaffPassword(
+  password: string,
+  staff: StaffUser
+): Promise<{ isValid: boolean; wasUpgraded: boolean }> {
+  if (!password || !staff?.passwordHash || !staff?.salt) {
+    return { isValid: false, wasUpgraded: false };
+  }
+
+  // 1. Check modern 220,000 iterations
+  const modernHash = crypto
+    .pbkdf2Sync(password, staff.salt, PBKDF2_ITERATIONS, 64, "sha512")
+    .toString("hex");
+
+  if (
+    staff.passwordHash.length === modernHash.length &&
+    crypto.timingSafeEqual(Buffer.from(staff.passwordHash), Buffer.from(modernHash))
+  ) {
+    return { isValid: true, wasUpgraded: false };
+  }
+
+  // 2. Check intermediate 210,000 or legacy 10,000 iterations
+  const intermediateHash = crypto
+    .pbkdf2Sync(password, staff.salt, INTERMEDIATE_PBKDF2_ITERATIONS, 64, "sha512")
+    .toString("hex");
+  const legacyHash = crypto
+    .pbkdf2Sync(password, staff.salt, LEGACY_PBKDF2_ITERATIONS, 64, "sha512")
+    .toString("hex");
+
+  const isIntermediate =
+    staff.passwordHash.length === intermediateHash.length &&
+    crypto.timingSafeEqual(Buffer.from(staff.passwordHash), Buffer.from(intermediateHash));
+  const isLegacy =
+    staff.passwordHash.length === legacyHash.length &&
+    crypto.timingSafeEqual(Buffer.from(staff.passwordHash), Buffer.from(legacyHash));
+
+  if (isIntermediate || isLegacy) {
+    // Earlier credentials match: automatically upgrade to 220,000 iterations
+    try {
+      const { hash: newHash, salt: newSalt } = hashPassword(password, undefined, PBKDF2_ITERATIONS);
+      await updateStaffUser(staff.id, {
+        passwordHash: newHash,
+        salt: newSalt,
+      });
+      return { isValid: true, wasUpgraded: true };
+    } catch {
+      // If DB update fails transiently, login still succeeds
+      return { isValid: true, wasUpgraded: false };
+    }
+  }
+
+  return { isValid: false, wasUpgraded: false };
 }
 
 function getBootstrapUsers(): StaffUser[] {
@@ -75,7 +182,7 @@ function getBootstrapUsers(): StaffUser[] {
 }
 
 export async function getStaffUsers(): Promise<StaffUser[]> {
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     try {
       const users = await db.dbGetStaffUsers();
       if (users.length > 0) return users;
@@ -87,7 +194,7 @@ export async function getStaffUsers(): Promise<StaffUser[]> {
       }
       return initialUsers;
     } catch (err) {
-      console.error("Supabase getStaffUsers error:", err);
+      console.error("MySQL getStaffUsers error:", err);
       throw err;
     }
   }
@@ -98,7 +205,7 @@ export async function getStaffUsers(): Promise<StaffUser[]> {
 
 export async function findStaffByEmail(email: string): Promise<StaffUser | undefined> {
   const normalized = email.toLowerCase().trim();
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     const user = await db.dbFindStaffByEmail(normalized);
     if (user && user.isActive && user.status !== "suspended") {
       return user;
@@ -116,7 +223,7 @@ export async function findStaffByEmail(email: string): Promise<StaffUser | undef
 }
 
 export async function findStaffById(id: string): Promise<StaffUser | undefined> {
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     const user = await db.dbFindStaffById(id);
     return user || undefined;
   }
@@ -165,7 +272,7 @@ export function verifySessionToken(token: string): SessionPayload | null {
  * active sessions are IMMEDIATELY revoked (returns null).
  */
 export async function getCurrentStaffSession(): Promise<SessionPayload | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
 
@@ -260,7 +367,7 @@ export async function createStaffUser(data: {
     updatedAt: new Date().toISOString(),
   };
 
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     return await db.dbCreateStaffUser(newUser);
   }
 
@@ -311,7 +418,7 @@ export async function updateStaffUser(
     }
   }
 
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     return await db.dbUpdateStaffUser(id, updates);
   }
 
@@ -353,7 +460,7 @@ export async function deleteStaffUser(id: string): Promise<boolean> {
     throw new Error("Cannot remove the last remaining administrator.");
   }
 
-  if (isSupabaseConfigured()) {
+  if (isMySQLConfigured()) {
     return await db.dbDeleteStaffUser(id);
   }
 

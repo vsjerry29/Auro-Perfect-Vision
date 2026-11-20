@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
-    domains: ["images.unsplash.com"],
     remotePatterns: [
       {
         protocol: "https",
@@ -13,6 +9,7 @@ const nextConfig = {
       },
     ],
   },
+  turbopack: {},
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -23,6 +20,14 @@ const nextConfig = {
       };
     }
     return config;
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "/api/uploads/:path*",
+      },
+    ];
   },
 };
 
