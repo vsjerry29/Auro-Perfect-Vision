@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/patch-next-trace.js",
     "db:generate": "prisma generate",
     "db:seed": "npx tsx scripts/mysql/seed.ts"
   },

@@ -1,4 +1,5 @@
 import path from "path";
+import "./scripts/patch-next-trace.js";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -27,16 +28,6 @@ const nextConfig = {
         path: false,
         crypto: false,
       };
-    }
-
-    // Remove TraceEntryPointsPlugin — it generates .nft.json files only needed
-    // for output:'standalone'. On Hostinger (full node_modules deployment) it is
-    // unnecessary, and its @vercel/nft directory-crawl with moduleSyncCatchall
-    // causes OOM (262k files scanned) on Windows/Webpack builds.
-    if (isServer) {
-      config.plugins = config.plugins.filter(
-        (plugin) => plugin.constructor.name !== "TraceEntryPointsPlugin"
-      );
     }
 
     return config;
