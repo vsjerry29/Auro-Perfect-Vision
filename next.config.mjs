@@ -15,6 +15,7 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
+      "@": path.resolve(process.cwd(), "src"),
       "lucide-react$": path.resolve(process.cwd(), "src/lib/icons.ts"),
       "date-fns$": path.resolve(process.cwd(), "src/lib/date-utils.ts"),
     };
