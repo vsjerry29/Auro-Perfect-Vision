@@ -1,5 +1,4 @@
 import path from "path";
-import "./scripts/patch-next-trace.js";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
