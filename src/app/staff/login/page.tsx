@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 function StaffLoginForm() {
   const router = useRouter();
@@ -14,6 +13,7 @@ function StaffLoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -48,17 +48,6 @@ function StaffLoginForm() {
       setError("Network or server error during sign in.");
       setLoading(false);
     }
-  };
-
-  const handleFillDemo = (type: "admin" | "therapist") => {
-    if (type === "admin") {
-      setEmail("admin@auroperfectvision.com");
-      setPassword("AuroVision@2026!");
-    } else {
-      setEmail("therapist@auroperfectvision.com");
-      setPassword("AnanyaVision@2026!");
-    }
-    setError("");
   };
 
   return (
@@ -99,7 +88,7 @@ function StaffLoginForm() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@auroperfectvision.com"
+                  placeholder="staff@auroperfectvision.com"
                   className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
                 />
               </div>
@@ -112,13 +101,25 @@ function StaffLoginForm() {
               <div className="relative">
                 <Lock className="w-4 h-4 text-ink-muted absolute left-3.5 top-3" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
+                  className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-ink-border bg-canvas-light text-ink focus:outline-none focus:ring-2 focus:ring-plum"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-2.5 text-ink-muted hover:text-ink transition-colors p-0.5 rounded focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -133,32 +134,6 @@ function StaffLoginForm() {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
-
-          {/* Initial Setup / Evaluation Quick-Fill */}
-          <div className="pt-6 border-t border-ink-border/60">
-            <span className="text-[11px] font-semibold text-ink-muted block uppercase tracking-wider mb-2 text-center">
-              Initial Staff Bootstrap Credentials
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-center">
-              <button
-                type="button"
-                onClick={() => handleFillDemo("admin")}
-                className="py-2 px-2.5 rounded-lg border border-ink-border bg-canvas-light text-ink text-[11px] hover:bg-canvas-dark transition-colors font-medium"
-              >
-                Auto-fill Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFillDemo("therapist")}
-                className="py-2 px-2.5 rounded-lg border border-ink-border bg-canvas-light text-ink text-[11px] hover:bg-canvas-dark transition-colors font-medium"
-              >
-                Auto-fill Therapist
-              </button>
-            </div>
-            <p className="text-[10px] text-ink-muted text-center mt-2.5">
-              Admin manages offerings, team & CMS. Therapist manages own calendar & assigned appointments.
-            </p>
-          </div>
         </div>
 
         <div className="text-center mt-6">
