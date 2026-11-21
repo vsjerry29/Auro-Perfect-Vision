@@ -169,7 +169,9 @@ export function SiteFooter() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-orange shrink-0" />
-                <span>connect@auroperfectvision.com</span>
+                <a href="mailto:auroperfectvision@gmail.com" className="hover:text-white transition-colors">
+                  auroperfectvision@gmail.com
+                </a>
               </div>
               <div className="flex items-start gap-2 pt-1">
                 <Clock className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />

@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentStaffSession } from "@/lib/server/auth";
-import { isEmailConfigured, getEmailSender, getRecentEmailLogs } from "@/lib/server/email";
+import {
+  isEmailConfigured,
+  getEmailSender,
+  getEmailReplyTo,
+  getAdminNotificationEmail,
+  getContactEmail,
+  getRecentEmailLogs,
+} from "@/lib/server/email";
 
 export async function GET() {
   const session = await getCurrentStaffSession();
@@ -11,15 +18,20 @@ export async function GET() {
   try {
     const configured = isEmailConfigured();
     const sender = getEmailSender();
+    const replyTo = getEmailReplyTo();
+    const adminNotificationEmail = getAdminNotificationEmail();
+    const contactEmail = getContactEmail();
     const logs = await getRecentEmailLogs(20);
 
     return NextResponse.json({
       configured,
       sender,
+      replyTo,
+      contactEmail,
       provider: "resend",
       hasApiKey: Boolean(process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes("placeholder")),
-      fromAddress: process.env.EMAIL_FROM || null,
-      adminNotificationEmail: process.env.ADMIN_NOTIFICATION_EMAIL || null,
+      fromAddress: process.env.EMAIL_FROM || sender,
+      adminNotificationEmail,
       logs,
     });
   } catch (err: any) {

@@ -596,6 +596,19 @@ export async function initMySQLSchema(): Promise<{ success: boolean; tablesCreat
       // Column already exists or already up-to-date
     }
 
+    // Synchronize active CMS contact email in MySQL
+    try {
+      await execute(
+        `UPDATE site_content
+         SET content = JSON_SET(content, '$.email', 'auroperfectvision@gmail.com', '$.contactEmail', 'auroperfectvision@gmail.com')
+         WHERE id = 'global_settings'
+           AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.email')) = 'connect@auroperfectvision.com'
+                OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.email')) IS NULL)`
+      );
+    } catch {
+      // Safe fallback if JSON functions differ
+    }
+
     schemaInitialized = true;
     return { success: true, tablesCreated: createdCount };
   } catch (err: any) {

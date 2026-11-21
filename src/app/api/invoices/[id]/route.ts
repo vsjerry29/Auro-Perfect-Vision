@@ -189,7 +189,7 @@ export async function GET(
     </table>
 
     <div class="footer">
-      <p>Thank you for choosing Auro Perfect Vision. For questions, call our clinic reception at +91 80123 05151 or email connect@auroperfectvision.com.</p>
+      <p>Thank you for choosing Auro Perfect Vision. For questions, call our clinic reception at +91 80123 05151 or email auroperfectvision@gmail.com.</p>
       <p style="font-size: 10px;">This computer-generated tax invoice is officially valid under the regulations of Auroville International Township, Tamil Nadu.</p>
     </div>
   </div>

@@ -9,6 +9,9 @@ export default function AdminNotificationsPage() {
   const [emailStatus, setEmailStatus] = useState<{
     configured: boolean;
     sender: string;
+    replyTo?: string;
+    contactEmail?: string;
+    adminNotificationEmail?: string;
     hasApiKey: boolean;
     fromAddress: string | null;
     logs: any[];
@@ -182,23 +185,29 @@ export default function AdminNotificationsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div className="p-3 bg-canvas-light rounded-xl border border-ink-border">
-            <span className="text-ink-muted block text-[11px] mb-1">Effective Sender</span>
-            <span className="font-mono font-medium text-ink break-all">
+            <span className="text-ink-muted block text-[11px] mb-1">Verified Sender</span>
+            <span className="font-mono font-medium text-ink break-all text-[11px]">
               {emailStatus?.sender || "notifications@auroperfectvision.com"}
             </span>
           </div>
           <div className="p-3 bg-canvas-light rounded-xl border border-ink-border">
-            <span className="text-ink-muted block text-[11px] mb-1">API Key Status</span>
-            <span className="font-medium text-ink">
-              {emailStatus?.hasApiKey ? "✓ Production Key Connected" : "⚠ Missing / Placeholder"}
+            <span className="text-ink-muted block text-[11px] mb-1">Official Reply-To</span>
+            <span className="font-mono font-medium text-ink break-all text-[11px]">
+              {emailStatus?.replyTo || "auroperfectvision@gmail.com"}
+            </span>
+          </div>
+          <div className="p-3 bg-canvas-light rounded-xl border border-ink-border">
+            <span className="text-ink-muted block text-[11px] mb-1">Admin Alert Inbox</span>
+            <span className="font-mono font-medium text-ink break-all text-[11px]">
+              {emailStatus?.adminNotificationEmail || "auroperfectvision@gmail.com"}
             </span>
           </div>
           <div className="p-3 bg-canvas-light rounded-xl border border-ink-border">
             <span className="text-ink-muted block text-[11px] mb-1">MySQL Delivery Logging</span>
             <span className="font-medium text-emerald-800">
-              ✓ Active (notification_jobs table)
+              ✓ Active (notification_jobs)
             </span>
           </div>
         </div>

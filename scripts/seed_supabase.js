@@ -97,7 +97,7 @@ async function seed() {
         about_heading: siteContent.aboutHeading || "",
         about_summary: siteContent.aboutSummary || "",
         phone: siteContent.phone || "+91 8012305151",
-        email: siteContent.email || "connect@auroperfectvision.com",
+        email: siteContent.email || "auroperfectvision@gmail.com",
         address: siteContent.address || "Auroville, Tamil Nadu 605101, India",
         whatsapp_link: siteContent.whatsappLink || "https://wa.me/918012305151",
         opening_hours: siteContent.openingHours || "Monday - Saturday: 9:00 AM - 5:30 PM IST",

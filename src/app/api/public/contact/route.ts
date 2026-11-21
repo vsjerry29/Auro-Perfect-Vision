@@ -4,6 +4,8 @@ import {
   sendEmail,
   renderContactInquiryAdminEmail,
   renderContactAcknowledgmentClientEmail,
+  getAdminNotificationEmail,
+  getEmailReplyTo,
 } from "@/lib/server/email";
 
 export async function POST(request: Request) {
@@ -46,40 +48,50 @@ export async function POST(request: Request) {
       source: "contact_form",
     });
 
-    // Dispatch transactional notifications via Resend (non-blocking)
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "connect@auroperfectvision.com";
+    // Dispatch transactional notifications via Resend (awaited with try/catch to ensure non-blocking persistence)
+    const adminEmail = getAdminNotificationEmail();
 
-    // 1. Alert to Admin
-    const adminTemplate = renderContactInquiryAdminEmail({
-      name: inquiry.name,
-      email: inquiry.email,
-      phone: inquiry.phone,
-      category: inquiry.category,
-      subject: inquiry.subject,
-      message: inquiry.message,
-      reference: inquiry.reference,
-    });
-    sendEmail({
-      to: adminEmail,
-      subject: `New Inquiry [${inquiry.reference}]: ${inquiry.subject}`,
-      html: adminTemplate.html,
-      text: adminTemplate.text,
-      templateKey: "contact_inquiry_admin",
-    }).catch((err) => console.warn("[Contact Admin Email Dispatch Notice]:", err.message));
+    // 1. Alert to Admin (reply_to set to inquirer email so staff can reply directly from Gmail)
+    try {
+      const adminTemplate = renderContactInquiryAdminEmail({
+        name: inquiry.name,
+        email: inquiry.email,
+        phone: inquiry.phone,
+        category: inquiry.category,
+        subject: inquiry.subject,
+        message: inquiry.message,
+        reference: inquiry.reference,
+      });
+      await sendEmail({
+        to: adminEmail,
+        subject: `New Inquiry [${inquiry.reference}]: ${inquiry.subject}`,
+        html: adminTemplate.html,
+        text: adminTemplate.text,
+        replyTo: inquiry.email,
+        templateKey: "contact_inquiry_admin",
+      });
+    } catch (adminErr: any) {
+      console.warn("[Contact Admin Email Dispatch Notice]:", adminErr.message);
+    }
 
-    // 2. Acknowledgment to Inquirer
-    const clientTemplate = renderContactAcknowledgmentClientEmail({
-      name: inquiry.name,
-      reference: inquiry.reference,
-      subject: inquiry.subject,
-    });
-    sendEmail({
-      to: inquiry.email,
-      subject: `Inquiry Received [${inquiry.reference}] — Auro Perfect Vision`,
-      html: clientTemplate.html,
-      text: clientTemplate.text,
-      templateKey: "contact_acknowledgment_client",
-    }).catch((err) => console.warn("[Contact Client Acknowledgment Dispatch Notice]:", err.message));
+    // 2. Acknowledgment to Inquirer (reply_to set to official Gmail)
+    try {
+      const clientTemplate = renderContactAcknowledgmentClientEmail({
+        name: inquiry.name,
+        reference: inquiry.reference,
+        subject: inquiry.subject,
+      });
+      await sendEmail({
+        to: inquiry.email,
+        subject: `Inquiry Received [${inquiry.reference}] — Auro Perfect Vision`,
+        html: clientTemplate.html,
+        text: clientTemplate.text,
+        replyTo: getEmailReplyTo(),
+        templateKey: "contact_acknowledgment_client",
+      });
+    } catch (clientErr: any) {
+      console.warn("[Contact Client Acknowledgment Dispatch Notice]:", clientErr.message);
+    }
 
     return NextResponse.json({
       success: true,

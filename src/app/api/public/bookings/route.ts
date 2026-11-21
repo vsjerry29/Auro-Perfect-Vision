@@ -9,7 +9,13 @@ import { isMySQLConfigured } from "@/lib/server/mysql";
 import * as db from "@/lib/server/mysql-db";
 import { findOrCreateClientFromBooking } from "@/lib/server/crm";
 import { getAllPatients, createPatient } from "@/lib/server/emr";
-import { sendEmail, renderBookingConfirmationEmail } from "@/lib/server/email";
+import {
+  sendEmail,
+  renderBookingConfirmationEmail,
+  renderAdminNewBookingAlertEmail,
+  getAdminNotificationEmail,
+  getEmailReplyTo,
+} from "@/lib/server/email";
 import { calculateOfferingPrice } from "@/lib/server/payments";
 import { Booking } from "@/lib/types";
 
@@ -135,32 +141,81 @@ export async function POST(request: Request) {
       console.warn("Could not sync booking to EMR:", emrErr);
     }
 
-    // 6. Dispatch Booking Confirmation Email via Resend (non-blocking)
+    // 6. Transactional Email Notifications
+    // Both dispatches are awaited inside try/catch blocks so that notification delivery errors
+    // do not impede successful booking persistence and client HTTP response.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com";
+    const adminNotificationEmail = getAdminNotificationEmail();
+
+    // 6a. Dispatch Customer Confirmation Email (to Client)
     if (saved.clientEmail) {
-      const confirmationTpl = renderBookingConfirmationEmail({
-        clientName: saved.clientName,
+      try {
+        const confirmationTpl = renderBookingConfirmationEmail({
+          clientName: saved.clientName,
+          bookingReference: saved.bookingReference,
+          offeringTitle: saved.offeringTitle,
+          therapistName: saved.therapistName,
+          bookingDate: saved.date,
+          timeSlot: saved.timeSlot,
+          paymentMethod: saved.paymentMethod || "offline",
+          paymentStatus: saved.paymentStatus || "pending",
+          totalAmount: saved.totalAmount || 0,
+          currency: saved.currency || "INR",
+          invoiceUrl: saved.invoiceNumber
+            ? `${appUrl}/api/invoices/${saved.invoiceNumber}`
+            : undefined,
+        });
+
+        const customerSubject =
+          saved.paymentStatus === "captured" || saved.paymentStatus === "offline_confirmed"
+            ? `Appointment Confirmation [${saved.bookingReference}] — Auro Perfect Vision`
+            : `Booking Received — Payment Pending [${saved.bookingReference}] — Auro Perfect Vision`;
+
+        await sendEmail({
+          to: saved.clientEmail,
+          subject: customerSubject,
+          html: confirmationTpl.html,
+          text: confirmationTpl.text,
+          replyTo: getEmailReplyTo(),
+          templateKey: "booking_confirmation",
+          bookingId: saved.id,
+        });
+      } catch (clientEmailErr: any) {
+        console.warn("[Booking Client Email Dispatch Notice]:", clientEmailErr.message);
+      }
+    }
+
+    // 6b. Dispatch Automatic Instant Admin Alert (to auroperfectvision@gmail.com)
+    try {
+      const adminAlertTpl = renderAdminNewBookingAlertEmail({
         bookingReference: saved.bookingReference,
+        clientName: saved.clientName,
+        clientEmail: saved.clientEmail || "Not provided",
+        clientPhone: saved.clientPhone || "Not provided",
         offeringTitle: saved.offeringTitle,
         therapistName: saved.therapistName,
         bookingDate: saved.date,
         timeSlot: saved.timeSlot,
-        paymentMethod: saved.paymentMethod || "offline",
-        paymentStatus: saved.paymentStatus || "pending",
+        participants: saved.seatsBooked || 1,
         totalAmount: saved.totalAmount || 0,
         currency: saved.currency || "INR",
-        invoiceUrl: saved.invoiceNumber
-          ? `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/api/invoices/${saved.invoiceNumber}`
-          : undefined,
+        paymentMethod: saved.paymentMethod || "offline",
+        paymentStatus: saved.paymentStatus || "pending",
+        bookingStatus: saved.status || "confirmed",
+        dashboardUrl: `${appUrl}/admin/bookings`,
       });
 
-      sendEmail({
-        to: saved.clientEmail,
-        subject: `Appointment Confirmation [${saved.bookingReference}] — Auro Perfect Vision`,
-        html: confirmationTpl.html,
-        text: confirmationTpl.text,
-        templateKey: "booking_confirmation",
+      await sendEmail({
+        to: adminNotificationEmail,
+        subject: `New Booking Received — ${saved.bookingReference} | Auro Perfect Vision`,
+        html: adminAlertTpl.html,
+        text: adminAlertTpl.text,
+        replyTo: saved.clientEmail || getEmailReplyTo(),
+        templateKey: "admin_new_booking_alert",
         bookingId: saved.id,
-      }).catch((emailErr) => console.warn("[Booking Confirmation Email Dispatch Notice]:", emailErr.message));
+      });
+    } catch (adminEmailErr: any) {
+      console.warn("[Booking Admin Alert Email Dispatch Notice]:", adminEmailErr.message);
     }
 
     return NextResponse.json({ success: true, booking: saved });

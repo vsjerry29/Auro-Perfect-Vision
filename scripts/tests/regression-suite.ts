@@ -29,6 +29,9 @@ Module.prototype.require = function (id: string, ...args: any[]) {
 const {
   isEmailConfigured,
   getEmailSender,
+  getEmailReplyTo,
+  getAdminNotificationEmail,
+  getContactEmail,
   renderStaffInvitationEmail,
   renderBookingConfirmationEmail,
   renderBookingCancellationEmail,
@@ -36,6 +39,9 @@ const {
   renderPaymentConfirmedEmail,
   renderContactInquiryAdminEmail,
   renderContactAcknowledgmentClientEmail,
+  renderAdminNewBookingAlertEmail,
+  renderAdminPaymentConfirmedAlertEmail,
+  renderAdminBookingCancelledAlertEmail,
   renderTestEmail,
 } = require("../../src/lib/server/email");
 
@@ -179,6 +185,115 @@ async function runRegressionSuite() {
     const tpl = renderTestEmail("admin@auroperfectvision.com");
     assert(tpl.html.includes("admin@auroperfectvision.com"));
     assert(tpl.html.includes("Resend Integration Test Passed"));
+  });
+
+  await test("Official business contact email defaults cleanly to auroperfectvision@gmail.com", () => {
+    const replyTo = getEmailReplyTo();
+    const adminEmail = getAdminNotificationEmail();
+    const contactEmail = getContactEmail();
+    assert.strictEqual(replyTo, "auroperfectvision@gmail.com");
+    assert.strictEqual(adminEmail, "auroperfectvision@gmail.com");
+    assert.strictEqual(contactEmail, "auroperfectvision@gmail.com");
+  });
+
+  await test("Admin New Booking Alert template formats required fields and excludes sensitive EMR intake", () => {
+    const tpl = renderAdminNewBookingAlertEmail({
+      bookingReference: "APV-2026-ADM99",
+      clientName: "Meera Krishnan",
+      clientEmail: "meera@example.com",
+      clientPhone: "+91 94440 12345",
+      offeringTitle: "Digital Eye Strain Protocol",
+      therapistName: "Dr. Ananya Sen",
+      bookingDate: "2026-11-28",
+      timeSlot: "11:00 AM - 12:00 PM",
+      participants: 1,
+      totalAmount: 1800,
+      currency: "INR",
+      paymentMethod: "offline_cash",
+      paymentStatus: "pending",
+      bookingStatus: "confirmed",
+      dashboardUrl: "https://auroperfectvision.com/admin/bookings",
+    });
+
+    assert(tpl.html.includes("NEW BOOKING — AURO PERFECT VISION"));
+    assert(tpl.html.includes("APV-2026-ADM99"));
+    assert(tpl.html.includes("Meera Krishnan"));
+    assert(tpl.html.includes("meera@example.com"));
+    assert(tpl.html.includes("+91 94440 12345"));
+    assert(tpl.html.includes("Digital Eye Strain Protocol"));
+    assert(tpl.html.includes("Dr. Ananya Sen"));
+    assert(tpl.html.includes("₹1,800"));
+    assert(tpl.html.includes("offline cash"));
+    assert(tpl.html.includes("/admin/bookings"));
+    assert(tpl.text.includes("NEW BOOKING — AURO PERFECT VISION"));
+    assert(tpl.text.includes("APV-2026-ADM99"));
+    assert(tpl.text.includes("₹1,800"));
+    // Ensure no health answers or intake questionnaires leaked
+    assert(!tpl.html.includes("medicalHistory"));
+    assert(!tpl.html.includes("clinicalAlerts"));
+    assert(!tpl.text.includes("clinicalAlerts"));
+  });
+
+  await test("Admin Payment Confirmed Alert template formats invoice and gateway details", () => {
+    const tpl = renderAdminPaymentConfirmedAlertEmail({
+      bookingReference: "APV-2026-PAY88",
+      invoiceNumber: "APV-2026-0088",
+      clientName: "Arjun Rao",
+      clientEmail: "arjun@example.com",
+      offeringTitle: "Neuro-Visual Retraining",
+      therapistName: "Dr. Ananya Sen",
+      totalAmount: 3200,
+      currency: "INR",
+      paymentGateway: "RAZORPAY",
+      paymentId: "pay_test_8877",
+      dashboardUrl: "https://auroperfectvision.com/admin/bookings",
+    });
+
+    assert(tpl.html.includes("PAYMENT CONFIRMED — AURO PERFECT VISION"));
+    assert(tpl.html.includes("APV-2026-PAY88"));
+    assert(tpl.html.includes("APV-2026-0088"));
+    assert(tpl.html.includes("₹3,200"));
+    assert(tpl.html.includes("RAZORPAY"));
+    assert(tpl.html.includes("pay_test_8877"));
+  });
+
+  await test("Admin Booking Cancelled Alert template renders reason and cancellation details", () => {
+    const tpl = renderAdminBookingCancelledAlertEmail({
+      bookingReference: "APV-2026-CAN77",
+      clientName: "Kiran Patel",
+      clientEmail: "kiran@example.com",
+      offeringTitle: "Conscious Eye Yoga",
+      bookingDate: "2026-11-30",
+      timeSlot: "02:00 PM - 03:00 PM",
+      reason: "Client travel rescheduled",
+      cancelledBy: "Client Request",
+    });
+
+    assert(tpl.html.includes("BOOKING CANCELLED — AURO PERFECT VISION"));
+    assert(tpl.html.includes("APV-2026-CAN77"));
+    assert(tpl.html.includes("Client travel rescheduled"));
+    assert(tpl.text.includes("Client Request"));
+  });
+
+  await test("Booking Confirmation email clearly notes pending payment for offline bookings", () => {
+    const offlineTpl = renderBookingConfirmationEmail({
+      clientName: "Ramesh Sharma",
+      bookingReference: "APV-2026-OFF01",
+      offeringTitle: "Comprehensive Vision Assessment",
+      therapistName: "Dr. Ananya Sen",
+      bookingDate: "2026-12-01",
+      timeSlot: "09:00 AM - 10:00 AM",
+      paymentMethod: "offline_cash",
+      paymentStatus: "pending",
+      totalAmount: 1500,
+      currency: "INR",
+    });
+
+    assert(offlineTpl.html.includes("Booking Received — Payment Pending"));
+    assert(offlineTpl.html.includes("Pending Offline / Counter Payment"));
+    assert(offlineTpl.html.includes("auroperfectvision@gmail.com"));
+    assert(offlineTpl.text.includes("Pending Offline Payment"));
+    assert(offlineTpl.text.includes("auroperfectvision@gmail.com"));
   });
 
   // ───────────────────────────────────────────────────────────────────────────

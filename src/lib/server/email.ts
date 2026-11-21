@@ -9,8 +9,10 @@ export interface SendEmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  replyTo?: string;
   templateKey?: string;
   bookingId?: string;
+  skipJobLogging?: boolean;
 }
 
 export interface SendEmailResult {
@@ -29,10 +31,31 @@ export function isEmailConfigured(): boolean {
 }
 
 /**
- * Returns the effective sender address.
+ * Returns the effective sender address (must be from the verified domain auroperfectvision.com).
  */
 export function getEmailSender(): string {
   return process.env.EMAIL_FROM || "Auro Perfect Vision <notifications@auroperfectvision.com>";
+}
+
+/**
+ * Returns the official business Reply-To email address (client replies route to official Gmail).
+ */
+export function getEmailReplyTo(): string {
+  return process.env.EMAIL_REPLY_TO || "auroperfectvision@gmail.com";
+}
+
+/**
+ * Returns the destination email for internal administrative booking and system alerts.
+ */
+export function getAdminNotificationEmail(): string {
+  return process.env.ADMIN_NOTIFICATION_EMAIL || "auroperfectvision@gmail.com";
+}
+
+/**
+ * Returns the public contact email for inquiries and customer communications.
+ */
+export function getContactEmail(): string {
+  return process.env.CONTACT_EMAIL || "auroperfectvision@gmail.com";
 }
 
 /**
@@ -73,20 +96,25 @@ async function logNotificationJob(params: {
  * Validates configuration, escapes dynamic content, and records dispatch history.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
-  const { to, subject, html, text, templateKey = "custom_email", bookingId } = options;
+  const { to, subject, html, text, templateKey = "custom_email", bookingId, replyTo, skipJobLogging } = options;
 
   if (!to || !to.includes("@")) {
     const err = "Invalid recipient email address";
-    await logNotificationJob({ bookingId, recipient: to || "unknown", templateKey, status: "failed", errorMessage: err });
+    if (!skipJobLogging) {
+      await logNotificationJob({ bookingId, recipient: to || "unknown", templateKey, status: "failed", errorMessage: err });
+    }
     return { success: false, error: err, provider: "resend", status: "failed" };
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = getEmailSender();
+  const effectiveReplyTo = replyTo || getEmailReplyTo();
 
   if (!apiKey || apiKey.includes("placeholder") || !process.env.EMAIL_FROM) {
     const errorMsg = "Email provider is not configured (RESEND_API_KEY and EMAIL_FROM required)";
-    await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errorMsg });
+    if (!skipJobLogging) {
+      await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errorMsg });
+    }
     return {
       success: false,
       error: errorMsg,
@@ -102,6 +130,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     const { data, error } = await resend.emails.send({
       from,
       to: [to],
+      replyTo: effectiveReplyTo,
       subject,
       html: html || undefined,
       text: plainTextFallback,
@@ -109,11 +138,15 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
 
     if (error || !data?.id) {
       const errMsg = `Resend API rejected delivery: ${error?.message || "Unknown error"}`;
-      await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errMsg });
+      if (!skipJobLogging) {
+        await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errMsg });
+      }
       return { success: false, error: errMsg, provider: "resend", status: "failed" };
     }
 
-    await logNotificationJob({ bookingId, recipient: to, templateKey, status: "sent" });
+    if (!skipJobLogging) {
+      await logNotificationJob({ bookingId, recipient: to, templateKey, status: "sent" });
+    }
 
     return {
       success: true,
@@ -123,7 +156,9 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     };
   } catch (err: any) {
     const errorMsg = err.message || "Failed to dispatch email via Resend";
-    await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errorMsg });
+    if (!skipJobLogging) {
+      await logNotificationJob({ bookingId, recipient: to, templateKey, status: "failed", errorMessage: errorMsg });
+    }
     return { success: false, error: errorMsg, provider: "resend", status: "failed" };
   }
 }
@@ -198,7 +233,7 @@ function baseEmailWrapper(title: string, contentHtml: string): string {
     <div class="footer">
       <p><strong>Auro Perfect Vision</strong></p>
       <p>Auroville International Township, Tamil Nadu 605101, India</p>
-      <p>Direct Center Desk: +91 80123 05151 • connect@auroperfectvision.com</p>
+      <p>Direct Center Desk: +91 80123 05151 • <a href="mailto:auroperfectvision@gmail.com" style="color: #7B7268; text-decoration: underline;">auroperfectvision@gmail.com</a></p>
       <p style="margin-top: 10px; font-size: 10px; color: #A0988E;">This is an automated communication from Auro Perfect Vision.</p>
     </div>
   </div>
@@ -281,7 +316,7 @@ export function renderBookingConfirmationEmail(data: {
   currency: string;
   invoiceUrl?: string;
 }): { html: string; text: string } {
-  const isPaid = data.paymentStatus === "captured";
+  const isPaid = data.paymentStatus === "captured" || data.paymentStatus === "offline_confirmed";
   const formattedFee =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
@@ -291,9 +326,17 @@ export function renderBookingConfirmationEmail(data: {
       ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
       : "—";
 
+  const subject = isPaid
+    ? `Appointment Confirmation: ${data.bookingReference}`
+    : `Booking Received — Payment Pending: ${data.bookingReference}`;
+
+  const statusMessage = isPaid
+    ? `Your appointment reservation at <strong>Auro Perfect Vision</strong> has been registered and confirmed.`
+    : `Your appointment reservation at <strong>Auro Perfect Vision</strong> has been received. Your slot is held pending offline payment confirmation.`;
+
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Namaste, ${escapeHtml(data.clientName)}</h2>
-    <p>Your appointment reservation at <strong>Auro Perfect Vision</strong> has been registered successfully.</p>
+    <p>${statusMessage}</p>
     
     <div class="meta-card">
       <div class="meta-row">
@@ -352,7 +395,7 @@ export function renderBookingConfirmationEmail(data: {
 
   const textContent = `Namaste, ${data.clientName}
 
-Your appointment reservation at Auro Perfect Vision is confirmed.
+${isPaid ? "Your appointment reservation at Auro Perfect Vision is confirmed." : "Your booking request has been received. Your slot is held pending offline payment confirmation."}
 
 Booking Reference: ${data.bookingReference}
 Therapy: ${data.offeringTitle}
@@ -363,10 +406,10 @@ Fee: ${textFee}
 Payment Status: ${isPaid ? "Paid & Verified" : "Pending Offline Payment"}
 
 Centre Location: Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.
-Contact: +91 80123 05151 • connect@auroperfectvision.com`;
+Contact: +91 80123 05151 • auroperfectvision@gmail.com`;
 
   return {
-    html: baseEmailWrapper(`Appointment Confirmation: ${data.bookingReference}`, htmlContent),
+    html: baseEmailWrapper(subject, htmlContent),
     text: textContent,
   };
 }
@@ -402,13 +445,15 @@ export function renderBookingCancelledEmail(data: {
 
 Your session for ${data.offeringTitle} on ${data.bookingDate} (Ref: ${data.bookingReference}) has been cancelled.
 ${data.reason ? `Reason: ${data.reason}\n` : ""}
-If you wish to reschedule, please contact us at connect@auroperfectvision.com or +91 80123 05151.`;
+If you wish to reschedule, please contact us at auroperfectvision@gmail.com or +91 80123 05151.`;
 
   return {
     html: baseEmailWrapper(`Appointment Cancelled: ${data.bookingReference}`, htmlContent),
     text: textContent,
   };
 }
+
+export const renderBookingCancellationEmail = renderBookingCancelledEmail;
 
 /**
  * 4. BOOKING REMINDER EMAIL
@@ -649,5 +694,334 @@ export function renderTestEmail(recipient: string): { html: string; text: string
   return {
     html: baseEmailWrapper("Resend Integration Test — Auro Perfect Vision", htmlContent),
     text: `Resend Integration Test Passed\nRecipient: ${recipient}\nTimestamp: ${now}\nSender: ${getEmailSender()}`,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. AUTOMATIC ADMINISTRATOR ALERTS (DISPATCHED TO OFFICIAL GMAIL)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface AdminNewBookingAlertData {
+  bookingReference: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  offeringTitle: string;
+  therapistName: string;
+  bookingDate: string;
+  timeSlot: string;
+  participants?: number;
+  totalAmount: number;
+  currency?: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  bookingStatus: string;
+  dashboardUrl?: string;
+}
+
+/**
+ * Renders the mandatory instant administrative alert dispatched to auroperfectvision@gmail.com
+ * whenever any customer completes any therapy/programme booking reservation.
+ * CRITICAL: NEVER includes sensitive medical intake questionnaires or clinical notes.
+ */
+export function renderAdminNewBookingAlertEmail(data: AdminNewBookingAlertData): {
+  html: string;
+  text: string;
+} {
+  const formattedFee = `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`;
+  const dashboardUrl = data.dashboardUrl || `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/admin/bookings`;
+  const isPaid = data.paymentStatus === "captured" || data.paymentStatus === "offline_confirmed";
+
+  const htmlContent = `
+    <div style="background-color: #3B1E4A; color: #FAF8F5; padding: 14px 20px; border-radius: 12px; margin-bottom: 22px; text-align: center;">
+      <h2 style="font-family: Georgia, serif; font-size: 18px; margin: 0; letter-spacing: 1px; color: #FAF8F5;">NEW BOOKING — AURO PERFECT VISION</h2>
+    </div>
+
+    <p style="font-size: 14px; margin-top: 0; color: #2C2621;">
+      A new appointment reservation has been registered and committed to the database:
+    </p>
+
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Booking Reference</span>
+        <span class="meta-value" style="color: #3B1E4A; font-family: monospace; font-size: 14px;">${escapeHtml(data.bookingReference)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Name</span>
+        <span class="meta-value">${escapeHtml(data.clientName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Email</span>
+        <span class="meta-value"><a href="mailto:${escapeHtml(data.clientEmail)}" style="color: #3B1E4A;">${escapeHtml(data.clientEmail)}</a></span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Phone</span>
+        <span class="meta-value">${escapeHtml(data.clientPhone || "Not provided")}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Therapy / Programme</span>
+        <span class="meta-value">${escapeHtml(data.offeringTitle)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Practitioner</span>
+        <span class="meta-value">${escapeHtml(data.therapistName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Scheduled Date</span>
+        <span class="meta-value">${escapeHtml(data.bookingDate)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Time Slot</span>
+        <span class="meta-value">${escapeHtml(data.timeSlot)} IST</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Participants</span>
+        <span class="meta-value">${escapeHtml(String(data.participants || 1))}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Total Amount</span>
+        <span class="meta-value" style="font-weight: 700; color: #3B1E4A;">${formattedFee}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Payment Method</span>
+        <span class="meta-value" style="text-transform: capitalize;">${escapeHtml(data.paymentMethod.replace(/_/g, " "))}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Payment Status</span>
+        <span class="meta-value" style="color: ${isPaid ? '#047857' : '#B45309'}; font-weight: bold;">
+          ${escapeHtml(data.paymentStatus)}
+        </span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Booking Status</span>
+        <span class="meta-value" style="font-weight: bold; text-transform: uppercase;">${escapeHtml(data.bookingStatus)}</span>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin: 26px 0;">
+      <a href="${escapeHtml(dashboardUrl)}" class="cta-button">Access Admin Dashboard (/admin/bookings)</a>
+    </div>
+
+    <p style="font-size: 11px; color: #7B7268; text-align: center; line-height: 1.5;">
+      Confidentiality Advisory: Confidential patient intake notes and clinical history are preserved within the secure EMR system and are never broadcast in unencrypted notifications.
+    </p>
+  `;
+
+  const textContent = `NEW BOOKING — AURO PERFECT VISION
+========================================
+
+Reference: ${data.bookingReference}
+Client Name: ${data.clientName}
+Email: ${data.clientEmail}
+Phone: ${data.clientPhone || "Not provided"}
+Therapy: ${data.offeringTitle}
+Practitioner: ${data.therapistName}
+Date: ${data.bookingDate}
+Time: ${data.timeSlot} IST
+Participants: ${data.participants || 1}
+Total Amount: ${formattedFee}
+Payment Method: ${data.paymentMethod}
+Actual Payment Status: ${data.paymentStatus}
+Booking Status: ${data.bookingStatus}
+
+Admin Dashboard: ${dashboardUrl}`;
+
+  return {
+    html: baseEmailWrapper(`New Booking Received — ${data.bookingReference} | Auro Perfect Vision`, htmlContent),
+    text: textContent,
+  };
+}
+
+export interface AdminPaymentConfirmedAlertData {
+  bookingReference: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  offeringTitle: string;
+  therapistName: string;
+  totalAmount: number;
+  currency?: string;
+  paymentGateway: string;
+  paymentId?: string;
+  dashboardUrl?: string;
+}
+
+/**
+ * Dispatched to auroperfectvision@gmail.com when an online or offline payment is verified.
+ */
+export function renderAdminPaymentConfirmedAlertEmail(data: AdminPaymentConfirmedAlertData): {
+  html: string;
+  text: string;
+} {
+  const formattedFee = `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`;
+  const dashboardUrl = data.dashboardUrl || `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/admin/bookings`;
+
+  const htmlContent = `
+    <div style="background-color: #047857; color: #FAF8F5; padding: 14px 20px; border-radius: 12px; margin-bottom: 22px; text-align: center;">
+      <h2 style="font-family: Georgia, serif; font-size: 18px; margin: 0; letter-spacing: 1px; color: #FAF8F5;">PAYMENT CONFIRMED — AURO PERFECT VISION</h2>
+    </div>
+
+    <p style="font-size: 14px; margin-top: 0; color: #2C2621;">
+      A verified payment transaction has been captured for reservation <strong>${escapeHtml(data.bookingReference)}</strong>:
+    </p>
+
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Booking Reference</span>
+        <span class="meta-value" style="font-family: monospace;">${escapeHtml(data.bookingReference)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Tax Invoice Number</span>
+        <span class="meta-value" style="font-family: monospace; font-weight: bold; color: #047857;">${escapeHtml(data.invoiceNumber)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Name</span>
+        <span class="meta-value">${escapeHtml(data.clientName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Email</span>
+        <span class="meta-value">${escapeHtml(data.clientEmail)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Therapy Offering</span>
+        <span class="meta-value">${escapeHtml(data.offeringTitle)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Practitioner</span>
+        <span class="meta-value">${escapeHtml(data.therapistName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Amount Captured</span>
+        <span class="meta-value" style="font-weight: bold; color: #047857;">${formattedFee}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Payment Gateway</span>
+        <span class="meta-value" style="font-weight: bold;">${escapeHtml(data.paymentGateway)}</span>
+      </div>
+      ${
+        data.paymentId
+          ? `<div class="meta-row">
+               <span class="meta-label">Transaction ID</span>
+               <span class="meta-value" style="font-family: monospace;">${escapeHtml(data.paymentId)}</span>
+             </div>`
+          : ""
+      }
+    </div>
+
+    <div style="text-align: center; margin: 26px 0;">
+      <a href="${escapeHtml(dashboardUrl)}" class="cta-button">Open in Admin Dashboard</a>
+    </div>
+  `;
+
+  const textContent = `PAYMENT CONFIRMED — AURO PERFECT VISION
+========================================
+
+Reference: ${data.bookingReference}
+Invoice Number: ${data.invoiceNumber}
+Client Name: ${data.clientName}
+Client Email: ${data.clientEmail}
+Therapy: ${data.offeringTitle}
+Amount: ${formattedFee}
+Payment Gateway: ${data.paymentGateway}
+Transaction ID: ${data.paymentId || "N/A"}
+
+Admin Dashboard: ${dashboardUrl}`;
+
+  return {
+    html: baseEmailWrapper(`Payment Confirmed — ${data.bookingReference} | Auro Perfect Vision`, htmlContent),
+    text: textContent,
+  };
+}
+
+export interface AdminBookingCancelledAlertData {
+  bookingReference: string;
+  clientName: string;
+  clientEmail: string;
+  offeringTitle: string;
+  bookingDate: string;
+  timeSlot?: string;
+  reason?: string;
+  cancelledBy?: string;
+  dashboardUrl?: string;
+}
+
+/**
+ * Dispatched to auroperfectvision@gmail.com when an appointment is cancelled.
+ */
+export function renderAdminBookingCancelledAlertEmail(data: AdminBookingCancelledAlertData): {
+  html: string;
+  text: string;
+} {
+  const dashboardUrl = data.dashboardUrl || `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/admin/bookings`;
+
+  const htmlContent = `
+    <div style="background-color: #991B1B; color: #FAF8F5; padding: 14px 20px; border-radius: 12px; margin-bottom: 22px; text-align: center;">
+      <h2 style="font-family: Georgia, serif; font-size: 18px; margin: 0; letter-spacing: 1px; color: #FAF8F5;">BOOKING CANCELLED — AURO PERFECT VISION</h2>
+    </div>
+
+    <p style="font-size: 14px; margin-top: 0; color: #2C2621;">
+      An appointment has been cancelled:
+    </p>
+
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Booking Reference</span>
+        <span class="meta-value" style="font-family: monospace;">${escapeHtml(data.bookingReference)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Name</span>
+        <span class="meta-value">${escapeHtml(data.clientName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Client Email</span>
+        <span class="meta-value">${escapeHtml(data.clientEmail)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Therapy</span>
+        <span class="meta-value">${escapeHtml(data.offeringTitle)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Date &amp; Time</span>
+        <span class="meta-value">${escapeHtml(data.bookingDate)}${data.timeSlot ? ` at ${escapeHtml(data.timeSlot)} IST` : ""}</span>
+      </div>
+      ${
+        data.reason
+          ? `<div class="meta-row">
+               <span class="meta-label">Cancellation Reason</span>
+               <span class="meta-value" style="color: #991B1B;">${escapeHtml(data.reason)}</span>
+             </div>`
+          : ""
+      }
+      ${
+        data.cancelledBy
+          ? `<div class="meta-row">
+               <span class="meta-label">Cancelled By</span>
+               <span class="meta-value">${escapeHtml(data.cancelledBy)}</span>
+             </div>`
+          : ""
+      }
+    </div>
+
+    <div style="text-align: center; margin: 26px 0;">
+      <a href="${escapeHtml(dashboardUrl)}" class="cta-button">Open in Admin Dashboard</a>
+    </div>
+  `;
+
+  const textContent = `BOOKING CANCELLED — AURO PERFECT VISION
+========================================
+
+Reference: ${data.bookingReference}
+Client Name: ${data.clientName}
+Client Email: ${data.clientEmail}
+Therapy: ${data.offeringTitle}
+Date & Time: ${data.bookingDate} ${data.timeSlot ? `at ${data.timeSlot} IST` : ""}
+Reason: ${data.reason || "Not specified"}
+Cancelled By: ${data.cancelledBy || "Staff / Client"}
+
+Admin Dashboard: ${dashboardUrl}`;
+
+  return {
+    html: baseEmailWrapper(`Booking Cancelled — ${data.bookingReference} | Auro Perfect Vision`, htmlContent),
+    text: textContent,
   };
 }

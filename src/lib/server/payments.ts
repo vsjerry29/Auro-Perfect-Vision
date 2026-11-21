@@ -5,7 +5,13 @@ import crypto from "crypto";
 import { getOfferingBySlug, getAllOfferings, getBookingByRef, getAllBookings, saveBooking } from "./cms";
 import { isMySQLConfigured } from "./mysql";
 import * as db from "./mysql-db";
-import { sendEmail, renderPaymentConfirmedEmail } from "./email";
+import {
+  sendEmail,
+  renderPaymentConfirmedEmail,
+  renderAdminPaymentConfirmedAlertEmail,
+  getAdminNotificationEmail,
+  getEmailReplyTo,
+} from "./email";
 import type { Booking, PaymentTransaction, InvoiceRecord } from "@/lib/types";
 
 // In-memory fallback stores for non-MySQL environments
@@ -244,27 +250,62 @@ export async function finalizePayment(params: {
     saveBooking(updatedBooking);
   }
 
-  // 7. Dispatch Branded Receipt Email via Resend
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com";
+
+  // 7. Dispatch Branded Receipt Email to Client via Resend
   if (updatedBooking.clientEmail) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com";
-    const emailTpl = renderPaymentConfirmedEmail({
-      clientName: updatedBooking.clientName,
+    try {
+      const emailTpl = renderPaymentConfirmedEmail({
+        clientName: updatedBooking.clientName,
+        bookingReference: updatedBooking.bookingReference,
+        invoiceNumber,
+        amount: finalAmount,
+        currency: finalCurrency,
+        paymentGateway: gateway.toUpperCase(),
+        invoiceUrl: `${appUrl}/api/invoices/${invoiceNumber}`,
+      });
+
+      await sendEmail({
+        to: updatedBooking.clientEmail,
+        subject: `Payment Confirmation & Invoice [${invoiceNumber}] — Auro Perfect Vision`,
+        html: emailTpl.html,
+        text: emailTpl.text,
+        replyTo: getEmailReplyTo(),
+        templateKey: "payment_invoice",
+        bookingId: updatedBooking.id,
+      });
+    } catch (err: any) {
+      console.warn("[Payment Confirmation Client Email Error]:", err.message);
+    }
+  }
+
+  // 8. Dispatch Admin Payment Alert to official Gmail (auroperfectvision@gmail.com)
+  try {
+    const adminAlertTpl = renderAdminPaymentConfirmedAlertEmail({
       bookingReference: updatedBooking.bookingReference,
       invoiceNumber,
-      amount: finalAmount,
+      clientName: updatedBooking.clientName,
+      clientEmail: updatedBooking.clientEmail || "Not provided",
+      offeringTitle: updatedBooking.offeringTitle,
+      therapistName: updatedBooking.therapistName,
+      totalAmount: finalAmount,
       currency: finalCurrency,
       paymentGateway: gateway.toUpperCase(),
-      invoiceUrl: `${appUrl}/api/invoices/${invoiceNumber}`,
+      paymentId: paymentRecord.gatewayPaymentId || paymentRecord.id,
+      dashboardUrl: `${appUrl}/admin/bookings`,
     });
 
-    sendEmail({
-      to: updatedBooking.clientEmail,
-      subject: `Payment Confirmation & Invoice [${invoiceNumber}] — Auro Perfect Vision`,
-      html: emailTpl.html,
-      text: emailTpl.text,
-      templateKey: "payment_invoice",
+    await sendEmail({
+      to: getAdminNotificationEmail(),
+      subject: `Payment Confirmed — ${updatedBooking.bookingReference} | Auro Perfect Vision`,
+      html: adminAlertTpl.html,
+      text: adminAlertTpl.text,
+      replyTo: updatedBooking.clientEmail || getEmailReplyTo(),
+      templateKey: "admin_payment_confirmed_alert",
       bookingId: updatedBooking.id,
-    }).catch((err) => console.warn("[Payment Confirmation Email Error]:", err.message));
+    });
+  } catch (adminErr: any) {
+    console.warn("[Admin Payment Confirmed Alert Email Error]:", adminErr.message);
   }
 
   return {

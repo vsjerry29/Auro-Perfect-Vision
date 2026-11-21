@@ -15,7 +15,7 @@ export default function ContactPage() {
 
   const phonePrimary = siteContent.phone || "+91 8012305151";
   const phoneSecondary = "+91 9488005685";
-  const email = siteContent.email || "connect@auroperfectvision.com";
+  const email = siteContent.email || "auroperfectvision@gmail.com";
   const address = siteContent.address || "Auroville, Tamil Nadu 605101, India";
   const hours = siteContent.openingHours || "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)";
   const whatsappUrl = siteContent.whatsappLink || "https://wa.me/918012305151";
@@ -26,7 +26,7 @@ export default function ContactPage() {
     "@type": "MedicalBusiness",
     name: "Auro Perfect Vision",
     description: "Holistic eye care, Bates method, conscious eye relaxation, and photobiomodulation centre in Auroville.",
-    url: "https://auro-perfect-vision.vercel.app/contact",
+    url: "https://auroperfectvision.com/contact",
     telephone: phonePrimary,
     email: email,
     address: {

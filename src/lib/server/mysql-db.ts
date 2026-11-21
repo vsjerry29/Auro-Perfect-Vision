@@ -39,6 +39,15 @@ import {
   TreatmentPlan,
   ClinicalAuditEvent,
 } from "@/lib/types/emr";
+import {
+  sendEmail,
+  isEmailConfigured,
+  renderBookingConfirmationEmail,
+  renderBookingReminderEmail,
+  renderAdminNewBookingAlertEmail,
+  getAdminNotificationEmail,
+  getEmailReplyTo,
+} from "./email";
 
 // Safe JSON parser helper
 function safeJsonParse<T>(val: any, fallback: T): T {
@@ -1595,12 +1604,100 @@ export async function dbProcessPendingNotificationJobs(): Promise<{
 
   for (const job of jobs) {
     try {
-      // In production, integration with Resend / WhatsApp API occurs here
-      await execute(
-        "UPDATE notification_jobs SET status = 'sent', sent_at = NOW(), attempts = attempts + 1 WHERE id = ?",
-        [job.id]
-      );
-      sent++;
+      if (job.channel === "email") {
+        if (!isEmailConfigured()) {
+          throw new Error("Email provider is not configured (RESEND_API_KEY and EMAIL_FROM required)");
+        }
+
+        let booking: Booking | null = null;
+        if (job.booking_id) {
+          booking = await dbGetBookingByRef(job.booking_id);
+          if (!booking) {
+            const all = await dbGetAllBookings();
+            booking = all.find((b) => b.id === job.booking_id) || null;
+          }
+        }
+
+        let subject = `Notification: Auro Perfect Vision`;
+        let html = `<p>Notification from Auro Perfect Vision</p>`;
+        let text = `Notification from Auro Perfect Vision`;
+
+        if (job.template_key === "booking_confirmation" && booking) {
+          const tpl = renderBookingConfirmationEmail({
+            clientName: booking.clientName,
+            bookingReference: booking.bookingReference,
+            offeringTitle: booking.offeringTitle,
+            therapistName: booking.therapistName,
+            bookingDate: booking.date,
+            timeSlot: booking.timeSlot,
+            paymentMethod: booking.paymentMethod || "offline",
+            paymentStatus: booking.paymentStatus || "pending",
+            totalAmount: booking.totalAmount || 0,
+            currency: booking.currency || "INR",
+          });
+          subject =
+            booking.paymentStatus === "captured" || booking.paymentStatus === "offline_confirmed"
+              ? `Appointment Confirmation [${booking.bookingReference}] — Auro Perfect Vision`
+              : `Booking Received — Payment Pending [${booking.bookingReference}] — Auro Perfect Vision`;
+          html = tpl.html;
+          text = tpl.text;
+        } else if (job.template_key === "booking_reminder" && booking) {
+          const tpl = renderBookingReminderEmail({
+            clientName: booking.clientName,
+            bookingReference: booking.bookingReference,
+            offeringTitle: booking.offeringTitle,
+            therapistName: booking.therapistName,
+            bookingDate: booking.date,
+            timeSlot: booking.timeSlot,
+          });
+          subject = `Reminder: Your Vision Session Tomorrow [${booking.bookingReference}] — Auro Perfect Vision`;
+          html = tpl.html;
+          text = tpl.text;
+        } else if (job.template_key === "admin_new_booking_alert" && booking) {
+          const tpl = renderAdminNewBookingAlertEmail({
+            bookingReference: booking.bookingReference,
+            clientName: booking.clientName,
+            clientEmail: booking.clientEmail || "Not provided",
+            clientPhone: booking.clientPhone || "Not provided",
+            offeringTitle: booking.offeringTitle,
+            therapistName: booking.therapistName,
+            bookingDate: booking.date,
+            timeSlot: booking.timeSlot,
+            participants: booking.seatsBooked || 1,
+            totalAmount: booking.totalAmount || 0,
+            currency: booking.currency || "INR",
+            paymentMethod: booking.paymentMethod || "offline",
+            paymentStatus: booking.paymentStatus || "pending",
+            bookingStatus: booking.status || "confirmed",
+            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/admin/bookings`,
+          });
+          subject = `New Booking Received — ${booking.bookingReference} | Auro Perfect Vision`;
+          html = tpl.html;
+          text = tpl.text;
+        }
+
+        const dispatchResult = await sendEmail({
+          to: job.recipient,
+          subject,
+          html,
+          text,
+          templateKey: job.template_key,
+          bookingId: job.booking_id,
+          skipJobLogging: true,
+        });
+
+        if (!dispatchResult.success) {
+          throw new Error(dispatchResult.error || "Email provider dispatch failed");
+        }
+
+        await execute(
+          "UPDATE notification_jobs SET status = 'sent', sent_at = NOW(), attempts = attempts + 1, error_message = NULL WHERE id = ?",
+          [job.id]
+        );
+        sent++;
+      } else {
+        throw new Error(`Channel "${job.channel}" is not supported or requires external provider configuration`);
+      }
     } catch (err: any) {
       await execute(
         "UPDATE notification_jobs SET status = 'failed', error_message = ?, attempts = attempts + 1 WHERE id = ?",

@@ -29,7 +29,7 @@ export function VisitCentre({ siteContent }: VisitCentreProps) {
   const phone = siteContent?.phone || "+91 80123 05151";
   const phoneSecondary = siteContent?.contactPhoneSecondary || "+91 94880 05685";
   const wa = siteContent?.contactWhatsApp || "+91 8012305151";
-  const email = siteContent?.email || "connect@auroperfectvision.com";
+  const email = siteContent?.email || "auroperfectvision@gmail.com";
   const hours = siteContent?.openingHours || "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)";
 
   const cleanWa = wa.replace(/[^0-9]/g, "");

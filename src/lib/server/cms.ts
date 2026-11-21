@@ -129,10 +129,10 @@ const DEFAULT_SITE_CONTENT: SiteContent = {
   aboutHeading: "Nurturing sight as a conscious, living sense.",
   aboutSummary:
     "Auro Perfect Vision was established in Auroville with a simple yet profound conviction: the eyes are dynamic organs capable of relaxation, flexibility, and sustained comfort when given mindful care.",
-  phone: "+91 98765 43210",
-  email: "connect@auroperfectvision.com",
-  address: "Auroville, Tamil Nadu 605101, India",
-  whatsappLink: "https://wa.me/919876543210",
+  phone: "+91 80123 05151",
+  email: "auroperfectvision@gmail.com",
+  address: "Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India",
+  whatsappLink: "https://wa.me/918012305151",
   openingHours: "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)",
   updatedAt: new Date().toISOString(),
 };

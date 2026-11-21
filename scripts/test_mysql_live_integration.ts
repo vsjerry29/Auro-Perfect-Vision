@@ -319,7 +319,7 @@ async function runLiveIntegrationTest() {
     emergencyNotice: "",
     announcementBanner: "Now welcoming participants to our residential retreat.",
     phone: "+91 80123 05151",
-    email: "connect@auroperfectvision.com",
+    email: "auroperfectvision@gmail.com",
     address: "Auroville, Tamil Nadu 605101, India",
     whatsappLink: "https://wa.me/918012305151",
     openingHours: "Mon-Sat: 9:00 AM - 5:30 PM IST",
