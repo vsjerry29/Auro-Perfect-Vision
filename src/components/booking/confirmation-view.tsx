@@ -165,7 +165,7 @@ export function ConfirmationView({ booking }: ConfirmationViewProps) {
               [WhatsApp to {booking.clientPhone}]:
             </p>
             <p className="leading-relaxed">
-              "Namaste {booking.clientName}, your session for *{booking.offeringTitle}* with *{booking.therapistName}* on {booking.date} at {booking.timeSlot} is {booking.status}. Ref: {booking.bookingReference}. We look forward to welcoming you in Auroville."
+              "Hey {booking.clientName}, your session for *{booking.offeringTitle}* with *{booking.therapistName}* on {booking.date} at {booking.timeSlot} is {booking.status}. Ref: {booking.bookingReference}. We look forward to welcoming you in Auroville."
             </p>
           </div>
         </div>

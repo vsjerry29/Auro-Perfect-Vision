@@ -116,7 +116,7 @@ export default function AdminNotificationsPage() {
       channel: "WhatsApp",
       event: "Booking Confirmed (Client)",
       target: "Guest Phone",
-      body: "Namaste {{client_name}}, your session for *{{offering_title}}* with *{{therapist_name}}* on {{date}} at {{time_slot}} is confirmed. Ref: {{booking_ref}}. Centre Address: Auroville, Tamil Nadu 605101.",
+      body: "Hey {{client_name}}, your session for *{{offering_title}}* with *{{therapist_name}}* on {{date}} at {{time_slot}} is confirmed. Ref: {{booking_ref}}. Centre Address: Auroville, Tamil Nadu 605101.",
       status: "Configured (Awaiting Meta WABA Production Phone ID)",
     },
     {
@@ -124,7 +124,7 @@ export default function AdminNotificationsPage() {
       channel: "WhatsApp",
       event: "New Session Notification (Therapist)",
       target: "Therapist Phone",
-      body: "Namaste {{therapist_name}}, new appointment booked: {{client_name}} has scheduled {{offering_title}} on {{date}} at {{time_slot}}. View intake notes in your Therapist Portal.",
+      body: "Hey {{therapist_name}}, new appointment booked: {{client_name}} has scheduled {{offering_title}} on {{date}} at {{time_slot}}. View intake notes in your Therapist Portal.",
       status: "Configured (Awaiting Meta WABA Production Phone ID)",
     },
   ];

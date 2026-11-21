@@ -335,7 +335,7 @@ export function renderBookingConfirmationEmail(data: {
     : `Your appointment reservation at <strong>Auro Perfect Vision</strong> has been received. Your slot is held pending offline payment confirmation.`;
 
   const htmlContent = `
-    <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Namaste, ${escapeHtml(data.clientName)}</h2>
+    <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Hey, ${escapeHtml(data.clientName)}</h2>
     <p>${statusMessage}</p>
     
     <div class="meta-card">
@@ -393,7 +393,7 @@ export function renderBookingConfirmationEmail(data: {
     </p>
   `;
 
-  const textContent = `Namaste, ${data.clientName}
+  const textContent = `Hey, ${data.clientName}
 
 ${isPaid ? "Your appointment reservation at Auro Perfect Vision is confirmed." : "Your booking request has been received. Your slot is held pending offline payment confirmation."}
 
@@ -468,7 +468,7 @@ export function renderBookingReminderEmail(data: {
 }): { html: string; text: string } {
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Upcoming Session Reminder</h2>
-    <p>Namaste ${escapeHtml(data.clientName)},</p>
+    <p>Hey ${escapeHtml(data.clientName)},</p>
     <p>This is a gentle reminder of your upcoming vision wellness appointment tomorrow at <strong>Auro Perfect Vision</strong>.</p>
 
     <div class="meta-card">
@@ -495,7 +495,7 @@ export function renderBookingReminderEmail(data: {
     </p>
   `;
 
-  const textContent = `Namaste ${data.clientName},
+  const textContent = `Hey ${data.clientName},
 
 Reminder: Your session for ${data.offeringTitle} with ${data.therapistName} is scheduled on ${data.bookingDate} at ${data.timeSlot} IST.
 Booking Ref: ${data.bookingReference}
