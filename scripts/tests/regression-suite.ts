@@ -42,6 +42,8 @@ const {
   renderAdminNewBookingAlertEmail,
   renderAdminPaymentConfirmedAlertEmail,
   renderAdminBookingCancelledAlertEmail,
+  renderBookingApprovedEmail,
+  renderBookingRejectedEmail,
   renderTestEmail,
 } = require("../../src/lib/server/email");
 
@@ -296,6 +298,45 @@ async function runRegressionSuite() {
     assert(offlineTpl.text.includes("auroperfectvision@gmail.com"));
   });
 
+  await test("Booking Approved email template reflects confirmed status and pending counter payment", () => {
+    const approvedTpl = renderBookingApprovedEmail({
+      clientName: "Deepa Menon",
+      bookingReference: "APV-2026-APP01",
+      offeringTitle: "Eye Yoga for Children & Adults",
+      therapistName: "Dr. Ananya Sen",
+      bookingDate: "2026-12-05",
+      timeSlot: "10:00 AM - 11:00 AM",
+      totalAmount: 2000,
+      currency: "INR",
+      paymentStatus: "pending",
+      trackingUrl: "https://auroperfectvision.com/booking/APV-2026-APP01",
+    });
+
+    assert(approvedTpl.html.includes("Your Appointment is Confirmed!"));
+    assert(approvedTpl.html.includes("APV-2026-APP01"));
+    assert(approvedTpl.html.includes("Pending (Payable at Centre)"));
+    assert(approvedTpl.html.includes("https://auroperfectvision.com/booking/APV-2026-APP01"));
+    assert(approvedTpl.text.includes("Appointment Confirmed"));
+  });
+
+  await test("Booking Rejected email template renders reason and reschedule link", () => {
+    const rejectedTpl = renderBookingRejectedEmail({
+      clientName: "Anil Kumar",
+      bookingReference: "APV-2026-REJ01",
+      offeringTitle: "Comprehensive Vision Assessment",
+      bookingDate: "2026-12-06",
+      timeSlot: "11:00 AM - 12:00 PM",
+      reason: "Emergency schedule adjustment",
+      rescheduleUrl: "https://auroperfectvision.com/therapies",
+    });
+
+    assert(rejectedTpl.html.includes("Booking Request Update"));
+    assert(rejectedTpl.html.includes("APV-2026-REJ01"));
+    assert(rejectedTpl.html.includes("Emergency schedule adjustment"));
+    assert(rejectedTpl.html.includes("https://auroperfectvision.com/therapies"));
+    assert(rejectedTpl.text.includes("Emergency schedule adjustment"));
+  });
+
   // ───────────────────────────────────────────────────────────────────────────
   console.log("\nSECTION 2: SECURE STAFF INVITATION & ACTIVATION WORKFLOW");
   // ───────────────────────────────────────────────────────────────────────────
@@ -527,11 +568,102 @@ async function runRegressionSuite() {
     });
 
     assert(result.success);
-    assert.strictEqual(result.booking.status, "confirmed");
+    assert.strictEqual(
+      result.booking.status,
+      "pending",
+      "Payment confirmation must preserve booking status and NOT automatically approve booking"
+    );
     assert.strictEqual(result.booking.paymentStatus, "offline_confirmed");
     assert(result.booking.invoiceIssued);
     assert(result.booking.invoiceNumber?.startsWith("APV-2026-"));
     assert.strictEqual(result.invoice.status, "paid");
+  });
+
+  await test("Separation of booking approval from payment confirmation", async () => {
+    const { approveBooking, rejectBooking } = require("../../src/lib/server/cms");
+    const testBooking = saveBooking({
+      id: `book-sep-test-${Date.now()}`,
+      bookingReference: `APV-SEP-${Date.now()}`,
+      offeringId: "eye-yoga",
+      offeringTitle: "Eye Yoga for Children & Adults",
+      therapistId: "therapist-1",
+      therapistName: "Dr. Ananya Sen",
+      date: "2026-12-05",
+      timeSlot: "10:00 AM - 11:00 AM",
+      clientTimezone: "Asia/Kolkata",
+      clientName: "Deepa Menon",
+      clientEmail: "deepa.m@example.com",
+      clientPhone: "+91 98888 77777",
+      seatsBooked: 1,
+      currency: "INR",
+      totalAmount: 2000,
+      status: "pending_approval",
+      paymentMethod: "offline_cash",
+      paymentStatus: "pending",
+      intakeAnswers: {},
+      invoiceIssued: false,
+      createdAt: new Date().toISOString(),
+    });
+
+    // 1. Confirm Booking (Approve appointment without altering payment)
+    const approved = approveBooking(testBooking.id, "Admin Staff");
+    assert(approved, "Booking must be found and approved");
+    assert.strictEqual(approved.status, "confirmed", "Booking status must be confirmed");
+    assert.strictEqual(approved.paymentStatus, "pending", "Payment status must remain pending");
+    assert.strictEqual(approved.invoiceIssued, false, "Invoice must not be issued on booking approval alone");
+
+    // 2. Confirm Payment (Captures payment without altering booking approval status)
+    const payResult = await finalizePayment({
+      bookingIdOrRef: testBooking.id,
+      gateway: "offline",
+      confirmedByStaffName: "Front Desk Staff",
+    });
+    assert(payResult.success);
+    assert.strictEqual(payResult.booking.status, "confirmed", "Booking status must remain confirmed");
+    assert.strictEqual(payResult.booking.paymentStatus, "offline_confirmed", "Payment status must be offline_confirmed");
+    assert.strictEqual(payResult.booking.invoiceIssued, true, "Invoice must be issued on payment verification");
+
+    // 3. Idempotency test (calling finalizePayment twice returns same invoice without duplicating)
+    const secondPayResult = await finalizePayment({
+      bookingIdOrRef: testBooking.id,
+      gateway: "offline",
+      confirmedByStaffName: "Front Desk Staff",
+    });
+    assert(secondPayResult.success);
+    assert.strictEqual(
+      secondPayResult.invoice.invoiceNumber,
+      payResult.invoice.invoiceNumber,
+      "Invoice number must be identical on repeated calls (idempotent)"
+    );
+
+    // 4. Reject Booking releases slot and cancels booking
+    const rejectTestBooking = saveBooking({
+      id: `book-rej-test-${Date.now()}`,
+      bookingReference: `APV-REJ-${Date.now()}`,
+      offeringId: "eye-yoga",
+      offeringTitle: "Eye Yoga",
+      therapistId: "therapist-1",
+      therapistName: "Dr. Ananya Sen",
+      date: "2026-12-06",
+      timeSlot: "11:00 AM - 12:00 PM",
+      clientTimezone: "Asia/Kolkata",
+      clientName: "Anil Kumar",
+      clientEmail: "anil.k@example.com",
+      clientPhone: "+91 97777 66666",
+      seatsBooked: 1,
+      currency: "INR",
+      totalAmount: 2000,
+      status: "pending_approval",
+      paymentMethod: "offline_cash",
+      paymentStatus: "pending",
+      intakeAnswers: {},
+      invoiceIssued: false,
+      createdAt: new Date().toISOString(),
+    });
+
+    const rejected = rejectBooking(rejectTestBooking.id, "Practitioner on emergency leave", "Admin Staff");
+    assert(rejected, "Booking must be rejected");
+    assert.strictEqual(rejected.status, "cancelled", "Rejected booking status must be cancelled");
   });
 
   // ───────────────────────────────────────────────────────────────────────────

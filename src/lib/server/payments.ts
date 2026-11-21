@@ -189,6 +189,62 @@ export async function finalizePayment(params: {
   const finalAmount = amount !== undefined ? amount : booking.totalAmount;
   const finalCurrency = "INR";
 
+  // Prevent duplicate payments and invoices (Idempotent check)
+  const isAlreadyPaid =
+    booking.paymentStatus === "captured" ||
+    booking.paymentStatus === "offline_confirmed" ||
+    (booking.paymentStatus as string) === "paid";
+
+  if (isAlreadyPaid && booking.invoiceIssued && booking.invoiceNumber) {
+    let foundPayment: PaymentTransaction | null = null;
+    let foundInvoice: InvoiceRecord | null = null;
+
+    if (isMySQLConfigured()) {
+      try {
+        foundPayment = await db.dbGetPaymentByBookingId(booking.id);
+        foundInvoice = await db.dbGetInvoiceByBookingId(booking.id);
+      } catch {}
+    }
+
+    if (!foundPayment) {
+      foundPayment = Array.from(paymentsStore.values()).find((p) => p.bookingId === booking.id) || null;
+    }
+    if (!foundInvoice) {
+      foundInvoice = Array.from(invoicesStore.values()).find((i) => i.bookingId === booking.id) || null;
+    }
+
+    const existingPayment: PaymentTransaction = foundPayment || {
+      id: `pay-${booking.id}`,
+      bookingId: booking.id,
+      gateway,
+      gatewayPaymentId: gatewayPaymentId || `pay-${booking.id}`,
+      amount: finalAmount,
+      currency: finalCurrency,
+      status: "captured",
+      rawResponse: rawResponse || {},
+      createdAt: booking.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const existingInvoice: InvoiceRecord = foundInvoice || {
+      id: `inv-${booking.id}`,
+      bookingId: booking.id,
+      invoiceNumber: booking.invoiceNumber,
+      totalAmount: finalAmount,
+      currency: finalCurrency,
+      status: "paid",
+      issuedAt: booking.offlineConfirmedAt || booking.createdAt,
+      createdAt: booking.createdAt,
+    };
+
+    return {
+      success: true,
+      booking,
+      invoice: existingInvoice,
+      payment: existingPayment,
+    };
+  }
+
   // 2. Generate Sequential Tax Invoice Number
   const timestamp = Date.now();
   const seqSuffix = String(timestamp).slice(-4);
@@ -222,16 +278,21 @@ export async function finalizePayment(params: {
   };
 
   // 5. Update Booking
+  // CRITICAL REQUIREMENT: Confirming payment must NEVER automatically approve an appointment.
+  // Preserve the existing booking approval status (e.g. pending_approval remains pending_approval).
   const updatedBooking: Booking = {
     ...booking,
-    status: "confirmed",
+    status:
+      booking.status === "awaiting_online_payment" && gateway !== "offline"
+        ? "confirmed"
+        : booking.status,
     paymentStatus: gateway === "offline" ? "offline_confirmed" : "captured",
     paymentMethod:
       gateway === "razorpay"
         ? "online_razorpay"
         : gateway === "paypal"
         ? "online_paypal"
-        : "offline_cash",
+        : booking.paymentMethod || "offline_cash",
     invoiceIssued: true,
     invoiceNumber,
     offlineConfirmedByStaff: confirmedByStaffName || booking.offlineConfirmedByStaff,
@@ -244,6 +305,7 @@ export async function finalizePayment(params: {
     await db.dbSavePayment(paymentRecord);
     await db.dbSaveInvoice(invoiceRecord);
     await db.dbSaveBooking(updatedBooking);
+    saveBooking(updatedBooking);
   } else {
     paymentsStore.set(paymentRecord.id, paymentRecord);
     invoicesStore.set(invoiceRecord.id, invoiceRecord);

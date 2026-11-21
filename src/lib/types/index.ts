@@ -97,6 +97,7 @@ export interface IntakeTemplate {
 export type BookingStatus =
   | 'draft'
   | 'awaiting_online_payment'
+  | 'pending_approval'
   | 'pending_offline_confirmation'
   | 'confirmed'
   | 'cancelled'
@@ -112,8 +113,10 @@ export type PaymentMethod =
 export type PaymentStatus =
   | 'not_started'
   | 'pending'
+  | 'paid'
   | 'captured'
   | 'failed'
+  | 'refunded'
   | 'offline_confirmed';
 
 export interface Booking {

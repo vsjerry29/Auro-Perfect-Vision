@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   saveBooking,
   getAllBookings,
+  getBookingByRef,
   getTherapistById,
   getLeaveExceptions,
 } from "@/lib/server/cms";
@@ -19,6 +20,51 @@ import {
 import { calculateOfferingPrice } from "@/lib/server/payments";
 import { Booking } from "@/lib/types";
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const reference = searchParams.get("reference") || searchParams.get("ref");
+    const id = searchParams.get("id");
+
+    if (!reference && !id) {
+      return NextResponse.json(
+        { error: "Booking reference or ID is required" },
+        { status: 400 }
+      );
+    }
+
+    let booking: Booking | null | undefined = null;
+
+    if (isMySQLConfigured()) {
+      if (reference) {
+        booking = await db.dbGetBookingByRef(reference);
+      } else if (id) {
+        const all = await db.dbGetAllBookings();
+        booking = all.find((b) => b.id === id);
+      }
+    } else {
+      if (reference) {
+        booking = getBookingByRef(reference);
+      } else if (id) {
+        const all = getAllBookings();
+        booking = all.find((b) => b.id === id);
+      }
+    }
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ booking });
+  } catch (err: any) {
+    console.error("[Public Booking Query Error]:", err);
+    return NextResponse.json(
+      { error: "Failed to retrieve booking" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const booking = (await request.json()) as Booking;
@@ -31,6 +77,23 @@ export async function POST(request: Request) {
         { error: "Date, time slot, and practitioner selection are required." },
         { status: 400 }
       );
+    }
+
+    // Explicitly separate booking status from payment status
+    const isOffline =
+      booking.paymentMethod === "offline_cash" ||
+      booking.paymentMethod === "offline_bank_transfer" ||
+      (booking.paymentMethod as string) === "offline" ||
+      (booking.paymentMethod as string) === "counter";
+
+    if (isOffline) {
+      booking.status = "pending_approval";
+      booking.paymentStatus = "pending";
+      booking.invoiceIssued = false;
+      booking.invoiceNumber = undefined;
+    } else if (booking.paymentStatus === "captured") {
+      booking.status = "confirmed";
+      booking.invoiceIssued = true;
     }
 
     // Standardize to INR exclusively and authoritatively recalculate total amount
@@ -159,6 +222,7 @@ export async function POST(request: Request) {
           timeSlot: saved.timeSlot,
           paymentMethod: saved.paymentMethod || "offline",
           paymentStatus: saved.paymentStatus || "pending",
+          bookingStatus: saved.status,
           totalAmount: saved.totalAmount || 0,
           currency: saved.currency || "INR",
           invoiceUrl: saved.invoiceNumber
@@ -166,10 +230,14 @@ export async function POST(request: Request) {
             : undefined,
         });
 
-        const customerSubject =
-          saved.paymentStatus === "captured" || saved.paymentStatus === "offline_confirmed"
-            ? `Appointment Confirmation [${saved.bookingReference}] — Auro Perfect Vision`
-            : `Booking Received — Payment Pending [${saved.bookingReference}] — Auro Perfect Vision`;
+        const isPaid =
+          saved.paymentStatus === "captured" ||
+          saved.paymentStatus === "offline_confirmed" ||
+          saved.paymentStatus === "paid";
+
+        const customerSubject = isPaid
+          ? `Appointment Confirmation [${saved.bookingReference}] — Auro Perfect Vision`
+          : `Booking Request Received [${saved.bookingReference}] — Auro Perfect Vision`;
 
         await sendEmail({
           to: saved.clientEmail,

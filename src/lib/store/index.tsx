@@ -65,6 +65,7 @@ interface DemoStoreContextType {
     paymentMethod: PaymentMethod;
     intakeAnswers: Record<string, any>;
   }) => Booking;
+  approveBooking: (bookingId: string) => void;
   markOfflineBookingPaid: (bookingId: string) => void;
   cancelBooking: (bookingId: string) => void;
 
@@ -323,7 +324,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
       seatsBooked: bookingData.seatsBooked,
       currency: "INR",
       totalAmount,
-      status: isOnlinePayment ? "confirmed" : "pending_offline_confirmation",
+      status: isOnlinePayment ? "confirmed" : "pending_approval",
       paymentMethod: bookingData.paymentMethod,
       paymentStatus: isOnlinePayment ? "captured" : "pending",
       intakeAnswers: bookingData.intakeAnswers,
@@ -344,6 +345,12 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     return newBooking;
   };
 
+  const approveBooking = (bookingId: string) => {
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: "confirmed" as BookingStatus } : b))
+    );
+  };
+
   const markOfflineBookingPaid = (bookingId: string) => {
     setBookings((prev) =>
       prev.map((b) => {
@@ -351,7 +358,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
           const invNum = b.invoiceNumber || generateInvoiceNumber(prev.length + 1);
           return {
             ...b,
-            status: "confirmed" as BookingStatus,
+            status: b.status, // Preserve existing booking approval status
             paymentStatus: "offline_confirmed",
             offlineConfirmedByStaff: "Admin (Front Desk)",
             offlineConfirmedAt: new Date().toISOString(),
@@ -417,6 +424,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
         getIntakeTemplateForOffering,
         saveIntakeFields,
         createBooking,
+        approveBooking,
         markOfflineBookingPaid,
         cancelBooking,
         saveBlogPost,

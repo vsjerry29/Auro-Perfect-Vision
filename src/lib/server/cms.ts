@@ -592,6 +592,38 @@ export function saveBooking(booking: Booking): Booking {
   return booking;
 }
 
+export function approveBooking(bookingId: string, _staffName?: string): Booking | null {
+  const bookings = getAllBookings();
+  const idx = bookings.findIndex((b) => b.id === bookingId);
+  if (idx < 0) return null;
+
+  const target = bookings[idx];
+  const updated: Booking = {
+    ...target,
+    status: "confirmed",
+  };
+
+  bookings[idx] = updated;
+  writeJsonFile("bookings.json", bookings);
+  return updated;
+}
+
+export function rejectBooking(bookingId: string, _reason?: string, _staffName?: string): Booking | null {
+  const bookings = getAllBookings();
+  const idx = bookings.findIndex((b) => b.id === bookingId);
+  if (idx < 0) return null;
+
+  const target = bookings[idx];
+  const updated: Booking = {
+    ...target,
+    status: "cancelled",
+  };
+
+  bookings[idx] = updated;
+  writeJsonFile("bookings.json", bookings);
+  return updated;
+}
+
 export function markBookingPaid(bookingId: string, confirmedByStaffName: string): Booking | null {
   const bookings = getAllBookings();
   const idx = bookings.findIndex((b) => b.id === bookingId);
@@ -601,9 +633,10 @@ export function markBookingPaid(bookingId: string, confirmedByStaffName: string)
   const seqNumber = (bookings.length + 1).toString().padStart(4, "0");
   const invoiceNumber = target.invoiceNumber || `APV-2026-${seqNumber}`;
 
+  // Preserve existing booking status (e.g. pending_approval remains pending_approval)
   const updated: Booking = {
     ...target,
-    status: "confirmed",
+    status: target.status,
     paymentStatus: "offline_confirmed",
     offlineConfirmedByStaff: confirmedByStaffName,
     offlineConfirmedAt: new Date().toISOString(),

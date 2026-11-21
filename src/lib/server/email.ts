@@ -312,11 +312,13 @@ export function renderBookingConfirmationEmail(data: {
   timeSlot: string;
   paymentMethod: string;
   paymentStatus: string;
+  bookingStatus?: string;
   totalAmount: number;
   currency: string;
   invoiceUrl?: string;
 }): { html: string; text: string } {
-  const isPaid = data.paymentStatus === "captured" || data.paymentStatus === "offline_confirmed";
+  const isPaid = data.paymentStatus === "captured" || data.paymentStatus === "offline_confirmed" || data.paymentStatus === "paid";
+  const isPendingApproval = data.bookingStatus === "pending_approval" || data.bookingStatus === "pending_offline_confirmation";
   const formattedFee =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
@@ -332,7 +334,7 @@ export function renderBookingConfirmationEmail(data: {
 
   const statusMessage = isPaid
     ? `Your appointment reservation at <strong>Auro Perfect Vision</strong> has been registered and confirmed.`
-    : `Your appointment reservation at <strong>Auro Perfect Vision</strong> has been received. Your slot is held pending offline payment confirmation.`;
+    : `Your booking request at <strong>Auro Perfect Vision</strong> has been received. Our team will review and confirm your appointment shortly.`;
 
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Hey, ${escapeHtml(data.clientName)}</h2>
@@ -1022,6 +1024,201 @@ Admin Dashboard: ${dashboardUrl}`;
 
   return {
     html: baseEmailWrapper(`Booking Cancelled — ${data.bookingReference} | Auro Perfect Vision`, htmlContent),
+    text: textContent,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. BOOKING APPROVAL & REJECTION NOTIFICATIONS (CLIENT FACING)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface BookingApprovedEmailData {
+  clientName: string;
+  bookingReference: string;
+  offeringTitle: string;
+  therapistName: string;
+  bookingDate: string;
+  timeSlot: string;
+  totalAmount: number;
+  currency?: string;
+  paymentStatus: string;
+  trackingUrl?: string;
+}
+
+/**
+ * Dispatched to client when an administrator confirms / approves their appointment reservation.
+ * CRITICAL: Never exposes sensitive clinical intake answers or questionnaires.
+ */
+export function renderBookingApprovedEmail(data: BookingApprovedEmailData): {
+  html: string;
+  text: string;
+} {
+  const isPaid =
+    data.paymentStatus === "captured" ||
+    data.paymentStatus === "offline_confirmed" ||
+    data.paymentStatus === "paid";
+  const formattedFee = `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`;
+  const trackingUrl =
+    data.trackingUrl ||
+    `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/booking/${data.bookingReference}`;
+
+  const htmlContent = `
+    <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Your Appointment is Confirmed!</h2>
+    <p>Dear ${escapeHtml(data.clientName)},</p>
+    <p>We are pleased to inform you that your appointment request at <strong>Auro Perfect Vision</strong> has been approved and confirmed by our clinical team.</p>
+
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Booking Reference</span>
+        <span class="meta-value" style="color: #3B1E4A; font-family: monospace; font-weight: bold;">${escapeHtml(data.bookingReference)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Therapy / Programme</span>
+        <span class="meta-value">${escapeHtml(data.offeringTitle)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Practitioner</span>
+        <span class="meta-value">${escapeHtml(data.therapistName)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Scheduled Date</span>
+        <span class="meta-value">${escapeHtml(data.bookingDate)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Time Slot</span>
+        <span class="meta-value">${escapeHtml(data.timeSlot)} IST</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Booking Status</span>
+        <span class="meta-value" style="color: #047857; font-weight: bold;">Confirmed</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Payment Status</span>
+        <span class="meta-value" style="color: ${isPaid ? "#047857" : "#B45309"}; font-weight: bold;">
+          ${isPaid ? "Paid &amp; Verified" : `${formattedFee} Pending (Payable at Centre)`}
+        </span>
+      </div>
+    </div>
+
+    ${
+      !isPaid
+        ? `<div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 12px; padding: 14px 18px; margin: 18px 0; font-size: 13px; color: #92400E;">
+            <strong>Payment Notice:</strong> Your appointment is confirmed! As you selected offline payment, the fee of <strong>${formattedFee}</strong> can be settled at our Auroville centre reception desk upon arrival via Cash, UPI, or Card.
+           </div>`
+        : ""
+    }
+
+    <div style="text-align: center; margin: 26px 0;">
+      <a href="${escapeHtml(trackingUrl)}" class="cta-button">View Live Booking Status</a>
+    </div>
+
+    <p style="font-size: 13px; color: #2C2621; line-height: 1.6;">
+      <strong>Centre Location:</strong> Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.<br>
+      Please arrive 10 minutes prior to your scheduled session. If you wear contact lenses, we recommend removing them before eye-relaxation therapies.
+    </p>
+  `;
+
+  const textContent = `Appointment Confirmed — Auro Perfect Vision
+========================================
+
+Dear ${data.clientName},
+
+Your appointment reservation at Auro Perfect Vision has been approved and confirmed by our clinical team.
+
+Booking Reference: ${data.bookingReference}
+Therapy: ${data.offeringTitle}
+Practitioner: ${data.therapistName}
+Date: ${data.bookingDate}
+Time: ${data.timeSlot} IST
+Booking Status: Confirmed
+Payment Status: ${isPaid ? "Paid & Verified" : `${formattedFee} Pending (Payable at Centre)`}
+
+${!isPaid ? `Payment of ${formattedFee} can be completed at our centre reception desk upon arrival.` : ""}
+
+View Live Booking: ${trackingUrl}
+
+Centre Location: Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.
+Contact: +91 80123 05151 • auroperfectvision@gmail.com`;
+
+  return {
+    html: baseEmailWrapper(`Appointment Confirmed [${data.bookingReference}] — Auro Perfect Vision`, htmlContent),
+    text: textContent,
+  };
+}
+
+export interface BookingRejectedEmailData {
+  clientName: string;
+  bookingReference: string;
+  offeringTitle: string;
+  bookingDate: string;
+  timeSlot?: string;
+  reason?: string;
+  rescheduleUrl?: string;
+}
+
+/**
+ * Dispatched to client when an appointment request cannot be accommodated.
+ */
+export function renderBookingRejectedEmail(data: BookingRejectedEmailData): {
+  html: string;
+  text: string;
+} {
+  const rescheduleUrl =
+    data.rescheduleUrl ||
+    `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/therapies`;
+
+  const htmlContent = `
+    <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Booking Request Update</h2>
+    <p>Dear ${escapeHtml(data.clientName)},</p>
+    <p>Thank you for your interest in <strong>Auro Perfect Vision</strong>. We regret to inform you that we are unable to accommodate your appointment request for <strong>${escapeHtml(data.offeringTitle)}</strong> on <strong>${escapeHtml(data.bookingDate)}</strong>${data.timeSlot ? ` at ${escapeHtml(data.timeSlot)}` : ""}.</p>
+
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Booking Reference</span>
+        <span class="meta-value" style="font-family: monospace;">${escapeHtml(data.bookingReference)}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Status</span>
+        <span class="meta-value" style="color: #991B1B; font-weight: bold;">Request Declined / Slot Released</span>
+      </div>
+      ${
+        data.reason
+          ? `<div class="meta-row">
+               <span class="meta-label">Reason / Notes</span>
+               <span class="meta-value" style="color: #991B1B;">${escapeHtml(data.reason)}</span>
+             </div>`
+          : ""
+      }
+    </div>
+
+    <p style="font-size: 13px; color: #2C2621;">
+      Your requested slot has been released. We warmly invite you to select an alternative date or explore other available practitioners on our schedule:
+    </p>
+
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${escapeHtml(rescheduleUrl)}" class="cta-button">Browse Available Dates &amp; Book</a>
+    </div>
+
+    <p style="font-size: 12px; color: #7B7268;">
+      If you need personal assistance with scheduling or have specific timing requirements, please feel free to reach out directly to our team at <a href="mailto:auroperfectvision@gmail.com" style="color: #3B1E4A;">auroperfectvision@gmail.com</a> or phone <strong>+91 80123 05151</strong>.
+    </p>
+  `;
+
+  const textContent = `Booking Request Update — Auro Perfect Vision
+========================================
+
+Dear ${data.clientName},
+
+We regret to inform you that we are unable to accommodate your appointment request for ${data.offeringTitle} on ${data.bookingDate}${data.timeSlot ? ` at ${data.timeSlot}` : ""} (Reference: ${data.bookingReference}).
+
+${data.reason ? `Reason: ${data.reason}\n` : ""}
+Your reserved slot has been released. You may choose an alternative time slot or explore other therapies here:
+${rescheduleUrl}
+
+For assistance, please contact us at auroperfectvision@gmail.com or +91 80123 05151.`;
+
+  return {
+    html: baseEmailWrapper(`Booking Request Update [${data.bookingReference}] — Auro Perfect Vision`, htmlContent),
     text: textContent,
   };
 }

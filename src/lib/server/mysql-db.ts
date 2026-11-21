@@ -786,6 +786,38 @@ export async function dbSaveBooking(b: Booking): Promise<Booking> {
   });
 }
 
+export async function dbApproveBooking(bookingId: string, _staffName?: string): Promise<Booking> {
+  await initMySQLSchema();
+  const all = await dbGetAllBookings();
+  const target = all.find((b) => b.id === bookingId || b.bookingReference.toLowerCase() === bookingId.toLowerCase());
+  if (!target) {
+    throw new Error(`Booking with ID or Reference ${bookingId} not found.`);
+  }
+
+  const updated: Booking = {
+    ...target,
+    status: "confirmed",
+  };
+
+  return await dbSaveBooking(updated);
+}
+
+export async function dbRejectBooking(bookingId: string, _reason?: string, _staffName?: string): Promise<Booking> {
+  await initMySQLSchema();
+  const all = await dbGetAllBookings();
+  const target = all.find((b) => b.id === bookingId || b.bookingReference.toLowerCase() === bookingId.toLowerCase());
+  if (!target) {
+    throw new Error(`Booking with ID or Reference ${bookingId} not found.`);
+  }
+
+  const updated: Booking = {
+    ...target,
+    status: "cancelled",
+  };
+
+  return await dbSaveBooking(updated);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. BLOG POSTS
 // ─────────────────────────────────────────────────────────────────────────────

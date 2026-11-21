@@ -38,14 +38,22 @@ export default function AdminOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const isPaid = (b: any) =>
+    b.paymentStatus === "captured" ||
+    b.paymentStatus === "offline_confirmed" ||
+    b.paymentStatus === "paid";
+
   const totalBookings = bookings.length;
   const confirmedBookings = bookings.filter((b) => b.status === "confirmed").length;
+  const pendingApproval = bookings.filter(
+    (b) => b.status === "pending_approval" || b.status === "pending_offline_confirmation"
+  ).length;
   const pendingOffline = bookings.filter(
-    (b) => b.status === "pending_offline_confirmation"
+    (b) => !isPaid(b) && b.status !== "cancelled"
   ).length;
 
   const totalRevenueINR = bookings
-    .filter((b) => b.status === "confirmed" && b.currency === "INR")
+    .filter((b) => isPaid(b) && b.currency === "INR")
     .reduce((sum, b) => sum + b.totalAmount, 0);
 
   const recentBookings = bookings.slice(0, 5);
@@ -196,7 +204,7 @@ export default function AdminOverviewPage() {
               {formatCurrency(totalRevenueINR, "INR")}
             </span>
             <span className="text-[11px] text-ink-muted block mt-1">
-              Confirmed Appointments (INR)
+              Captured &amp; Verified Payments (INR)
             </span>
           </div>
         </div>
