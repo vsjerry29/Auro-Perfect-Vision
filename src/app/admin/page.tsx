@@ -48,10 +48,6 @@ export default function AdminOverviewPage() {
     .filter((b) => b.status === "confirmed" && b.currency === "INR")
     .reduce((sum, b) => sum + b.totalAmount, 0);
 
-  const totalRevenueUSD = bookings
-    .filter((b) => b.status === "confirmed" && b.currency === "USD")
-    .reduce((sum, b) => sum + b.totalAmount, 0);
-
   const recentBookings = bookings.slice(0, 5);
 
   return (
@@ -147,6 +143,21 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
           <div className="flex items-center justify-between text-ink-muted mb-2">
+            <span className="text-xs uppercase tracking-wider font-medium">Total Bookings</span>
+            <CalendarCheck className="w-4 h-4 text-plum" />
+          </div>
+          <div>
+            <span className="font-serif text-3xl font-bold text-ink">
+              {totalBookings}
+            </span>
+            <span className="text-[11px] text-ink-muted block mt-1">
+              ({confirmedBookings} Confirmed Appointments)
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
+          <div className="flex items-center justify-between text-ink-muted mb-2">
             <span className="text-xs uppercase tracking-wider font-medium">Published Therapies</span>
             <Layers className="w-4 h-4 text-plum" />
           </div>
@@ -186,23 +197,6 @@ export default function AdminOverviewPage() {
             </span>
             <span className="text-[11px] text-ink-muted block mt-1">
               Confirmed Appointments (INR)
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
-          <div className="flex items-center justify-between text-ink-muted mb-2">
-            <span className="text-xs uppercase tracking-wider font-medium">
-              {totalRevenueUSD > 0 ? "Historical Ledger (USD)" : "Settlement Currency"}
-            </span>
-            <CreditCard className="w-4 h-4 text-emerald-700" />
-          </div>
-          <div>
-            <span className="font-serif text-3xl font-bold text-emerald-800">
-              {totalRevenueUSD > 0 ? `$${totalRevenueUSD} USD` : "₹ INR Only"}
-            </span>
-            <span className="text-[11px] text-ink-muted block mt-1">
-              {totalRevenueUSD > 0 ? "Archived Prior to INR Standardization" : "Exclusively Indian Rupees"}
             </span>
           </div>
         </div>

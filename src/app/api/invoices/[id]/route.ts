@@ -93,10 +93,10 @@ export async function GET(
   const isINR = booking.currency === "INR" || !booking.currency;
   const unitRateFormatted = isINR
     ? `₹${Math.round(booking.totalAmount / (booking.seatsBooked || 1)).toLocaleString("en-IN")}`
-    : `${booking.currency} ${(booking.totalAmount / (booking.seatsBooked || 1)).toFixed(2)}`;
+    : "—";
   const totalAmountFormatted = isINR
     ? `₹${Math.round(booking.totalAmount).toLocaleString("en-IN")}`
-    : `${booking.currency} ${booking.totalAmount.toFixed(2)}`;
+    : "—";
 
   const html = `<!DOCTYPE html>
 <html lang="en">

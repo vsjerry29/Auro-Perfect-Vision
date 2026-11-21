@@ -181,7 +181,7 @@ export async function finalizePayment(params: {
   }
 
   const finalAmount = amount !== undefined ? amount : booking.totalAmount;
-  const finalCurrency = currency || booking.currency || "INR";
+  const finalCurrency = "INR";
 
   // 2. Generate Sequential Tax Invoice Number
   const timestamp = Date.now();

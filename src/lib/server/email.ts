@@ -285,11 +285,11 @@ export function renderBookingConfirmationEmail(data: {
   const formattedFee =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
-      : `${escapeHtml(data.currency)} ${data.totalAmount.toFixed(2)}`;
+      : "—";
   const textFee =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
-      : `${data.currency} ${data.totalAmount.toFixed(2)}`;
+      : "—";
 
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Namaste, ${escapeHtml(data.clientName)}</h2>
@@ -479,11 +479,11 @@ export function renderPaymentConfirmedEmail(data: {
   const formattedAmount =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.amount).toLocaleString("en-IN")}`
-      : `${escapeHtml(data.currency)} ${data.amount.toFixed(2)}`;
+      : "—";
   const textAmount =
     data.currency === "INR" || !data.currency
       ? `₹${Math.round(data.amount).toLocaleString("en-IN")}`
-      : `${data.currency} ${data.amount.toFixed(2)}`;
+      : "—";
 
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Payment Confirmation &amp; Official Receipt</h2>

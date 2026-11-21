@@ -514,11 +514,6 @@ export default function Client360Page() {
               <div className="font-serif text-2xl font-medium text-plum">
                 ₹{(client.totalSpentINR || 0).toLocaleString("en-IN")}
               </div>
-              {(client.totalSpentUSD || 0) > 0 && (
-                <div className="text-xs font-mono text-ink-muted">
-                  ${client.totalSpentUSD} USD (Historical)
-                </div>
-              )}
               <div className="pt-2 text-[11px] text-ink-muted flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Consent Given: {client.consentGiven ? "Yes (GDPR/APV)" : "Pending"}</span>
@@ -916,26 +911,17 @@ export default function Client360Page() {
             <h3 className="font-serif text-base font-medium text-ink mb-3">Lifetime Invoices & Receipts</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
-                <span className="text-xs text-ink-muted block">Total Paid in INR</span>
+                <span className="text-xs text-ink-muted block">Total Settled (INR)</span>
                 <span className="font-serif text-2xl font-medium text-plum">
                   ₹{(client.totalSpentINR || 0).toLocaleString("en-IN")}
                 </span>
               </div>
-              {(client.totalSpentUSD || 0) > 0 ? (
-                <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
-                  <span className="text-xs text-ink-muted block">Historical Paid in USD</span>
-                  <span className="font-serif text-2xl font-medium text-gold-dark">
-                    ${client.totalSpentUSD} USD
-                  </span>
-                </div>
-              ) : (
-                <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
-                  <span className="text-xs text-ink-muted block">Settlement Currency</span>
-                  <span className="font-serif text-2xl font-medium text-gold-dark">
-                    ₹ INR Exclusively
-                  </span>
-                </div>
-              )}
+              <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
+                <span className="text-xs text-ink-muted block">Total Invoices</span>
+                <span className="font-serif text-2xl font-medium text-gold-dark">
+                  {bookings.length} Record(s)
+                </span>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -959,7 +945,9 @@ export default function Client360Page() {
                       <td className="py-2.5 px-3">{b.offeringTitle}</td>
                       <td className="py-2.5 px-3 text-ink-muted">{b.date}</td>
                       <td className="py-2.5 px-3 font-mono font-medium">
-                        ₹{b.totalAmount.toLocaleString("en-IN")}
+                        {b.currency === "INR" || !b.currency
+                          ? `₹${b.totalAmount.toLocaleString("en-IN")}`
+                          : "—"}
                       </td>
                       <td className="py-2.5 px-3 capitalize">
                         {b.paymentMethod.replace(/_/g, " ")}
