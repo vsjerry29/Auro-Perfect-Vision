@@ -70,28 +70,105 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [isHolding, setIsHolding] = useState(false);
+  const [isTabHidden, setIsTabHidden] = useState(false);
+  const [isOutOfView, setIsOutOfView] = useState(false);
 
   const carouselRef = useRef<HTMLDivElement>(null);
-  const progressStartTimeRef = useRef<number>(Date.now());
-  const animationFrameRef = useRef<number | null>(null);
+  const activeBarRef = useRef<HTMLDivElement | null>(null);
+
+  // Single reliable animation clock tracking refs
+  const startTimeRef = useRef<number | null>(null);
+  const pausedElapsedRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
+  const isExplicitlyPausedRef = useRef<boolean>(false);
+  const prefersReducedMotionRef = useRef<boolean>(false);
+
+  // Touch & gesture tracking refs
+  const touchStartXRef = useRef<number>(0);
+  const touchStartYRef = useRef<number>(0);
+  const touchStartTimeRef = useRef<number>(0);
+  const isSwipingRef = useRef<boolean>(false);
+  const isLongPressRef = useRef<boolean>(false);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTouchEndRef = useRef<number>(0);
 
   // Check prefers-reduced-motion on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      prefersReducedMotionRef.current = mediaQuery.matches;
       if (mediaQuery.matches) {
         setIsPlaying(false);
       }
+      const handler = (e: MediaQueryListEvent) => {
+        prefersReducedMotionRef.current = e.matches;
+        if (e.matches) {
+          setIsPlaying(false);
+        }
+      };
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
     }
   }, []);
 
+  // Handle dynamic slide changes from CMS gracefully
+  useEffect(() => {
+    if (currentIndex >= totalSlides && totalSlides > 0) {
+      setCurrentIndex(0);
+      pausedElapsedRef.current = 0;
+      startTimeRef.current = null;
+      if (activeBarRef.current) {
+        activeBarRef.current.style.width = "0%";
+      }
+    }
+  }, [totalSlides, currentIndex]);
+
+  // Pause carousel when scrolled out of viewport
+  useEffect(() => {
+    if (!carouselRef.current || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsOutOfView(!entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(carouselRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Browser tab visibility handling
+  // Never automatically resume an explicitly paused carousel on visibility restore
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsTabHidden(true);
+      } else {
+        setIsTabHidden(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Navigation handlers
   const goToSlide = useCallback(
     (index: number) => {
       if (totalSlides <= 1) return;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      pausedElapsedRef.current = 0;
+      startTimeRef.current = null;
+      if (activeBarRef.current) {
+        activeBarRef.current.style.width = "0%";
+      }
       setCurrentIndex((index + totalSlides) % totalSlides);
-      setProgress(0);
-      progressStartTimeRef.current = Date.now();
     },
     [totalSlides]
   );
@@ -105,8 +182,11 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
   }, [currentIndex, goToSlide]);
 
   const togglePlay = () => {
-    setIsPlaying((prev) => !prev);
-    progressStartTimeRef.current = Date.now() - (progress / 100) * SLIDE_DURATION_MS;
+    setIsPlaying((prev) => {
+      const next = !prev;
+      isExplicitlyPausedRef.current = !next;
+      return next;
+    });
   };
 
   // Keyboard navigation
@@ -121,65 +201,230 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
     }
   };
 
-  // Pause on tab switch (visibility change)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setIsPlaying(false);
-      } else {
-        setIsPlaying(true);
-        progressStartTimeRef.current = Date.now() - (progress / 100) * SLIDE_DURATION_MS;
-      }
-    };
+  // Single reliable animation clock: requestAnimationFrame with elapsed-time tracking
+  const isPaused =
+    !isPlaying ||
+    isHovered ||
+    isFocused ||
+    isHolding ||
+    isTabHidden ||
+    isOutOfView ||
+    totalSlides <= 1;
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [progress]);
-
-  // Coordinated slide auto-advance and smooth Instagram-style progress fill
   useEffect(() => {
     if (totalSlides <= 1) {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
       return;
     }
-
-    const isPaused = !isPlaying || isHovered || isFocused;
 
     if (isPaused) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      // Pause: Save elapsed time up to this exact frame and cancel RAF
+      if (startTimeRef.current !== null) {
+        pausedElapsedRef.current += performance.now() - startTimeRef.current;
+        startTimeRef.current = null;
+      }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
       return;
     }
 
-    // Set start time anchored to current progress so resume is continuous
-    progressStartTimeRef.current = Date.now() - (progress / 100) * SLIDE_DURATION_MS;
+    // Resume/Start: Anchor startTime to current time
+    startTimeRef.current = performance.now();
 
-    const updateProgress = () => {
-      const elapsed = Date.now() - progressStartTimeRef.current;
-      const currentProgress = Math.min((elapsed / SLIDE_DURATION_MS) * 100, 100);
+    const tick = (now: number) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = now;
+      }
+      const elapsed = now - startTimeRef.current + pausedElapsedRef.current;
+      const pct = Math.min((elapsed / SLIDE_DURATION_MS) * 100, 100);
 
-      setProgress(currentProgress);
+      // Performant direct DOM update of the active progress bar (no React re-renders per frame)
+      if (activeBarRef.current) {
+        activeBarRef.current.style.width = `${pct}%`;
+      }
 
       if (elapsed >= SLIDE_DURATION_MS) {
-        setProgress(0);
+        // Slide duration elapsed: reset progress and advance immediately
+        pausedElapsedRef.current = 0;
+        startTimeRef.current = null;
+        if (activeBarRef.current) {
+          activeBarRef.current.style.width = "100%";
+        }
         setCurrentIndex((prev) => (prev + 1) % totalSlides);
-        progressStartTimeRef.current = Date.now();
       } else {
-        animationFrameRef.current = requestAnimationFrame(updateProgress);
+        rafRef.current = requestAnimationFrame(tick);
       }
     };
 
-    animationFrameRef.current = requestAnimationFrame(updateProgress);
+    rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
     };
-  }, [currentIndex, isPlaying, isHovered, isFocused, totalSlides, progress]);
+  }, [currentIndex, isPaused, totalSlides]);
+
+  // Touch gesture handling: Instagram Stories / WhatsApp Status interactions
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    // CRITICAL: Never intercept interactions on buttons, links, or progress tabs
+    if (target.closest("a, button")) {
+      return;
+    }
+
+    if (e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    touchStartTimeRef.current = Date.now();
+    isSwipingRef.current = false;
+    isLongPressRef.current = false;
+
+    // Start long-press detection (Stories press-and-hold to pause)
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      setIsHolding(true);
+    }, 220);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    // If movement exceeds slight jitter threshold, cancel long press
+    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+    }
+
+    // Determine if user is performing horizontal swipe
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 25) {
+      isSwipingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+
+    lastTouchEndRef.current = Date.now();
+
+    // If user was in a press-and-hold state, resume playback and DO NOT trigger tap navigation
+    if (isLongPressRef.current) {
+      isLongPressRef.current = false;
+      setIsHolding(false);
+      return;
+    }
+
+    if (e.changedTouches.length !== 1) return;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+    const touchDuration = Date.now() - touchStartTimeRef.current;
+
+    // 1. Horizontal swipe gesture detection (swipe left = next, swipe right = prev)
+    // Must be predominantly horizontal to keep normal vertical page scrolling smooth
+    if (
+      Math.abs(deltaX) > 40 &&
+      Math.abs(deltaX) > Math.abs(deltaY) * 1.3 &&
+      touchDuration < 600
+    ) {
+      if (deltaX < 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+      return;
+    }
+
+    // 2. Tap navigation (minimal movement, quick release)
+    // Avoid triggering if user was scrolling vertically
+    if (Math.abs(deltaX) < 18 && Math.abs(deltaY) < 18 && touchDuration < 350) {
+      const rect = carouselRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const tapX = touch.clientX - rect.left;
+      const width = rect.width;
+
+      // Tap left 35% -> Previous slide; Tap right 65% -> Next slide (Instagram Stories behavior)
+      if (tapX < width * 0.35) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    }
+  };
+
+  const handleTouchCancel = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (isLongPressRef.current) {
+      isLongPressRef.current = false;
+      setIsHolding(false);
+    }
+  };
+
+  // Click on non-interactive slide area (desktop mouse emulation or direct click)
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If click happened immediately following touch, ignore to prevent duplicate triggering
+    if (Date.now() - lastTouchEndRef.current < 450) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button")) return;
+
+    const rect = carouselRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const clickX = e.clientX - rect.left;
+    if (clickX < rect.width * 0.35) {
+      prevSlide();
+    } else {
+      nextSlide();
+    }
+  };
+
+  // Mouse hold-to-pause for desktop emulation
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (Date.now() - lastTouchEndRef.current < 450) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button")) return;
+
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      setIsHolding(true);
+    }, 220);
+  };
+
+  const handleMouseUp = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (isLongPressRef.current) {
+      isLongPressRef.current = false;
+      setIsHolding(false);
+    }
+  };
 
   if (totalSlides === 0) return null;
 
@@ -192,17 +437,33 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
       aria-label="Auro Perfect Vision Featured Therapies Carousel"
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        if (isHolding) {
+          setIsHolding(false);
+          isLongPressRef.current = false;
+        }
+      }}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       tabIndex={0}
     >
-      {/* 4:5 Card Container */}
-      <div className="relative rounded-3xl overflow-hidden shadow-elevated border-4 border-white bg-brand-charcoal aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5] select-none">
+      {/* 4:5 Card Container with Stories gestures and touch-action: pan-y for smooth vertical scrolling */}
+      <div
+        className="relative rounded-3xl overflow-hidden shadow-elevated border-4 border-white bg-brand-charcoal aspect-[4/5] sm:aspect-[5/6] lg:aspect-[4/5] select-none cursor-pointer"
+        style={{ touchAction: "pan-y" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onClick={handleContainerClick}
+      >
         {/* Slides Layer */}
         <div
           className="relative w-full h-full"
-          aria-live={isPlaying && !isHovered && !isFocused ? "off" : "polite"}
+          aria-live={isPlaying && !isHovered && !isFocused && !isHolding ? "off" : "polite"}
         >
           {activeSlides.map((slide, idx) => {
             const isActive = idx === currentIndex;
@@ -225,14 +486,15 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                     isActive ? "scale-100" : "scale-105"
                   }`}
                   loading={idx === 0 ? "eager" : "lazy"}
+                  draggable={false}
                 />
 
                 {/* Multi-stage contrast overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/95 via-brand-charcoal/40 to-transparent pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-charcoal/40 via-transparent to-transparent pointer-events-none" />
 
-                {/* Floating Top Badge (positioned below Instagram progress bars) */}
-                <div className="absolute top-9 sm:top-10 left-5 z-20">
+                {/* Floating Top Badge */}
+                <div className="absolute top-9 sm:top-10 left-5 z-20 pointer-events-none">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-xs font-sora font-bold text-brand-purple border border-white/60 shadow-card">
                     <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0" />
                     <span>{slide.badge}</span>
@@ -240,7 +502,7 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                 </div>
 
                 {/* Bottom Overlay Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-7 z-20 flex flex-col justify-end">
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-7 z-20 flex flex-col justify-end pointer-events-none">
                   <h3 className="font-sora text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm mb-2">
                     {slide.title}
                   </h3>
@@ -252,7 +514,9 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                   <div className="flex items-center justify-between gap-3 pt-1">
                     <Link
                       href={slide.linkUrl || "/therapies"}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs sm:text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5"
+                      onClick={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs sm:text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
                     >
                       <span>{slide.linkText || "Explore Therapy"}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -264,42 +528,51 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
           })}
         </div>
 
-        {/* Top-Right Control Bar (Pause/Play & Arrows) — Hidden if only 1 slide */}
+        {/* Desktop Controls (Previous, Pause/Play, Next) — Completely hidden on mobile below 768px (md) */}
         {totalSlides > 1 && (
-          <div className="absolute top-9 sm:top-10 right-5 z-30 flex items-center gap-1.5 bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-white/20 text-white shadow-sm">
+          <div className="hidden md:flex absolute top-9 sm:top-10 right-5 z-30 items-center gap-1.5 bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-white/20 text-white shadow-sm pointer-events-auto">
             <button
               type="button"
-              onClick={prevSlide}
+              onClick={(e) => {
+                e.stopPropagation();
+                prevSlide();
+              }}
               aria-label="Previous therapy slide"
-              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={togglePlay}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
               aria-label={isPlaying ? "Pause automatic slide rotation" : "Start automatic slide rotation"}
-              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
             >
               {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
             </button>
 
             <button
               type="button"
-              onClick={nextSlide}
+              onClick={(e) => {
+                e.stopPropagation();
+                nextSlide();
+              }}
               aria-label="Next therapy slide"
-              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Instagram Stories-Style Segmented Progress Bar (Top Edge) — Hidden if only 1 slide */}
+        {/* Instagram Stories / WhatsApp Status Segmented Progress Bar (Top Edge) */}
         {totalSlides > 1 && (
           <div
-            className="absolute top-3 left-4 right-4 sm:top-4 sm:left-5 sm:right-5 z-30 flex items-center gap-1.5"
+            className="absolute top-3 left-4 right-4 sm:top-4 sm:left-5 sm:right-5 z-30 flex items-center gap-1.5 pointer-events-auto"
             role="tablist"
             aria-label="Slide progress indicators"
           >
@@ -313,21 +586,19 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => goToSlide(idx)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToSlide(idx);
+                  }}
                   aria-label={`Jump to slide ${idx + 1}: ${slide.title}`}
-                  className="group relative flex-1 h-1 sm:h-1.5 rounded-full bg-white/30 backdrop-blur-xs overflow-hidden transition-all focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
+                  className="group relative flex-1 h-1 sm:h-1.5 rounded-full bg-white/30 backdrop-blur-xs overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
                 >
                   <div
-                    className={`h-full bg-brand-orange rounded-full ${
-                      isActive
-                        ? "opacity-100"
-                        : isCompleted
-                        ? "w-full opacity-100"
-                        : "w-0 opacity-0"
-                    }`}
+                    ref={isActive ? activeBarRef : null}
+                    className="h-full bg-brand-orange rounded-full will-change-[width]"
                     style={{
-                      width: isActive ? `${progress}%` : isCompleted ? "100%" : "0%",
-                      transition: isActive ? "width 50ms linear" : "none",
+                      width: isCompleted ? "100%" : "0%",
+                      opacity: isCompleted || isActive ? 1 : 0,
                     }}
                   />
                 </button>
