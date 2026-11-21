@@ -56,7 +56,7 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Step 3 State: Currency & Payment Method
-  const [currency, setCurrency] = useState<"INR" | "USD">("INR");
+  const currency = "INR" as const;
   const [seats, setSeats] = useState<number>(1);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online_razorpay");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -268,8 +268,6 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
             timeSlot={selectedSlot}
             clientTimezone={clientTimezone}
             seats={seats}
-            currency={currency}
-            onCurrencyChange={setCurrency}
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
           />

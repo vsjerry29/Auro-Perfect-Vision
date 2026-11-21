@@ -259,7 +259,6 @@ export default function AdminProgrammesPage() {
                       <div className="font-serif text-lg font-medium text-plum">
                         ₹{prog.priceINR.toLocaleString("en-IN")}
                       </div>
-                      <div className="text-xs font-mono text-ink-muted">${prog.priceUSD} USD</div>
                     </div>
 
                     <button
@@ -462,24 +461,15 @@ export default function AdminProgrammesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-ink-muted mb-1 font-medium">Price (INR)</label>
+                  <label className="block text-ink-muted mb-1 font-medium">Price (₹)</label>
                   <input
                     type="number"
                     value={editingProg.priceINR || 28000}
-                    onChange={(e) => setEditingProg({ ...editingProg, priceINR: Number(e.target.value) })}
+                    onChange={(e) => setEditingProg({ ...editingProg, priceINR: Number(e.target.value), priceUSD: Math.round(Number(e.target.value) / 80) })}
                     className="w-full p-2 border border-ink-border rounded bg-ivory/30 focus:outline-none font-mono"
                     required
                   />
-                </div>
-                <div>
-                  <label className="block text-ink-muted mb-1 font-medium">Price (USD)</label>
-                  <input
-                    type="number"
-                    value={editingProg.priceUSD || 420}
-                    onChange={(e) => setEditingProg({ ...editingProg, priceUSD: Number(e.target.value) })}
-                    className="w-full p-2 border border-ink-border rounded bg-ivory/30 focus:outline-none font-mono"
-                    required
-                  />
+                  <span className="text-[11px] text-ink-muted mt-1 block">Indian Rupees (INR) • Tax-inclusive</span>
                 </div>
               </div>
 

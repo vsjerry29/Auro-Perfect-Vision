@@ -134,7 +134,7 @@ async function runRegressionSuite() {
     });
     assert(tpl.html.includes("APV-2026-TEST1"));
     assert(tpl.html.includes("Sunita Patel"));
-    assert(tpl.html.includes("INR 2500.00"));
+    assert(tpl.html.includes("₹2,500"));
     assert(tpl.html.includes("https://auroperfectvision.com/api/invoices/APV-2026-0001"));
   });
 
@@ -150,7 +150,7 @@ async function runRegressionSuite() {
     });
     assert(tpl.html.includes("APV-2026-0042"));
     assert(tpl.html.includes("RAZORPAY"));
-    assert(tpl.text.includes("4500"));
+    assert(tpl.text.includes("4,500"));
   });
 
   await test("Contact Form Auto-Acknowledgment & Admin Alert templates render", () => {
@@ -347,10 +347,10 @@ async function runRegressionSuite() {
     const multiSeats = calculateOfferingPrice("eye-yoga", "INR", 2);
     assert.strictEqual(multiSeats.amount, inrPrice.amount * 2);
 
-    // USD currency
-    const usdPrice = calculateOfferingPrice("eye-yoga", "USD", 1);
-    assert(usdPrice.amount > 0);
-    assert.strictEqual(usdPrice.currency, "USD");
+    // INR-only currency standardisation: all bookings calculated in INR
+    const standardizedPrice = calculateOfferingPrice("eye-yoga", "INR", 1);
+    assert(standardizedPrice.amount > 0);
+    assert.strictEqual(standardizedPrice.currency, "INR");
   });
 
   await test("Razorpay cryptographic HMAC-SHA256 signature verification", () => {

@@ -15,12 +15,13 @@ const invoicesStore = new Map<string, InvoiceRecord>();
 /**
  * Calculates authoritative offering price on the server.
  * Never trust prices passed from client browser.
+ * Standardized exclusively to INR (₹) across Auro Perfect Vision.
  */
 export function calculateOfferingPrice(
   offeringIdOrSlug: string,
-  currency: "INR" | "USD" = "INR",
+  _currency: "INR" | "USD" = "INR",
   seats = 1
-): { amount: number; currency: "INR" | "USD"; offeringTitle: string } {
+): { amount: number; currency: "INR"; offeringTitle: string } {
   const offerings = getAllOfferings(true);
   const offering =
     offerings.find((o) => o.id === offeringIdOrSlug || o.slug === offeringIdOrSlug) ||
@@ -30,17 +31,14 @@ export function calculateOfferingPrice(
     throw new Error(`Offering "${offeringIdOrSlug}" not found in catalogue`);
   }
 
-  const unitPrice =
-    currency === "USD"
-      ? offering.price.usd || Math.round(offering.price.inr / 80)
-      : offering.price.inr;
-
+  // Authoritative INR price calculation
+  const unitPrice = offering.price.inr;
   const validSeats = Math.max(1, seats);
   const amount = unitPrice * validSeats;
 
   return {
     amount,
-    currency,
+    currency: "INR",
     offeringTitle: offering.title,
   };
 }
@@ -97,66 +95,16 @@ export async function createRazorpayOrder(params: {
 
 /**
  * Creates an order with PayPal.
+ * NOTE: PayPal USD checkout is disabled in favor of exclusive INR (₹) processing.
  */
-export async function createPayPalOrder(params: {
+export async function createPayPalOrder(_params: {
   amount: number;
   currency?: "USD";
   referenceId: string;
 }): Promise<{ orderId: string; simulated?: boolean }> {
-  const { amount, currency = "USD", referenceId } = params;
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret || clientId.includes("placeholder")) {
-    return {
-      orderId: `PAYPAL_SIM_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      simulated: true,
-    };
-  }
-
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-  const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  const tokenData = await tokenRes.json();
-  if (!tokenRes.ok || !tokenData.access_token) {
-    throw new Error("Failed to authenticate with PayPal Gateway");
-  }
-
-  const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${tokenData.access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          reference_id: referenceId,
-          amount: {
-            currency_code: currency,
-            value: amount.toFixed(2),
-          },
-        },
-      ],
-    }),
-  });
-
-  const orderData = await orderRes.json();
-  if (!orderRes.ok || !orderData.id) {
-    throw new Error(orderData?.message || "Failed to create PayPal payment order");
-  }
-
-  return {
-    orderId: orderData.id,
-  };
+  throw new Error(
+    "PayPal USD checkout is currently disabled. Auro Perfect Vision processes payments exclusively in Indian Rupees (₹ INR) via Razorpay or offline at clinic."
+  );
 }
 
 /**

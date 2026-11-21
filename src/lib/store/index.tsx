@@ -304,10 +304,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
       bookingData.paymentMethod === "online_razorpay" ||
       bookingData.paymentMethod === "online_paypal";
 
-    const unitPrice =
-      bookingData.currency === "INR"
-        ? offering?.price.inr || 2000
-        : offering?.price.usd || 45;
+    const unitPrice = offering?.price.inr || 2000;
     const totalAmount = unitPrice * bookingData.seatsBooked;
 
     const newBooking: Booking = {
@@ -324,7 +321,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
       clientEmail: bookingData.clientEmail,
       clientPhone: bookingData.clientPhone,
       seatsBooked: bookingData.seatsBooked,
-      currency: bookingData.currency,
+      currency: "INR",
       totalAmount,
       status: isOnlinePayment ? "confirmed" : "pending_offline_confirmation",
       paymentMethod: bookingData.paymentMethod,

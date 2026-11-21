@@ -57,8 +57,30 @@ export default async function OfferingDetailPage({ params }: OfferingDetailPageP
     ? `7-Day Residential Retreat • ${offering.durationMinutes} mins/daily session`
     : `${offering.durationMinutes} Minutes`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: offering.title,
+    description: offering.shortDescription,
+    provider: {
+      "@type": "MedicalBusiness",
+      name: "Auro Perfect Vision",
+      url: "https://auroperfectvision.com",
+    },
+    offers: {
+      "@type": "Offer",
+      price: offering.price.inr,
+      priceCurrency: "INR",
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <div className="bg-[#FAF9FC] min-h-screen pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Breadcrumb strip */}
       <div className="bg-white border-b border-brand-gray/80 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -240,12 +262,9 @@ export default async function OfferingDetailPage({ params }: OfferingDetailPageP
                   <span className="font-sora text-3xl sm:text-4xl font-extrabold text-brand-purple">
                     {formatCurrency(offering.price.inr, "INR")}
                   </span>
-                  <span className="text-sm font-inter text-brand-secondary">
-                    / ${offering.price.usd} USD
-                  </span>
                 </div>
                 <span className="text-xs font-inter text-brand-secondary block mt-1">
-                  Transparent pricing • No hidden facility fees
+                  Transparent pricing in INR (₹) • No hidden facility fees
                 </span>
               </div>
 

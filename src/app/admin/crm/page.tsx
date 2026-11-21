@@ -422,7 +422,15 @@ export default function AdminCrmPage() {
                       )}
                     </td>
                     <td className="py-3 px-4 font-mono font-medium text-ink">
-                      {c.totalSpentINR > 0 ? `₹${c.totalSpentINR.toLocaleString()}` : `$${c.totalSpentUSD}`}
+                      {c.totalSpentINR > 0 ? (
+                        `₹${c.totalSpentINR.toLocaleString("en-IN")}`
+                      ) : (c.totalSpentUSD || 0) > 0 ? (
+                        <span className="text-ink-muted text-xs font-normal" title="Historical USD transaction">
+                          ${c.totalSpentUSD} USD
+                        </span>
+                      ) : (
+                        "₹0"
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex flex-wrap items-center gap-1">

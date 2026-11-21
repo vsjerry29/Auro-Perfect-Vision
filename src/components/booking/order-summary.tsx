@@ -12,8 +12,6 @@ interface OrderSummaryProps {
   timeSlot: string;
   clientTimezone: string;
   seats: number;
-  currency: "INR" | "USD";
-  onCurrencyChange: (curr: "INR" | "USD") => void;
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
 }
@@ -25,12 +23,10 @@ export function OrderSummary({
   timeSlot,
   clientTimezone,
   seats,
-  currency,
-  onCurrencyChange,
   paymentMethod,
   onPaymentMethodChange,
 }: OrderSummaryProps) {
-  const unitPrice = currency === "INR" ? offering.price.inr : offering.price.usd;
+  const unitPrice = offering.price.inr;
   const totalPrice = unitPrice * seats;
 
   return (
@@ -84,39 +80,15 @@ export function OrderSummary({
         </div>
       </div>
 
-      {/* Currency & Total Breakdown */}
+      {/* Total Breakdown */}
       <div className="bg-[#FAF9FC] p-6 rounded-3xl border border-brand-gray/80 space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-inter font-semibold text-brand-charcoal">Billing Currency:</span>
-          <div className="inline-flex rounded-xl border border-brand-gray p-1 bg-white">
-            <button
-              type="button"
-              onClick={() => onCurrencyChange("INR")}
-              className={`px-3 py-1.5 text-xs rounded-lg font-sora font-semibold transition-all ${
-                currency === "INR" ? "bg-brand-purple text-white shadow-sm" : "text-brand-secondary hover:text-brand-charcoal"
-              }`}
-            >
-              INR (₹)
-            </button>
-            <button
-              type="button"
-              onClick={() => onCurrencyChange("USD")}
-              className={`px-3 py-1.5 text-xs rounded-lg font-sora font-semibold transition-all ${
-                currency === "USD" ? "bg-brand-purple text-white shadow-sm" : "text-brand-secondary hover:text-brand-charcoal"
-              }`}
-            >
-              USD ($)
-            </button>
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-brand-gray/80 flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between">
           <div>
             <span className="text-xs font-inter font-medium text-brand-secondary block">Total Payable</span>
-            <span className="text-[11px] font-inter text-brand-secondary/80">Includes all applicable taxes</span>
+            <span className="text-[11px] font-inter text-brand-secondary/80">Includes all applicable taxes (INR / ₹)</span>
           </div>
           <span className="font-sora text-3xl font-extrabold text-brand-purple">
-            {formatCurrency(totalPrice, currency)}
+            {formatCurrency(totalPrice, "INR")}
           </span>
         </div>
       </div>

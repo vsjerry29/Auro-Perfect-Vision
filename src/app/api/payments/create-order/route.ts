@@ -7,10 +7,20 @@ import { calculateOfferingPrice, createRazorpayOrder, createPayPalOrder } from "
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { bookingReference, gateway = "razorpay", currency = "INR" } = body;
+    const { bookingReference, gateway = "razorpay" } = body;
 
     if (!bookingReference) {
       return NextResponse.json({ error: "Booking reference is required" }, { status: 400 });
+    }
+
+    if (gateway === "paypal") {
+      return NextResponse.json(
+        {
+          error:
+            "PayPal USD checkout is disabled. Auro Perfect Vision processes payments exclusively in Indian Rupees (₹ INR) via Razorpay or offline at clinic.",
+        },
+        { status: 400 }
+      );
     }
 
     // Locate booking
@@ -25,10 +35,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // Authoritative Server-side Price Calculation
+    // Authoritative Server-side Price Calculation in INR
     const pricing = calculateOfferingPrice(
       booking.offeringId,
-      currency as "INR" | "USD",
+      "INR",
       booking.seatsBooked || 1
     );
 
@@ -51,23 +61,6 @@ export async function POST(request: Request) {
         amount: order.amount,
         currency: order.currency,
         keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
-        simulated: order.simulated,
-      });
-    }
-
-    if (gateway === "paypal") {
-      const order = await createPayPalOrder({
-        amount: pricing.amount,
-        currency: "USD",
-        referenceId: booking.bookingReference,
-      });
-
-      return NextResponse.json({
-        success: true,
-        gateway: "paypal",
-        orderId: order.orderId,
-        amount: pricing.amount,
-        currency: "USD",
         simulated: order.simulated,
       });
     }

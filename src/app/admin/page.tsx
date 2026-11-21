@@ -177,7 +177,7 @@ export default function AdminOverviewPage() {
 
         <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
           <div className="flex items-center justify-between text-ink-muted mb-2">
-            <span className="text-xs uppercase tracking-wider font-medium">Domestic (INR)</span>
+            <span className="text-xs uppercase tracking-wider font-medium">Total Revenue (₹)</span>
             <CreditCard className="w-4 h-4 text-gold-dark" />
           </div>
           <div>
@@ -185,22 +185,24 @@ export default function AdminOverviewPage() {
               {formatCurrency(totalRevenueINR, "INR")}
             </span>
             <span className="text-[11px] text-ink-muted block mt-1">
-              Confirmed Domestic Bookings
+              Confirmed Appointments (INR)
             </span>
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-ink-border shadow-subtle flex flex-col justify-between">
           <div className="flex items-center justify-between text-ink-muted mb-2">
-            <span className="text-xs uppercase tracking-wider font-medium">International (USD)</span>
+            <span className="text-xs uppercase tracking-wider font-medium">
+              {totalRevenueUSD > 0 ? "Historical Ledger (USD)" : "Settlement Currency"}
+            </span>
             <CreditCard className="w-4 h-4 text-emerald-700" />
           </div>
           <div>
             <span className="font-serif text-3xl font-bold text-emerald-800">
-              ${totalRevenueUSD}
+              {totalRevenueUSD > 0 ? `$${totalRevenueUSD} USD` : "₹ INR Only"}
             </span>
             <span className="text-[11px] text-ink-muted block mt-1">
-              Confirmed International
+              {totalRevenueUSD > 0 ? "Archived Prior to INR Standardization" : "Exclusively Indian Rupees"}
             </span>
           </div>
         </div>

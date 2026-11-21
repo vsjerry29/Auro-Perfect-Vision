@@ -10,6 +10,7 @@ import * as db from "@/lib/server/mysql-db";
 import { findOrCreateClientFromBooking } from "@/lib/server/crm";
 import { getAllPatients, createPatient } from "@/lib/server/emr";
 import { sendEmail, renderBookingConfirmationEmail } from "@/lib/server/email";
+import { calculateOfferingPrice } from "@/lib/server/payments";
 import { Booking } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -24,6 +25,17 @@ export async function POST(request: Request) {
         { error: "Date, time slot, and practitioner selection are required." },
         { status: 400 }
       );
+    }
+
+    // Standardize to INR exclusively and authoritatively recalculate total amount
+    booking.currency = "INR";
+    if (booking.offeringId) {
+      try {
+        const pricing = calculateOfferingPrice(booking.offeringId, "INR", booking.seatsBooked || 1);
+        booking.totalAmount = pricing.amount;
+      } catch (priceErr) {
+        console.warn("[Booking Pricing Calculation Notice]:", priceErr);
+      }
     }
 
     // 1. Therapist Archival Check

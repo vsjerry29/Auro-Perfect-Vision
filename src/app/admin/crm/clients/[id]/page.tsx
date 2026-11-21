@@ -514,9 +514,11 @@ export default function Client360Page() {
               <div className="font-serif text-2xl font-medium text-plum">
                 ₹{(client.totalSpentINR || 0).toLocaleString("en-IN")}
               </div>
-              <div className="text-xs font-mono text-ink-muted">
-                ${client.totalSpentUSD || 0} USD
-              </div>
+              {(client.totalSpentUSD || 0) > 0 && (
+                <div className="text-xs font-mono text-ink-muted">
+                  ${client.totalSpentUSD} USD (Historical)
+                </div>
+              )}
               <div className="pt-2 text-[11px] text-ink-muted flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Consent Given: {client.consentGiven ? "Yes (GDPR/APV)" : "Pending"}</span>
@@ -919,12 +921,21 @@ export default function Client360Page() {
                   ₹{(client.totalSpentINR || 0).toLocaleString("en-IN")}
                 </span>
               </div>
-              <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
-                <span className="text-xs text-ink-muted block">Total Paid in USD</span>
-                <span className="font-serif text-2xl font-medium text-gold-dark">
-                  ${client.totalSpentUSD || 0} USD
-                </span>
-              </div>
+              {(client.totalSpentUSD || 0) > 0 ? (
+                <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
+                  <span className="text-xs text-ink-muted block">Historical Paid in USD</span>
+                  <span className="font-serif text-2xl font-medium text-gold-dark">
+                    ${client.totalSpentUSD} USD
+                  </span>
+                </div>
+              ) : (
+                <div className="bg-ivory p-4 rounded-lg border border-ink-border/70">
+                  <span className="text-xs text-ink-muted block">Settlement Currency</span>
+                  <span className="font-serif text-2xl font-medium text-gold-dark">
+                    ₹ INR Exclusively
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="overflow-x-auto">

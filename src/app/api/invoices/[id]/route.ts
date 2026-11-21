@@ -90,6 +90,14 @@ export async function GET(
   }
 
   // Render Printable HTML Invoice
+  const isINR = booking.currency === "INR" || !booking.currency;
+  const unitRateFormatted = isINR
+    ? `₹${Math.round(booking.totalAmount / (booking.seatsBooked || 1)).toLocaleString("en-IN")}`
+    : `${booking.currency} ${(booking.totalAmount / (booking.seatsBooked || 1)).toFixed(2)}`;
+  const totalAmountFormatted = isINR
+    ? `₹${Math.round(booking.totalAmount).toLocaleString("en-IN")}`
+    : `${booking.currency} ${booking.totalAmount.toFixed(2)}`;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,12 +178,12 @@ export async function GET(
             <span style="font-size: 11px; color: #7B7268;">Natural Bates vision session, ocular muscle realignment, relaxation</span>
           </td>
           <td>${booking.seatsBooked || 1} Participant(s)</td>
-          <td class="text-right">${booking.currency} ${(booking.totalAmount / (booking.seatsBooked || 1)).toFixed(2)}</td>
-          <td class="text-right">${booking.currency} ${booking.totalAmount.toFixed(2)}</td>
+          <td class="text-right">${unitRateFormatted}</td>
+          <td class="text-right">${totalAmountFormatted}</td>
         </tr>
         <tr class="total-row">
           <td colspan="3" class="text-right">Total Amount Paid:</td>
-          <td class="text-right">${booking.currency} ${booking.totalAmount.toFixed(2)}</td>
+          <td class="text-right">${totalAmountFormatted}</td>
         </tr>
       </tbody>
     </table>

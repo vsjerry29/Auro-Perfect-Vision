@@ -282,6 +282,14 @@ export function renderBookingConfirmationEmail(data: {
   invoiceUrl?: string;
 }): { html: string; text: string } {
   const isPaid = data.paymentStatus === "captured";
+  const formattedFee =
+    data.currency === "INR" || !data.currency
+      ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
+      : `${escapeHtml(data.currency)} ${data.totalAmount.toFixed(2)}`;
+  const textFee =
+    data.currency === "INR" || !data.currency
+      ? `₹${Math.round(data.totalAmount).toLocaleString("en-IN")}`
+      : `${data.currency} ${data.totalAmount.toFixed(2)}`;
 
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Namaste, ${escapeHtml(data.clientName)}</h2>
@@ -310,7 +318,7 @@ export function renderBookingConfirmationEmail(data: {
       </div>
       <div class="meta-row">
         <span class="meta-label">Total Fee</span>
-        <span class="meta-value">${escapeHtml(data.currency)} ${data.totalAmount.toFixed(2)}</span>
+        <span class="meta-value">${formattedFee}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Payment Status</span>
@@ -351,7 +359,7 @@ Therapy: ${data.offeringTitle}
 Practitioner: ${data.therapistName}
 Date: ${data.bookingDate}
 Time: ${data.timeSlot} IST
-Fee: ${data.currency} ${data.totalAmount.toFixed(2)}
+Fee: ${textFee}
 Payment Status: ${isPaid ? "Paid & Verified" : "Pending Offline Payment"}
 
 Centre Location: Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.
@@ -468,6 +476,15 @@ export function renderPaymentConfirmedEmail(data: {
   paymentGateway: string;
   invoiceUrl?: string;
 }): { html: string; text: string } {
+  const formattedAmount =
+    data.currency === "INR" || !data.currency
+      ? `₹${Math.round(data.amount).toLocaleString("en-IN")}`
+      : `${escapeHtml(data.currency)} ${data.amount.toFixed(2)}`;
+  const textAmount =
+    data.currency === "INR" || !data.currency
+      ? `₹${Math.round(data.amount).toLocaleString("en-IN")}`
+      : `${data.currency} ${data.amount.toFixed(2)}`;
+
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Payment Confirmation &amp; Official Receipt</h2>
     <p>Dear ${escapeHtml(data.clientName)},</p>
@@ -480,7 +497,7 @@ export function renderPaymentConfirmedEmail(data: {
       </div>
       <div class="meta-row">
         <span class="meta-label">Amount Received</span>
-        <span class="meta-value">${escapeHtml(data.currency)} ${data.amount.toFixed(2)}</span>
+        <span class="meta-value">${formattedAmount}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Payment Gateway</span>
@@ -503,7 +520,7 @@ export function renderPaymentConfirmedEmail(data: {
 
   const textContent = `Dear ${data.clientName},
 
-Your payment of ${data.currency} ${data.amount.toFixed(2)} for booking ${data.bookingReference} has been verified.
+Your payment of ${textAmount} for booking ${data.bookingReference} has been verified.
 Invoice Number: ${data.invoiceNumber}
 Payment Gateway: ${data.paymentGateway}
 

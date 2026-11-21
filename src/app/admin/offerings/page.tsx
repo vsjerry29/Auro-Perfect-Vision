@@ -47,7 +47,6 @@ export default function AdminOfferingsPage() {
   const [formatType, setFormatType] = useState<OfferingFormat>("individual");
   const [delivery, setDelivery] = useState<OfferingDelivery>("onsite");
   const [priceINR, setPriceINR] = useState(2000);
-  const [priceUSD, setPriceUSD] = useState(40);
   const [assignedTherapistIds, setAssignedTherapistIds] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const [isPublished, setIsPublished] = useState(false);
@@ -106,7 +105,6 @@ export default function AdminOfferingsPage() {
     setFormatType("individual");
     setDelivery("onsite");
     setPriceINR(2000);
-    setPriceUSD(40);
     setAssignedTherapistIds(therapists.length > 0 ? [therapists[0].id] : []);
     setImageUrl("https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80");
     setIsPublished(true); // default to publish or draft
@@ -131,7 +129,6 @@ export default function AdminOfferingsPage() {
     setFormatType(offering.format);
     setDelivery(offering.delivery);
     setPriceINR(offering.price.inr);
-    setPriceUSD(offering.price.usd);
     setAssignedTherapistIds(offering.assignedTherapistIds || []);
     setImageUrl(offering.imageUrl || "");
     setIsPublished(offering.isPublished);
@@ -208,7 +205,7 @@ export default function AdminOfferingsPage() {
       delivery,
       price: {
         inr: Number(priceINR) || 0,
-        usd: Number(priceUSD) || 0,
+        usd: Math.round((Number(priceINR) || 0) / 80),
         taxInclusive: true,
       },
       assignedTherapistIds,
@@ -439,7 +436,7 @@ export default function AdminOfferingsPage() {
                     {offering.durationMinutes} mins
                   </span>
                   <span className="font-semibold text-plum">
-                    {formatCurrency(offering.price.inr, "INR")} / ${offering.price.usd}
+                    {formatCurrency(offering.price.inr, "INR")}
                   </span>
                 </div>
 
@@ -651,26 +648,16 @@ export default function AdminOfferingsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-ink mb-1">Price in INR (₹)</label>
-                    <input
-                      type="number"
-                      value={priceINR}
-                      onChange={(e) => setPriceINR(Math.max(0, Number(e.target.value)))}
-                      className="w-full px-3 py-1.5 rounded-lg border border-ink-border bg-canvas-light text-ink font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold text-ink mb-1">Price in USD ($)</label>
-                    <input
-                      type="number"
-                      value={priceUSD}
-                      onChange={(e) => setPriceUSD(Math.max(0, Number(e.target.value)))}
-                      className="w-full px-3 py-1.5 rounded-lg border border-ink-border bg-canvas-light text-ink"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-semibold text-ink mb-1">Price (₹)</label>
+                  <input
+                    type="number"
+                    value={priceINR}
+                    onChange={(e) => setPriceINR(Math.max(0, Number(e.target.value)))}
+                    className="w-full px-3 py-1.5 rounded-lg border border-ink-border bg-canvas-light text-ink font-semibold"
+                    placeholder="2000"
+                  />
+                  <span className="text-[11px] text-ink-muted mt-1 block">Indian Rupees (INR) • Tax-inclusive fee</span>
                 </div>
 
                 <div>

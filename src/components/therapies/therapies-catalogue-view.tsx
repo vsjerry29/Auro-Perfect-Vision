@@ -292,9 +292,6 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
                           <span className="font-sora text-xl font-extrabold text-brand-purple">
                             {formatCurrency(offering.price.inr, "INR")}
                           </span>
-                          <span className="text-[11px] font-inter text-brand-secondary">
-                            / ${offering.price.usd}
-                          </span>
                         </div>
                       </div>
 
