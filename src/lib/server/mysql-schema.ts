@@ -21,6 +21,7 @@ export const MYSQL_SCHEMA_STATEMENTS = [
     therapist_id VARCHAR(64),
     invitation_token VARCHAR(255),
     invitation_sent_at DATETIME,
+    invitation_expires_at DATETIME,
     last_login_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -587,6 +588,14 @@ export async function initMySQLSchema(): Promise<{ success: boolean; tablesCreat
       await execute(statement);
       createdCount++;
     }
+
+    // Safe backward-compatible schema enhancements
+    try {
+      await execute("ALTER TABLE staff_profiles ADD COLUMN invitation_expires_at DATETIME AFTER invitation_sent_at");
+    } catch {
+      // Column already exists or already up-to-date
+    }
+
     schemaInitialized = true;
     return { success: true, tablesCreated: createdCount };
   } catch (err: any) {

@@ -32,6 +32,17 @@ function readStaticSeedFile<T>(filename: string, fallbackDefault: T): T {
   return fallbackDefault;
 }
 
+function ensureDirectory(dir: string): void {
+  try {
+    if (!fs.existsSync(dir)) {
+      const mkdir = (fs as any)["mkdirSync"];
+      if (typeof mkdir === "function") {
+        mkdir(dir, { recursive: true });
+      }
+    }
+  } catch {}
+}
+
 export function isTestMode(): boolean {
   return (
     process.env.APV_TEST_MODE === "1" ||
@@ -59,13 +70,7 @@ export function expandStoragePath(inputPath: string): string {
 export function getPersistentUploadDir(): string {
   if (process.env.UPLOAD_DIR) {
     const resolved = expandStoragePath(process.env.UPLOAD_DIR);
-    if (!fs.existsSync(/*turbopackIgnore: true*/ resolved)) {
-      try {
-        fs.mkdirSync(resolved, { recursive: true });
-      } catch (err: any) {
-        console.warn("[Storage] Could not create configured UPLOAD_DIR:", err.message);
-      }
-    }
+    ensureDirectory(resolved);
     return resolved;
   }
 
@@ -73,24 +78,12 @@ export function getPersistentUploadDir(): string {
   if (process.env.NODE_ENV === "production" && (process.env.HOME || os.homedir())) {
     const home = process.env.HOME || os.homedir();
     const persistentDir = path.join(home, "apv_storage", "uploads");
-    if (!fs.existsSync(/*turbopackIgnore: true*/ persistentDir)) {
-      try {
-        fs.mkdirSync(persistentDir, { recursive: true });
-        return persistentDir;
-      } catch {
-        // Fall back to public/uploads if HOME dir creation is restricted
-      }
-    } else {
-      return persistentDir;
-    }
+    ensureDirectory(persistentDir);
+    return persistentDir;
   }
 
   const defaultDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(/*turbopackIgnore: true*/ defaultDir)) {
-    try {
-      fs.mkdirSync(defaultDir, { recursive: true });
-    } catch {}
-  }
+  ensureDirectory(defaultDir);
   return defaultDir;
 }
 
@@ -101,21 +94,13 @@ export function getPersistentUploadDir(): string {
 export function getPrivateDocumentsDir(): string {
   if (process.env.PRIVATE_DOCS_DIR) {
     const resolved = expandStoragePath(process.env.PRIVATE_DOCS_DIR);
-    if (!fs.existsSync(/*turbopackIgnore: true*/ resolved)) {
-      try {
-        fs.mkdirSync(resolved, { recursive: true });
-      } catch {}
-    }
+    ensureDirectory(resolved);
     return resolved;
   }
 
   const baseDir = getPersistentUploadDir();
   const privateDir = path.join(baseDir, "..", "private_clinical_docs");
-  if (!fs.existsSync(/*turbopackIgnore: true*/ privateDir)) {
-    try {
-      fs.mkdirSync(privateDir, { recursive: true });
-    } catch {}
-  }
+  ensureDirectory(privateDir);
   return privateDir;
 }
 

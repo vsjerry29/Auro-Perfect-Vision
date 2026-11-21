@@ -20,20 +20,23 @@ const crmMemoryStore: Map<string, any> = new Map();
 async function syncCrmToMySQL(filename: string, data: any): Promise<void> {
   if (!isMySQLConfigured()) return;
   try {
-    if (filename === "clients.json" && Array.isArray(data)) {
-      const latest = data[data.length - 1];
-      if (latest) await db.dbSaveClient(latest);
-    } else if (filename === "inquiries.json" && Array.isArray(data)) {
-      const latest = data[data.length - 1];
-      if (latest) await db.dbSaveInquiry(latest);
-    } else if (filename === "tasks.json" && Array.isArray(data)) {
-      const latest = data[data.length - 1];
-      if (latest) await db.dbSaveTask(latest);
-    } else if (filename === "notes.json" && Array.isArray(data)) {
+    if ((filename === "crm_clients.json" || filename === "clients.json") && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveClient(item);
+      }
+    } else if ((filename === "crm_inquiries.json" || filename === "inquiries.json") && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveInquiry(item);
+      }
+    } else if ((filename === "crm_tasks.json" || filename === "tasks.json") && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveTask(item);
+      }
+    } else if ((filename === "crm_notes.json" || filename === "notes.json") && Array.isArray(data)) {
       const latest = data[data.length - 1];
       if (latest) await db.dbAddClientNote(latest);
-    } else if (filename === "activities.json" && Array.isArray(data)) {
-      const latest = data[data.length - 1];
+    } else if ((filename === "crm_activities.json" || filename === "activities.json") && Array.isArray(data)) {
+      const latest = data[0] || data[data.length - 1];
       if (latest) await db.dbLogCrmActivity(latest);
     }
   } catch (err: any) {

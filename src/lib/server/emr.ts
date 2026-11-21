@@ -335,6 +335,37 @@ export async function getPatientChart(patientId: string): Promise<{
 }> {
   initializeBaselineEmrSeed();
 
+  if (isMySQLConfigured()) {
+    try {
+      const patient = await db.dbGetPatientById(patientId);
+      const medicalHistory = await db.dbGetMedicalHistory(patientId);
+      const encounters = await db.dbGetEncountersByPatientId(patientId);
+      const assessments = await db.dbGetAssessmentsByPatientId(patientId);
+      const notes = await db.dbGetNotesByPatientId(patientId);
+      const treatmentPlans = await db.dbGetTreatmentPlansByPatientId(patientId);
+      const auditLogs = await db.dbGetClinicalAuditEvents(patientId);
+
+      const documents = Array.from(emrStore.documents.values()).filter((d) => d.patientId === patientId);
+      const consents = Array.from(emrStore.consents.values()).filter((c) => c.patientId === patientId);
+
+      if (patient) {
+        return {
+          patient,
+          medicalHistory,
+          encounters,
+          assessments,
+          notes,
+          treatmentPlans,
+          documents,
+          consents,
+          auditLogs,
+        };
+      }
+    } catch (err: any) {
+      console.warn("[MySQL EMR Chart Fallback]:", err.message);
+    }
+  }
+
   const patient = emrStore.patients.get(patientId) || null;
   const medicalHistory = emrStore.medicalHistories.get(patientId) || null;
 
@@ -407,7 +438,7 @@ export async function createPatient(data: Partial<PatientRecord>): Promise<Patie
   emrStore.patients.set(id, newPatient);
 
   // Initialize empty medical history
-  emrStore.medicalHistories.set(id, {
+  const newHist: PatientMedicalHistory = {
     id: `hist-${Date.now()}`,
     patientId: id,
     ocularHistory: {},
@@ -415,7 +446,17 @@ export async function createPatient(data: Partial<PatientRecord>): Promise<Patie
     visualEnvironment: {},
     visualAids: {},
     updatedAt: new Date().toISOString(),
-  });
+  };
+  emrStore.medicalHistories.set(id, newHist);
+
+  if (isMySQLConfigured()) {
+    try {
+      await db.dbSavePatient(newPatient);
+      await db.dbSaveMedicalHistory(newHist);
+    } catch (err: any) {
+      console.warn("[MySQL Create Patient Error]:", err.message);
+    }
+  }
 
   return newPatient;
 }
@@ -434,6 +475,15 @@ export async function updatePatient(
     updatedAt: new Date().toISOString(),
   };
   emrStore.patients.set(patientId, updated);
+
+  if (isMySQLConfigured()) {
+    try {
+      await db.dbSavePatient(updated);
+    } catch (err: any) {
+      console.warn("[MySQL Update Patient Error]:", err.message);
+    }
+  }
+
   return updated;
 }
 
@@ -459,6 +509,15 @@ export async function updateMedicalHistory(
   };
 
   emrStore.medicalHistories.set(patientId, updated);
+
+  if (isMySQLConfigured()) {
+    try {
+      await db.dbSaveMedicalHistory(updated);
+    } catch (err: any) {
+      console.warn("[MySQL Update Medical History Error]:", err.message);
+    }
+  }
+
   return updated;
 }
 
@@ -485,6 +544,15 @@ export async function createEncounter(data: Partial<ClinicalEncounter>): Promise
   };
 
   emrStore.encounters.set(id, encounter);
+
+  if (isMySQLConfigured()) {
+    try {
+      await db.dbSaveEncounter(encounter);
+    } catch (err: any) {
+      console.warn("[MySQL Create Encounter Error]:", err.message);
+    }
+  }
+
   return encounter;
 }
 
@@ -512,6 +580,15 @@ export async function createVisionAssessment(
   };
 
   emrStore.assessments.set(id, assessment);
+
+  if (isMySQLConfigured()) {
+    try {
+      await db.dbSaveAssessment(assessment);
+    } catch (err: any) {
+      console.warn("[MySQL Save Assessment Error]:", err.message);
+    }
+  }
+
   return assessment;
 }
 
@@ -549,6 +626,10 @@ export async function saveSoapNote(data: {
       updatedAt: new Date().toISOString(),
     };
     emrStore.notes.set(data.id, updated);
+
+    if (isMySQLConfigured()) {
+      await db.dbSaveNote(updated);
+    }
     return updated;
   }
 
@@ -572,6 +653,10 @@ export async function saveSoapNote(data: {
   };
 
   emrStore.notes.set(id, newNote);
+
+  if (isMySQLConfigured()) {
+    await db.dbSaveNote(newNote);
+  }
   return newNote;
 }
 
@@ -600,6 +685,10 @@ export async function signAndLockSoapNote(
   };
 
   emrStore.notes.set(noteId, signed);
+
+  if (isMySQLConfigured()) {
+    await db.dbSaveNote(signed);
+  }
 
   // Log clinical audit event
   logClinicalAuditEvent({
@@ -680,6 +769,17 @@ export async function createTreatmentPlan(data: Partial<TreatmentPlan>): Promise
   };
 
   emrStore.treatmentPlans.set(id, plan);
+
+  if (isMySQLConfigured()) {
+    try {
+      db.dbSaveTreatmentPlan(plan).catch((err) =>
+        console.warn("[MySQL Save Treatment Plan Error]:", err.message)
+      );
+    } catch (err: any) {
+      console.warn("[MySQL Save Treatment Plan Error]:", err.message);
+    }
+  }
+
   return plan;
 }
 
@@ -703,5 +803,12 @@ export function logClinicalAuditEvent(event: {
   };
 
   emrStore.auditLogs.unshift(auditEvent);
+
+  if (isMySQLConfigured()) {
+    try {
+      db.dbLogClinicalAuditEvent(auditEvent).catch(() => {});
+    } catch {}
+  }
+
   return auditEvent;
 }

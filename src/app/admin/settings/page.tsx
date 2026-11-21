@@ -157,6 +157,35 @@ export default function AdminSettingsPage() {
         </form>
       </div>
 
+      {/* Resend Email Configuration Summary Card */}
+      <div className="bg-white p-6 rounded-2xl border border-ink-border shadow-subtle space-y-4">
+        <div className="flex items-center justify-between border-b pb-3">
+          <div>
+            <h3 className="font-serif text-base font-medium text-ink flex items-center gap-2">
+              <span className="text-plum font-serif text-lg font-bold">✉</span>
+              <span>Transactional Email Service (Resend)</span>
+            </h3>
+            <p className="text-xs text-ink-muted mt-0.5">
+              Production transactional email pipeline powering staff invitations, booking confirmations, invoices, and reminders.
+            </p>
+          </div>
+          <Badge variant="plum">Production Service</Badge>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <p className="text-xs text-ink-muted">
+            Configure sender identities, test live delivery, and inspect recent delivery logs in the Notifications manager.
+          </p>
+          <a
+            href="/admin/notifications"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-ink-border text-xs font-sans text-plum hover:bg-canvas-light transition-colors shrink-0"
+          >
+            <span>Manage Email Settings & Logs</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
       {/* Data Backup & Export Card */}
       <div className="bg-white p-6 rounded-2xl border border-ink-border shadow-subtle space-y-4">
         <div className="flex items-center justify-between border-b pb-3">

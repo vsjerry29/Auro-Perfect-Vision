@@ -59,6 +59,14 @@ async function syncCmsToMySQL(filename: string, data: any): Promise<void> {
       if (latest) {
         await db.dbSaveMediaAsset(latest);
       }
+    } else if (filename === "bookings.json" && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveBooking(item);
+      }
+    } else if (filename === "programmes.json" && Array.isArray(data)) {
+      for (const item of data) {
+        await db.dbSaveProgramme(item);
+      }
     }
   } catch (err: any) {
     console.warn(`[MySQL CMS Sync Notice (${filename})]:`, err.message);

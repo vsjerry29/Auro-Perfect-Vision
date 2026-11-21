@@ -143,6 +143,32 @@ export interface Booking {
   createdAt: string;
 }
 
+export interface PaymentTransaction {
+  id: string;
+  bookingId: string;
+  gateway: 'razorpay' | 'paypal' | 'offline';
+  gatewayPaymentId?: string;
+  gatewayOrderId?: string;
+  amount: number;
+  currency: 'INR' | 'USD';
+  status: 'pending' | 'captured' | 'failed' | 'refunded';
+  rawResponse?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvoiceRecord {
+  id: string;
+  bookingId: string;
+  invoiceNumber: string;
+  totalAmount: number;
+  currency: 'INR' | 'USD';
+  status: 'paid' | 'pending' | 'cancelled';
+  pdfStoragePath?: string;
+  issuedAt: string;
+  createdAt: string;
+}
+
 export interface BlogPost {
   id: string;
   slug: string;
@@ -170,6 +196,9 @@ export interface StaffUser {
   salt: string;
   isActive: boolean;
   status?: "active" | "invited" | "suspended";
+  invitationToken?: string;
+  invitationSentAt?: string;
+  invitationExpiresAt?: string;
   lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;

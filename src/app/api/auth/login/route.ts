@@ -132,6 +132,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // Pending invited accounts must activate via their secure invitation link first
+    if (staff.status === "invited") {
+      return NextResponse.json(
+        {
+          error:
+            "This account is pending activation. Please open the secure invitation link sent to your email to establish your password and activate your access.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Suspended or deactivated staff accounts cannot authenticate
+    if (staff.status === "suspended" || !staff.isActive) {
+      return NextResponse.json(
+        {
+          error:
+            "This staff account has been deactivated or suspended. Please contact your Super Administrator.",
+        },
+        { status: 403 }
+      );
+    }
+
     // Verify password with automatic upgrade of legacy iterations to modern 220,000
     const { isValid, wasUpgraded } = await verifyAndUpgradeStaffPassword(password, staff);
 

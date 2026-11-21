@@ -34,12 +34,17 @@ export default function AdminUsersPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [lastInviteResult, setLastInviteResult] = useState<{
+    email: string;
+    inviteUrl?: string;
+    emailSent?: boolean;
+  } | null>(null);
+  const [actionInProgressId, setActionInProgressId] = useState<string | null>(null);
   const [inviteForm, setInviteForm] = useState({
     fullName: "",
     email: "",
     phone: "",
     role: "admin" as "super_admin" | "admin" | "therapist",
-    initialPassword: "",
     roleTitle: "Vision Wellness Guide",
     specialties: "Bates Method, Eye Yoga, Palming",
     bio: "",
@@ -122,7 +127,6 @@ export default function AdminUsersPage() {
         email: inviteForm.email.trim(),
         phone: inviteForm.phone.trim(),
         role: inviteForm.role,
-        initialPassword: inviteForm.initialPassword || "AuroVision@2026",
       };
 
       if (inviteForm.role === "therapist") {
@@ -153,21 +157,87 @@ export default function AdminUsersPage() {
         email: "",
         phone: "",
         role: "admin",
-        initialPassword: "",
         roleTitle: "Vision Wellness Guide",
         specialties: "Bates Method, Eye Yoga, Palming",
         bio: "",
       });
 
-      toast.success(
-        `Staff invitation successfully created for ${payload.email}.`,
-        "Staff Member Invited"
-      );
+      setLastInviteResult({
+        email: payload.email,
+        inviteUrl: data.inviteUrl,
+        emailSent: !!data.emailSent,
+      });
+
+      if (data.emailSent) {
+        toast.success(
+          `Staff invitation email sent to ${payload.email}. Valid for 48 hours.`,
+          "Invitation Dispatched"
+        );
+      } else {
+        toast.info(
+          `Staff record created. Copy the manual activation URL shown above.`,
+          "Manual Activation Ready"
+        );
+      }
       await fetchUsers();
     } catch (err: any) {
       setInviteError(cleanErrorMessage(err.message || "Error creating staff user"));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResendInvite = async (user: StaffUser) => {
+    try {
+      setActionInProgressId(user.id);
+      const res = await fetch("/api/admin/users/invite/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(cleanErrorMessage(data.error || "Failed to resend invitation"));
+      }
+
+      setLastInviteResult({
+        email: user.email,
+        inviteUrl: data.inviteUrl,
+        emailSent: !!data.emailSent,
+      });
+
+      if (data.emailSent) {
+        toast.success(`Invitation email resent to ${user.email}.`, "Dispatched");
+      } else {
+        toast.info(`New invitation token generated. Activation link shown above.`, "Token Regenerated");
+      }
+      await fetchUsers();
+    } catch (err: any) {
+      toast.error(cleanErrorMessage(err.message || "Error resending invitation"), "Action Failed");
+    } finally {
+      setActionInProgressId(null);
+    }
+  };
+
+  const handleRevokeInvite = async (user: StaffUser) => {
+    try {
+      setActionInProgressId(user.id);
+      const res = await fetch("/api/admin/users/invite/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(cleanErrorMessage(data.error || "Failed to revoke invitation"));
+      }
+
+      toast.success(`Invitation revoked and account suspended for ${user.email}.`, "Invitation Revoked");
+      await fetchUsers();
+    } catch (err: any) {
+      toast.error(cleanErrorMessage(err.message || "Error revoking invitation"), "Action Failed");
+    } finally {
+      setActionInProgressId(null);
     }
   };
 
@@ -341,6 +411,48 @@ export default function AdminUsersPage() {
         </div>
       )}
 
+      {/* Last Invite Alert Banner */}
+      {lastInviteResult && (
+        <div
+          className={`p-4 rounded-xl border text-xs flex items-start justify-between gap-3 ${
+            lastInviteResult.emailSent
+              ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+              : "bg-amber-50 border-amber-200 text-amber-900"
+          }`}
+        >
+          <div className="space-y-1">
+            <p className="font-semibold">
+              {lastInviteResult.emailSent
+                ? `Invitation email successfully dispatched to ${lastInviteResult.email}.`
+                : `Staff profile created for ${lastInviteResult.email}. (Email dispatch offline or unconfigured).`}
+            </p>
+            {lastInviteResult.inviteUrl && (
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="font-mono text-[11px] bg-white/90 px-2 py-1 rounded border border-current select-all break-all">
+                  {lastInviteResult.inviteUrl}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(lastInviteResult.inviteUrl!);
+                    toast.success("Activation link copied to clipboard.", "Copied");
+                  }}
+                  className="px-2 py-1 bg-white rounded border border-ink-border text-ink hover:bg-ivory font-medium cursor-pointer shrink-0"
+                >
+                  Copy Activation Link
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setLastInviteResult(null)}
+            className="text-ink-muted hover:text-ink font-medium shrink-0 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="bg-white rounded-xl border border-ink-border p-4 shadow-sm flex items-center justify-between">
         <div className="relative w-full max-w-sm">
@@ -400,17 +512,32 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium capitalize ${
-                          user.status === "active" || (user.isActive && !user.status)
-                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                            : user.status === "invited"
-                            ? "bg-amber-50 text-amber-800 border border-amber-200"
-                            : "bg-red-50 text-red-800 border border-red-200"
-                        }`}
-                      >
-                        {user.status || (user.isActive ? "active" : "suspended")}
-                      </span>
+                      {user.status === "invited" ? (
+                        (() => {
+                          const isExpired =
+                            user.invitationExpiresAt &&
+                            new Date(user.invitationExpiresAt).getTime() < Date.now();
+                          return isExpired ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-800 border border-red-200">
+                              Invite Expired
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                              Pending Activation
+                            </span>
+                          );
+                        })()
+                      ) : (
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium capitalize ${
+                            user.status === "active" || (user.isActive && !user.status)
+                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                              : "bg-red-50 text-red-800 border border-red-200"
+                          }`}
+                        >
+                          {user.status || (user.isActive ? "active" : "suspended")}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-ink-muted">
                       {user.phone || "—"}
@@ -432,6 +559,26 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {user.status === "invited" && (
+                          <>
+                            <button
+                              onClick={() => handleResendInvite(user)}
+                              disabled={actionInProgressId === user.id}
+                              className="p-1 text-ink-muted hover:text-plum rounded hover:bg-ivory cursor-pointer disabled:opacity-50"
+                              title="Resend Invitation Token / Email"
+                            >
+                              <RotateCcw className={`w-3.5 h-3.5 ${actionInProgressId === user.id ? "animate-spin text-plum" : ""}`} />
+                            </button>
+                            <button
+                              onClick={() => handleRevokeInvite(user)}
+                              disabled={actionInProgressId === user.id}
+                              className="p-1 text-ink-muted hover:text-amber-700 rounded hover:bg-amber-50 cursor-pointer disabled:opacity-50"
+                              title="Revoke Invitation"
+                            >
+                              <ShieldAlert className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => openEditModal(user)}
                           className="p-1 text-ink-muted hover:text-plum rounded hover:bg-ivory cursor-pointer"
@@ -533,20 +680,14 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-ink-muted mb-1 font-medium">
-                  Initial Temporary Password
-                </label>
-                <input
-                  type="text"
-                  value={inviteForm.initialPassword}
-                  onChange={(e) => setInviteForm({ ...inviteForm, initialPassword: e.target.value })}
-                  placeholder="Defaults to AuroVision@2026"
-                  className="w-full p-2 border border-ink-border rounded bg-ivory/30 focus:outline-none font-mono"
-                />
-                <span className="text-[10px] text-ink-muted mt-0.5 block">
-                  Staff member will be prompted to reset password on initial login.
-                </span>
+              <div className="bg-ivory/60 p-3 rounded-lg border border-ink-border/60 text-[11px] text-ink-muted space-y-1">
+                <div className="flex items-center gap-1.5 text-ink font-medium">
+                  <Lock className="w-3.5 h-3.5 text-gold-dark" />
+                  <span>Secure Invitation & Activation Link</span>
+                </div>
+                <p className="leading-relaxed">
+                  No default password is generated. An invitation containing a cryptographically secure 48-hour activation token will be sent directly to the staff member's email so they can set their own password securely.
+                </p>
               </div>
 
               {/* Therapist Profile Section */}

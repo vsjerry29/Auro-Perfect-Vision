@@ -4,6 +4,7 @@ import { isMySQLConfigured } from "./mysql";
 import * as db from "./mysql-db";
 import { readStore, writeStore } from "./storage-engine";
 import { StaffUser } from "@/lib/types";
+import { sendEmail, renderStaffInvitationEmail } from "./email";
 
 export type { StaffUser };
 
@@ -330,6 +331,310 @@ export async function requireTherapistSession(): Promise<SessionPayload> {
     throw new Error("FORBIDDEN");
   }
   return session;
+}
+
+/**
+ * Creates a pending staff invitation with a single-use cryptographically secure token,
+ * stores ONLY the SHA-256 hash in MySQL, sets a 48-hour expiration, and dispatches
+ * a branded invitation email via Resend.
+ */
+export async function createStaffInvitation(data: {
+  email: string;
+  fullName: string;
+  role: "super_admin" | "admin" | "therapist";
+  phone?: string;
+  therapistId?: string;
+  invitedBy?: { id: string; email: string; fullName: string };
+}): Promise<{
+  user: StaffUser;
+  rawToken: string;
+  inviteUrl: string;
+  emailSent: boolean;
+  emailError?: string;
+}> {
+  const users = await getStaffUsers();
+  const normalizedEmail = data.email.toLowerCase().trim();
+  const existing = users.find(
+    (u) => u.email.toLowerCase() === normalizedEmail
+  );
+  if (existing) {
+    throw new Error("A staff user with this email address already exists.");
+  }
+
+  // Generate 32 bytes of secure random entropy (64 hex characters)
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+  const id = `staff-${Date.now()}`;
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1000); // 48-hour expiration
+
+  const newUser: StaffUser = {
+    id,
+    email: normalizedEmail,
+    fullName: data.fullName.trim(),
+    role: data.role,
+    phone: data.phone?.trim() || "",
+    therapistId: data.therapistId,
+    passwordHash: "", // No default passwords allowed
+    salt: "",
+    isActive: true,
+    status: "invited",
+    invitationToken: tokenHash, // Store ONLY the SHA-256 hash in database
+    invitationSentAt: now.toISOString(),
+    invitationExpiresAt: expiresAt.toISOString(),
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
+  };
+
+  let savedUser: StaffUser;
+  if (isMySQLConfigured()) {
+    savedUser = await db.dbCreateStaffUser(newUser);
+  } else {
+    users.push(newUser);
+    await writeStore("staff_users.json", users);
+    savedUser = newUser;
+  }
+
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com").replace(/\/$/, "");
+  const inviteUrl = `${appUrl}/staff/activate?token=${rawToken}`;
+
+  let emailSent = false;
+  let emailError: string | undefined;
+
+  const emailTemplates = renderStaffInvitationEmail({
+    fullName: savedUser.fullName,
+    role: savedUser.role,
+    inviteUrl,
+    expiresInHours: 48,
+  });
+
+  const sendResult = await sendEmail({
+    to: savedUser.email,
+    subject: "Invitation to Join Auro Perfect Vision Staff Portal",
+    html: emailTemplates.html,
+    text: emailTemplates.text,
+    templateKey: "staff_invitation",
+  });
+
+  if (sendResult.success) {
+    emailSent = true;
+  } else {
+    emailError = sendResult.error || "Email delivery failed";
+  }
+
+  return {
+    user: savedUser,
+    rawToken,
+    inviteUrl,
+    emailSent,
+    emailError,
+  };
+}
+
+/**
+ * Resends a staff invitation with a fresh single-use token and 48-hour expiration.
+ */
+export async function resendStaffInvitation(
+  userId: string,
+  requesterSession: SessionPayload
+): Promise<{
+  success: boolean;
+  rawToken: string;
+  inviteUrl: string;
+  emailSent: boolean;
+  emailError?: string;
+}> {
+  const staff = await findStaffById(userId);
+  if (!staff) {
+    throw new Error("Staff user not found.");
+  }
+  if (staff.status !== "invited") {
+    throw new Error("Only pending accounts in invited status can receive an invitation resend.");
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+  const updated = await updateStaffUser(userId, {
+    invitationToken: tokenHash,
+    invitationSentAt: now.toISOString(),
+    invitationExpiresAt: expiresAt.toISOString(),
+  });
+
+  if (!updated) {
+    throw new Error("Failed to update staff invitation token in database.");
+  }
+
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com").replace(/\/$/, "");
+  const inviteUrl = `${appUrl}/staff/activate?token=${rawToken}`;
+
+  let emailSent = false;
+  let emailError: string | undefined;
+
+  const emailTemplates = renderStaffInvitationEmail({
+    fullName: staff.fullName,
+    role: staff.role,
+    inviteUrl,
+    expiresInHours: 48,
+  });
+
+  const sendResult = await sendEmail({
+    to: staff.email,
+    subject: "Your New Invitation Link — Auro Perfect Vision Staff Portal",
+    html: emailTemplates.html,
+    text: emailTemplates.text,
+    templateKey: "staff_invitation_resend",
+  });
+
+  if (sendResult.success) {
+    emailSent = true;
+  } else {
+    emailError = sendResult.error || "Email delivery failed";
+  }
+
+  return {
+    success: true,
+    rawToken,
+    inviteUrl,
+    emailSent,
+    emailError,
+  };
+}
+
+/**
+ * Revokes a pending staff invitation by removing the unactivated account.
+ */
+export async function revokeStaffInvitation(
+  userId: string,
+  requesterSession: SessionPayload
+): Promise<{ success: boolean }> {
+  const staff = await findStaffById(userId);
+  if (!staff) {
+    throw new Error("Staff user not found.");
+  }
+  if (staff.status !== "invited") {
+    throw new Error("Only pending invitations can be revoked.");
+  }
+
+  await deleteStaffUser(userId);
+  return { success: true };
+}
+
+/**
+ * Verifies an invitation token without consuming it. Used by the activation page.
+ */
+export async function verifyStaffInvitationToken(rawToken: string): Promise<{
+  valid: boolean;
+  user?: { id: string; email: string; fullName: string; role: string };
+  error?: string;
+}> {
+  if (!rawToken || typeof rawToken !== "string" || rawToken.trim().length < 32) {
+    return { valid: false, error: "Invalid invitation link." };
+  }
+
+  const tokenHash = crypto.createHash("sha256").update(rawToken.trim()).digest("hex");
+  let user: StaffUser | null = null;
+
+  if (isMySQLConfigured()) {
+    user = await db.dbFindStaffByInvitationTokenHash(tokenHash);
+  } else {
+    const users = await getStaffUsers();
+    user = users.find((u) => u.invitationToken === tokenHash) || null;
+  }
+
+  if (!user || user.status !== "invited") {
+    return {
+      valid: false,
+      error: "This invitation link is invalid or has already been used. Please request a new invitation from your administrator.",
+    };
+  }
+
+  const now = Date.now();
+  const expiresAt = user.invitationExpiresAt
+    ? new Date(user.invitationExpiresAt).getTime()
+    : user.invitationSentAt
+    ? new Date(user.invitationSentAt).getTime() + 48 * 60 * 60 * 1000
+    : 0;
+
+  if (now > expiresAt) {
+    return {
+      valid: false,
+      error: "This invitation link expired after 48 hours. Please request your administrator to resend the invitation.",
+    };
+  }
+
+  return {
+    valid: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+    },
+  };
+}
+
+/**
+ * Accepts a staff invitation, validates password complexity, stores OWASP PBKDF2 hash,
+ * activates the account, and invalidates the single-use token.
+ */
+export async function acceptStaffInvitation(
+  rawToken: string,
+  newPassword: string
+): Promise<{
+  success: boolean;
+  user?: { id: string; email: string; fullName: string; role: string };
+  error?: string;
+}> {
+  const verification = await verifyStaffInvitationToken(rawToken);
+  if (!verification.valid || !verification.user) {
+    return { success: false, error: verification.error || "Invalid invitation token." };
+  }
+
+  if (!newPassword || typeof newPassword !== "string" || newPassword.length < 8) {
+    return { success: false, error: "Password must be at least 8 characters long." };
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    return { success: false, error: "Password must contain at least one uppercase letter." };
+  }
+  if (!/[a-z]/.test(newPassword)) {
+    return { success: false, error: "Password must contain at least one lowercase letter." };
+  }
+  if (!/[0-9]/.test(newPassword)) {
+    return { success: false, error: "Password must contain at least one digit." };
+  }
+  if (!/[^A-Za-z0-9]/.test(newPassword)) {
+    return { success: false, error: "Password must contain at least one special character." };
+  }
+
+  const { hash, salt } = hashPassword(newPassword, undefined, PBKDF2_ITERATIONS);
+
+  const updated = await updateStaffUser(verification.user.id, {
+    passwordHash: hash,
+    salt,
+    status: "active",
+    isActive: true,
+    invitationToken: undefined,
+    invitationSentAt: undefined,
+    invitationExpiresAt: undefined,
+  });
+
+  if (!updated) {
+    return { success: false, error: "Failed to activate staff account. Please try again." };
+  }
+
+  return {
+    success: true,
+    user: {
+      id: updated.id,
+      email: updated.email,
+      fullName: updated.fullName,
+      role: updated.role,
+    },
+  };
 }
 
 export async function createStaffUser(data: {

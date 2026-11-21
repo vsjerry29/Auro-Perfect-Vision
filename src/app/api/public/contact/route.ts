@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { saveInquiry } from "@/lib/server/crm";
+import {
+  sendEmail,
+  renderContactInquiryAdminEmail,
+  renderContactAcknowledgmentClientEmail,
+} from "@/lib/server/email";
 
 export async function POST(request: Request) {
   try {
@@ -40,6 +45,41 @@ export async function POST(request: Request) {
       message: message.trim(),
       source: "contact_form",
     });
+
+    // Dispatch transactional notifications via Resend (non-blocking)
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "connect@auroperfectvision.com";
+
+    // 1. Alert to Admin
+    const adminTemplate = renderContactInquiryAdminEmail({
+      name: inquiry.name,
+      email: inquiry.email,
+      phone: inquiry.phone,
+      category: inquiry.category,
+      subject: inquiry.subject,
+      message: inquiry.message,
+      reference: inquiry.reference,
+    });
+    sendEmail({
+      to: adminEmail,
+      subject: `New Inquiry [${inquiry.reference}]: ${inquiry.subject}`,
+      html: adminTemplate.html,
+      text: adminTemplate.text,
+      templateKey: "contact_inquiry_admin",
+    }).catch((err) => console.warn("[Contact Admin Email Dispatch Notice]:", err.message));
+
+    // 2. Acknowledgment to Inquirer
+    const clientTemplate = renderContactAcknowledgmentClientEmail({
+      name: inquiry.name,
+      reference: inquiry.reference,
+      subject: inquiry.subject,
+    });
+    sendEmail({
+      to: inquiry.email,
+      subject: `Inquiry Received [${inquiry.reference}] — Auro Perfect Vision`,
+      html: clientTemplate.html,
+      text: clientTemplate.text,
+      templateKey: "contact_acknowledgment_client",
+    }).catch((err) => console.warn("[Contact Client Acknowledgment Dispatch Notice]:", err.message));
 
     return NextResponse.json({
       success: true,

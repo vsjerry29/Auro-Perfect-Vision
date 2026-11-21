@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   getCurrentStaffSession,
   getStaffUsers,
-  createStaffUser,
+  createStaffInvitation,
   updateStaffUser,
   deleteStaffUser,
 } from "@/lib/server/auth";
@@ -72,13 +72,17 @@ export async function POST(request: Request) {
       therapistId = savedProfile.id;
     }
 
-    const newUser = await createStaffUser({
+    const inviteResult = await createStaffInvitation({
       email,
       fullName,
       role,
       phone,
       therapistId,
-      initialPassword: body.initialPassword,
+      invitedBy: {
+        id: session.userId,
+        email: session.email,
+        fullName: session.fullName,
+      },
     });
 
     await logAuditEvent({
@@ -87,12 +91,23 @@ export async function POST(request: Request) {
       staffName: session.fullName,
       action: "STAFF_USER_INVITED",
       entityType: "StaffUser",
-      entityId: newUser.id,
-      details: { email: newUser.email, role: newUser.role },
+      entityId: inviteResult.user.id,
+      details: {
+        email: inviteResult.user.email,
+        role: inviteResult.user.role,
+        emailSent: inviteResult.emailSent,
+        emailError: inviteResult.emailError,
+      },
     });
 
-    const { passwordHash, salt, ...safe } = newUser;
-    return NextResponse.json({ success: true, user: safe });
+    const { passwordHash, salt, ...safe } = inviteResult.user;
+    return NextResponse.json({
+      success: true,
+      user: safe,
+      emailSent: inviteResult.emailSent,
+      emailError: inviteResult.emailError,
+      inviteUrl: inviteResult.inviteUrl,
+    });
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to create staff user" },

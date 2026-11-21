@@ -20,6 +20,8 @@ import {
   LeaveException,
   IntakeTemplate,
   SiteContent,
+  PaymentTransaction,
+  InvoiceRecord,
 } from "@/lib/types";
 import {
   ClientContact,
@@ -70,6 +72,9 @@ export async function dbGetStaffUsers(): Promise<StaffUser[]> {
     isActive: Boolean(r.is_active),
     status: r.status || (r.is_active ? "active" : "suspended"),
     therapistId: r.therapist_id,
+    invitationToken: r.invitation_token || undefined,
+    invitationSentAt: r.invitation_sent_at ? new Date(r.invitation_sent_at).toISOString() : undefined,
+    invitationExpiresAt: r.invitation_expires_at ? new Date(r.invitation_expires_at).toISOString() : undefined,
     lastLoginAt: r.last_login_at ? new Date(r.last_login_at).toISOString() : undefined,
     createdAt: new Date(r.created_at).toISOString(),
     updatedAt: new Date(r.updated_at).toISOString(),
@@ -98,6 +103,9 @@ export async function dbFindStaffByEmail(email: string): Promise<StaffUser | nul
     isActive: Boolean(r.is_active),
     status: r.status || (r.is_active ? "active" : "suspended"),
     therapistId: r.therapist_id,
+    invitationToken: r.invitation_token || undefined,
+    invitationSentAt: r.invitation_sent_at ? new Date(r.invitation_sent_at).toISOString() : undefined,
+    invitationExpiresAt: r.invitation_expires_at ? new Date(r.invitation_expires_at).toISOString() : undefined,
     lastLoginAt: r.last_login_at ? new Date(r.last_login_at).toISOString() : undefined,
     createdAt: new Date(r.created_at).toISOString(),
     updatedAt: new Date(r.updated_at).toISOString(),
@@ -124,6 +132,9 @@ export async function dbFindStaffById(id: string): Promise<StaffUser | null> {
     isActive: Boolean(r.is_active),
     status: r.status || (r.is_active ? "active" : "suspended"),
     therapistId: r.therapist_id,
+    invitationToken: r.invitation_token || undefined,
+    invitationSentAt: r.invitation_sent_at ? new Date(r.invitation_sent_at).toISOString() : undefined,
+    invitationExpiresAt: r.invitation_expires_at ? new Date(r.invitation_expires_at).toISOString() : undefined,
     lastLoginAt: r.last_login_at ? new Date(r.last_login_at).toISOString() : undefined,
     createdAt: new Date(r.created_at).toISOString(),
     updatedAt: new Date(r.updated_at).toISOString(),
@@ -135,8 +146,8 @@ export async function dbCreateStaffUser(user: StaffUser): Promise<StaffUser> {
   const sql = `
     INSERT INTO staff_profiles (
       id, email, full_name, role, phone, password_hash, salt,
-      is_active, status, therapist_id, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      is_active, status, therapist_id, invitation_token, invitation_sent_at, invitation_expires_at, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     ON DUPLICATE KEY UPDATE
       full_name = VALUES(full_name),
       role = VALUES(role),
@@ -146,6 +157,9 @@ export async function dbCreateStaffUser(user: StaffUser): Promise<StaffUser> {
       is_active = VALUES(is_active),
       status = VALUES(status),
       therapist_id = VALUES(therapist_id),
+      invitation_token = VALUES(invitation_token),
+      invitation_sent_at = VALUES(invitation_sent_at),
+      invitation_expires_at = VALUES(invitation_expires_at),
       updated_at = NOW()
   `;
 
@@ -155,14 +169,46 @@ export async function dbCreateStaffUser(user: StaffUser): Promise<StaffUser> {
     user.fullName,
     user.role,
     user.phone || "",
-    user.passwordHash,
-    user.salt,
+    user.passwordHash || "",
+    user.salt || "",
     user.isActive ? 1 : 0,
     user.status || "active",
     user.therapistId || null,
+    user.invitationToken || null,
+    user.invitationSentAt ? new Date(user.invitationSentAt) : null,
+    user.invitationExpiresAt ? new Date(user.invitationExpiresAt) : null,
   ]);
 
   return user;
+}
+
+export async function dbFindStaffByInvitationTokenHash(tokenHash: string): Promise<StaffUser | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM staff_profiles WHERE invitation_token = ? LIMIT 1",
+    [tokenHash]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+
+  return {
+    id: r.id,
+    email: r.email,
+    fullName: r.full_name,
+    role: r.role,
+    phone: r.phone || "",
+    passwordHash: r.password_hash || "",
+    salt: r.salt || "",
+    isActive: Boolean(r.is_active),
+    status: r.status || (r.is_active ? "active" : "suspended"),
+    therapistId: r.therapist_id,
+    invitationToken: r.invitation_token || undefined,
+    invitationSentAt: r.invitation_sent_at ? new Date(r.invitation_sent_at).toISOString() : undefined,
+    invitationExpiresAt: r.invitation_expires_at ? new Date(r.invitation_expires_at).toISOString() : undefined,
+    lastLoginAt: r.last_login_at ? new Date(r.last_login_at).toISOString() : undefined,
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  };
 }
 
 export async function dbUpdateStaffUser(
@@ -207,6 +253,18 @@ export async function dbUpdateStaffUser(
   if (updates.therapistId !== undefined) {
     fields.push("therapist_id = ?");
     params.push(updates.therapistId || null);
+  }
+  if (updates.invitationToken !== undefined) {
+    fields.push("invitation_token = ?");
+    params.push(updates.invitationToken || null);
+  }
+  if (updates.invitationSentAt !== undefined) {
+    fields.push("invitation_sent_at = ?");
+    params.push(updates.invitationSentAt ? new Date(updates.invitationSentAt) : null);
+  }
+  if (updates.invitationExpiresAt !== undefined) {
+    fields.push("invitation_expires_at = ?");
+    params.push(updates.invitationExpiresAt ? new Date(updates.invitationExpiresAt) : null);
   }
   if (updates.lastLoginAt !== undefined) {
     fields.push("last_login_at = ?");
@@ -1520,4 +1578,575 @@ export async function dbProcessPendingNotificationJobs(): Promise<{
   }
 
   return { processed: jobs.length, sent, failed };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 14. EMR EXTENSIONS: MEDICAL HISTORIES, ENCOUNTERS, ASSESSMENTS, NOTES, PLANS, AUDIT
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function dbGetMedicalHistory(patientId: string): Promise<PatientMedicalHistory | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM patient_medical_histories WHERE patient_id = ? LIMIT 1",
+    [patientId]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    patientId: r.patient_id,
+    ocularHistory: safeJsonParse<any>(r.ocular_history, {}),
+    systemicHistory: safeJsonParse<any>(r.systemic_history, {}),
+    familyOcularHistory: r.family_ocular_history || "",
+    currentMedications: r.current_medications || "",
+    visualEnvironment: safeJsonParse<any>(r.visual_environment, {}),
+    visualAids: safeJsonParse<any>(r.visual_aids, {}),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  };
+}
+
+export async function dbSaveMedicalHistory(h: PatientMedicalHistory): Promise<PatientMedicalHistory> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO patient_medical_histories (
+      id, patient_id, ocular_history, systemic_history, family_ocular_history,
+      current_medications, visual_environment, visual_aids, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE
+      ocular_history = VALUES(ocular_history),
+      systemic_history = VALUES(systemic_history),
+      family_ocular_history = VALUES(family_ocular_history),
+      current_medications = VALUES(current_medications),
+      visual_environment = VALUES(visual_environment),
+      visual_aids = VALUES(visual_aids),
+      updated_at = NOW()
+  `;
+
+  await execute(sql, [
+    h.id,
+    h.patientId,
+    JSON.stringify(h.ocularHistory || {}),
+    JSON.stringify(h.systemicHistory || {}),
+    h.familyOcularHistory || "",
+    h.currentMedications || "",
+    JSON.stringify(h.visualEnvironment || {}),
+    JSON.stringify(h.visualAids || {}),
+  ]);
+
+  return h;
+}
+
+export async function dbGetEncountersByPatientId(patientId: string): Promise<ClinicalEncounter[]> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM clinical_encounters WHERE patient_id = ? ORDER BY encounter_date DESC",
+    [patientId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    patientName: r.patient_name,
+    encounterDate: r.encounter_date instanceof Date ? r.encounter_date.toISOString().split("T")[0] : String(r.encounter_date).split("T")[0],
+    encounterType: r.encounter_type,
+    therapistId: r.therapist_id,
+    therapistName: r.therapist_name,
+    chiefComplaint: r.chief_complaint,
+    status: r.status,
+    linkedBookingId: r.linked_booking_id,
+    durationMinutes: r.duration_minutes,
+    clinicalSummary: r.clinical_summary,
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  }));
+}
+
+export async function dbSaveEncounter(e: ClinicalEncounter): Promise<ClinicalEncounter> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO clinical_encounters (
+      id, patient_id, patient_name, encounter_date, encounter_type, therapist_id,
+      therapist_name, chief_complaint, status, linked_booking_id, duration_minutes,
+      clinical_summary, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE
+      patient_name = VALUES(patient_name),
+      encounter_date = VALUES(encounter_date),
+      encounter_type = VALUES(encounter_type),
+      therapist_id = VALUES(therapist_id),
+      therapist_name = VALUES(therapist_name),
+      chief_complaint = VALUES(chief_complaint),
+      status = VALUES(status),
+      linked_booking_id = VALUES(linked_booking_id),
+      duration_minutes = VALUES(duration_minutes),
+      clinical_summary = VALUES(clinical_summary),
+      updated_at = NOW()
+  `;
+
+  await execute(sql, [
+    e.id,
+    e.patientId,
+    e.patientName,
+    e.encounterDate,
+    e.encounterType,
+    e.therapistId,
+    e.therapistName,
+    e.chiefComplaint,
+    e.status,
+    e.linkedBookingId || null,
+    e.durationMinutes || 60,
+    e.clinicalSummary || null,
+  ]);
+
+  return e;
+}
+
+export async function dbGetAssessmentsByPatientId(patientId: string): Promise<VisionAssessment[]> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM vision_assessments WHERE patient_id = ? ORDER BY assessment_date DESC",
+    [patientId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    encounterId: r.encounter_id,
+    assessmentDate: r.assessment_date instanceof Date ? r.assessment_date.toISOString().split("T")[0] : String(r.assessment_date).split("T")[0],
+    therapistId: r.therapist_id,
+    therapistName: r.therapist_name,
+    visualAcuity: safeJsonParse<any>(r.visual_acuity, {}),
+    refraction: safeJsonParse<any>(r.refraction, {}),
+    binocularVision: safeJsonParse<any>(r.binocular_vision, {}),
+    intraocularPressureIOP: safeJsonParse<any>(r.intraocular_pressure_iop, {}),
+    clinicalImpression: r.clinical_impression,
+    recommendations: r.recommendations,
+    createdAt: new Date(r.created_at).toISOString(),
+  }));
+}
+
+export async function dbSaveAssessment(a: VisionAssessment): Promise<VisionAssessment> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO vision_assessments (
+      id, patient_id, encounter_id, assessment_date, therapist_id, therapist_name,
+      visual_acuity, refraction, binocular_vision, intraocular_pressure_iop,
+      clinical_impression, recommendations, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE
+      encounter_id = VALUES(encounter_id),
+      assessment_date = VALUES(assessment_date),
+      therapist_id = VALUES(therapist_id),
+      therapist_name = VALUES(therapist_name),
+      visual_acuity = VALUES(visual_acuity),
+      refraction = VALUES(refraction),
+      binocular_vision = VALUES(binocular_vision),
+      intraocular_pressure_iop = VALUES(intraocular_pressure_iop),
+      clinical_impression = VALUES(clinical_impression),
+      recommendations = VALUES(recommendations)
+  `;
+
+  await execute(sql, [
+    a.id,
+    a.patientId,
+    a.encounterId || null,
+    a.assessmentDate,
+    a.therapistId,
+    a.therapistName,
+    JSON.stringify(a.visualAcuity || {}),
+    JSON.stringify(a.refraction || {}),
+    JSON.stringify(a.binocularVision || {}),
+    JSON.stringify(a.intraocularPressureIOP || {}),
+    a.clinicalImpression,
+    a.recommendations,
+  ]);
+
+  return a;
+}
+
+export async function dbGetNotesByPatientId(patientId: string): Promise<ClinicalNote[]> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM clinical_notes WHERE patient_id = ? ORDER BY note_date DESC, created_at DESC",
+    [patientId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    encounterId: r.encounter_id,
+    therapistId: r.therapist_id,
+    therapistName: r.therapist_name,
+    noteDate: r.note_date instanceof Date ? r.note_date.toISOString().split("T")[0] : String(r.note_date).split("T")[0],
+    subjective: r.subjective,
+    objective: r.objective,
+    assessment: r.assessment,
+    plan: r.plan,
+    status: r.status,
+    isLocked: Boolean(r.is_locked),
+    signedBy: r.signed_by,
+    signedByName: r.signed_by_name,
+    signedAt: r.signed_at ? new Date(r.signed_at).toISOString() : undefined,
+    amendments: [],
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  }));
+}
+
+export async function dbSaveNote(n: ClinicalNote): Promise<ClinicalNote> {
+  await initMySQLSchema();
+
+  // Immutability Protection: Verify existing record lock status
+  const existingRows = await query<any>(
+    "SELECT is_locked, subjective, objective, assessment, plan FROM clinical_notes WHERE id = ? LIMIT 1",
+    [n.id]
+  );
+
+  if (existingRows && existingRows.length > 0) {
+    const existing = existingRows[0];
+    if (existing.is_locked) {
+      const hasSoapModification =
+        existing.subjective !== n.subjective ||
+        existing.objective !== n.objective ||
+        existing.assessment !== n.assessment ||
+        existing.plan !== n.plan;
+
+      if (hasSoapModification) {
+        throw new Error(
+          "IMMUTABLE_CLINICAL_RECORD: Locked and signed SOAP notes cannot be edited. Please append an amendment instead."
+        );
+      }
+    }
+  }
+
+  const sql = `
+    INSERT INTO clinical_notes (
+      id, patient_id, encounter_id, therapist_id, therapist_name, note_date,
+      subjective, objective, assessment, plan, status, is_locked, signed_by,
+      signed_by_name, signed_at, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE
+      encounter_id = VALUES(encounter_id),
+      therapist_id = VALUES(therapist_id),
+      therapist_name = VALUES(therapist_name),
+      note_date = VALUES(note_date),
+      subjective = VALUES(subjective),
+      objective = VALUES(objective),
+      assessment = VALUES(assessment),
+      plan = VALUES(plan),
+      status = VALUES(status),
+      is_locked = VALUES(is_locked),
+      signed_by = VALUES(signed_by),
+      signed_by_name = VALUES(signed_by_name),
+      signed_at = VALUES(signed_at),
+      updated_at = NOW()
+  `;
+
+  await execute(sql, [
+    n.id,
+    n.patientId,
+    n.encounterId || null,
+    n.therapistId,
+    n.therapistName,
+    n.noteDate,
+    n.subjective,
+    n.objective,
+    n.assessment,
+    n.plan,
+    n.status,
+    n.isLocked ? 1 : 0,
+    n.signedBy || null,
+    n.signedByName || null,
+    n.signedAt ? new Date(n.signedAt) : null,
+  ]);
+
+  return n;
+}
+
+export async function dbGetTreatmentPlansByPatientId(patientId: string): Promise<TreatmentPlan[]> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM treatment_plans WHERE patient_id = ? ORDER BY created_at DESC",
+    [patientId]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    therapistId: r.therapist_id,
+    therapistName: r.therapist_name,
+    title: r.title,
+    primaryDiagnosis: r.diagnosis_summary || "",
+    goals: safeJsonParse<string[]>(r.primary_goals, []),
+    prescribedTherapies: safeJsonParse<any[]>(r.prescribed_therapies, []),
+    startDate: r.start_date instanceof Date ? r.start_date.toISOString().split("T")[0] : String(r.start_date).split("T")[0],
+    targetEndDate: r.target_completion_date
+      ? (r.target_completion_date instanceof Date ? r.target_completion_date.toISOString().split("T")[0] : String(r.target_completion_date).split("T")[0])
+      : (r.start_date instanceof Date ? r.start_date.toISOString().split("T")[0] : String(r.start_date).split("T")[0]),
+    status: (r.status as any) || "active",
+    progressNotes: "",
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  }));
+}
+
+export async function dbSaveTreatmentPlan(p: TreatmentPlan): Promise<TreatmentPlan> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO treatment_plans (
+      id, patient_id, patient_name, therapist_id, therapist_name, title,
+      diagnosis_summary, primary_goals, prescribed_therapies, home_exercises,
+      duration_weeks, sessions_per_week, status, start_date, target_completion_date,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE
+      therapist_id = VALUES(therapist_id),
+      therapist_name = VALUES(therapist_name),
+      title = VALUES(title),
+      diagnosis_summary = VALUES(diagnosis_summary),
+      primary_goals = VALUES(primary_goals),
+      prescribed_therapies = VALUES(prescribed_therapies),
+      status = VALUES(status),
+      start_date = VALUES(start_date),
+      target_completion_date = VALUES(target_completion_date),
+      updated_at = NOW()
+  `;
+
+  await execute(sql, [
+    p.id,
+    p.patientId,
+    "", // patient_name
+    p.therapistId,
+    p.therapistName,
+    p.title,
+    p.primaryDiagnosis || null,
+    JSON.stringify(p.goals || []),
+    JSON.stringify(p.prescribedTherapies || []),
+    JSON.stringify([]), // home_exercises
+    12, // duration_weeks
+    2,  // sessions_per_week
+    p.status,
+    p.startDate,
+    p.targetEndDate || null,
+  ]);
+
+  return p;
+}
+
+export async function dbLogClinicalAuditEvent(e: ClinicalAuditEvent): Promise<void> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO clinical_audit_events (
+      id, staff_id, staff_name, staff_role, action, patient_id,
+      patient_name, entity_type, entity_id, reason, diff_json, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+
+  await execute(sql, [
+    e.id,
+    e.staffId,
+    e.staffName,
+    "therapist",
+    e.action,
+    e.patientId || null,
+    null,
+    "patient_record",
+    e.patientId || e.id,
+    null,
+    JSON.stringify(e.details || {}),
+  ]);
+}
+
+export async function dbGetClinicalAuditEvents(patientId?: string): Promise<ClinicalAuditEvent[]> {
+  await initMySQLSchema();
+  let sql = "SELECT * FROM clinical_audit_events";
+  const params: any[] = [];
+  if (patientId) {
+    sql += " WHERE patient_id = ?";
+    params.push(patientId);
+  }
+  sql += " ORDER BY created_at DESC LIMIT 100";
+
+  const rows = await query<any>(sql, params);
+  return rows.map((r) => ({
+    id: r.id,
+    patientId: r.patient_id,
+    staffId: r.staff_id,
+    staffName: r.staff_name,
+    action: r.action,
+    timestamp: new Date(r.created_at).toISOString(),
+    details: safeJsonParse<any>(r.diff_json, {}),
+  }));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 15. PAYMENTS & INVOICES
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function dbSavePayment(p: PaymentTransaction): Promise<PaymentTransaction> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO payments (
+      id, booking_id, gateway, gateway_payment_id, gateway_order_id,
+      amount, currency, status, raw_response, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE
+      gateway = VALUES(gateway),
+      gateway_payment_id = VALUES(gateway_payment_id),
+      gateway_order_id = VALUES(gateway_order_id),
+      amount = VALUES(amount),
+      currency = VALUES(currency),
+      status = VALUES(status),
+      raw_response = VALUES(raw_response),
+      updated_at = NOW()
+  `;
+
+  await execute(sql, [
+    p.id,
+    p.bookingId,
+    p.gateway,
+    p.gatewayPaymentId || null,
+    p.gatewayOrderId || null,
+    p.amount,
+    p.currency,
+    p.status,
+    p.rawResponse ? JSON.stringify(p.rawResponse) : null,
+  ]);
+
+  return p;
+}
+
+export async function dbGetPaymentByGatewayOrderId(orderId: string): Promise<PaymentTransaction | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM payments WHERE gateway_order_id = ? LIMIT 1",
+    [orderId]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    bookingId: r.booking_id,
+    gateway: r.gateway,
+    gatewayPaymentId: r.gateway_payment_id,
+    gatewayOrderId: r.gateway_order_id,
+    amount: parseFloat(r.amount),
+    currency: r.currency,
+    status: r.status,
+    rawResponse: safeJsonParse<any>(r.raw_response, {}),
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  };
+}
+
+export async function dbGetPaymentByBookingId(bookingId: string): Promise<PaymentTransaction | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM payments WHERE booking_id = ? ORDER BY created_at DESC LIMIT 1",
+    [bookingId]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    bookingId: r.booking_id,
+    gateway: r.gateway,
+    gatewayPaymentId: r.gateway_payment_id,
+    gatewayOrderId: r.gateway_order_id,
+    amount: parseFloat(r.amount),
+    currency: r.currency,
+    status: r.status,
+    rawResponse: safeJsonParse<any>(r.raw_response, {}),
+    createdAt: new Date(r.created_at).toISOString(),
+    updatedAt: new Date(r.updated_at).toISOString(),
+  };
+}
+
+export async function dbUpdatePaymentStatus(
+  id: string,
+  status: 'pending' | 'captured' | 'failed' | 'refunded',
+  gatewayPaymentId?: string,
+  rawResponse?: any
+): Promise<void> {
+  await initMySQLSchema();
+  const fields = ["status = ?", "updated_at = NOW()"];
+  const params: any[] = [status];
+
+  if (gatewayPaymentId) {
+    fields.push("gateway_payment_id = ?");
+    params.push(gatewayPaymentId);
+  }
+  if (rawResponse) {
+    fields.push("raw_response = ?");
+    params.push(JSON.stringify(rawResponse));
+  }
+  params.push(id);
+
+  await execute(`UPDATE payments SET ${fields.join(", ")} WHERE id = ?`, params);
+}
+
+export async function dbSaveInvoice(inv: InvoiceRecord): Promise<InvoiceRecord> {
+  await initMySQLSchema();
+  const sql = `
+    INSERT INTO invoices (
+      id, booking_id, invoice_number, total_amount, currency,
+      status, pdf_storage_path, issued_at, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    ON DUPLICATE KEY UPDATE
+      total_amount = VALUES(total_amount),
+      currency = VALUES(currency),
+      status = VALUES(status),
+      pdf_storage_path = VALUES(pdf_storage_path)
+  `;
+
+  await execute(sql, [
+    inv.id,
+    inv.bookingId,
+    inv.invoiceNumber,
+    inv.totalAmount,
+    inv.currency,
+    inv.status,
+    inv.pdfStoragePath || null,
+    inv.issuedAt ? new Date(inv.issuedAt) : new Date(),
+  ]);
+
+  return inv;
+}
+
+export async function dbGetInvoiceByNumber(invoiceNumber: string): Promise<InvoiceRecord | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM invoices WHERE LOWER(invoice_number) = LOWER(?) LIMIT 1",
+    [invoiceNumber.trim()]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    bookingId: r.booking_id,
+    invoiceNumber: r.invoice_number,
+    totalAmount: parseFloat(r.total_amount),
+    currency: r.currency,
+    status: r.status,
+    pdfStoragePath: r.pdf_storage_path,
+    issuedAt: new Date(r.issued_at).toISOString(),
+    createdAt: new Date(r.created_at).toISOString(),
+  };
+}
+
+export async function dbGetInvoiceByBookingId(bookingId: string): Promise<InvoiceRecord | null> {
+  await initMySQLSchema();
+  const rows = await query<any>(
+    "SELECT * FROM invoices WHERE booking_id = ? ORDER BY created_at DESC LIMIT 1",
+    [bookingId]
+  );
+  if (!rows || rows.length === 0) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    bookingId: r.booking_id,
+    invoiceNumber: r.invoice_number,
+    totalAmount: parseFloat(r.total_amount),
+    currency: r.currency,
+    status: r.status,
+    pdfStoragePath: r.pdf_storage_path,
+    issuedAt: new Date(r.issued_at).toISOString(),
+    createdAt: new Date(r.created_at).toISOString(),
+  };
 }

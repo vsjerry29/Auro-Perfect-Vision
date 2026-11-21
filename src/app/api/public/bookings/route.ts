@@ -5,8 +5,11 @@ import {
   getTherapistById,
   getLeaveExceptions,
 } from "@/lib/server/cms";
+import { isMySQLConfigured } from "@/lib/server/mysql";
+import * as db from "@/lib/server/mysql-db";
 import { findOrCreateClientFromBooking } from "@/lib/server/crm";
 import { getAllPatients, createPatient } from "@/lib/server/emr";
+import { sendEmail, renderBookingConfirmationEmail } from "@/lib/server/email";
 import { Booking } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -47,30 +50,48 @@ export async function POST(request: Request) {
     }
 
     // 3. Concurrency / Double-Booking Protection
-    const existingBookings = getAllBookings();
-    const conflict = existingBookings.find(
-      (b) =>
-        b.therapistId === booking.therapistId &&
-        b.date === booking.date &&
-        b.timeSlot === booking.timeSlot &&
-        b.id !== booking.id &&
-        b.status !== "cancelled"
-    );
-
-    if (conflict) {
-      return NextResponse.json(
-        {
-          error:
-            "This appointment slot was just reserved by another client. Please select an adjacent time slot or an alternative practitioner.",
-        },
-        { status: 409 }
+    let saved: Booking;
+    if (isMySQLConfigured()) {
+      try {
+        saved = await db.dbSaveBooking(booking);
+        // Also update memory cache
+        saveBooking(booking);
+      } catch (dbErr: any) {
+        if (dbErr.message && dbErr.message.includes("DOUBLE_BOOKING_PREVENTED")) {
+          return NextResponse.json(
+            {
+              error:
+                "This appointment slot was just reserved by another client. Please select an adjacent time slot or an alternative practitioner.",
+            },
+            { status: 409 }
+          );
+        }
+        throw dbErr;
+      }
+    } else {
+      const existingBookings = getAllBookings();
+      const conflict = existingBookings.find(
+        (b) =>
+          b.therapistId === booking.therapistId &&
+          b.date === booking.date &&
+          b.timeSlot === booking.timeSlot &&
+          b.id !== booking.id &&
+          b.status !== "cancelled"
       );
+
+      if (conflict) {
+        return NextResponse.json(
+          {
+            error:
+              "This appointment slot was just reserved by another client. Please select an adjacent time slot or an alternative practitioner.",
+          },
+          { status: 409 }
+        );
+      }
+      saved = saveBooking(booking);
     }
 
-    // 4. Save Booking
-    const saved = saveBooking(booking);
-
-    // 5. Automatically associate or create client profile in CRM
+    // 4. Automatically associate or create client profile in CRM
     let crmClient = null;
     try {
       crmClient = findOrCreateClientFromBooking(saved);
@@ -78,7 +99,7 @@ export async function POST(request: Request) {
       console.warn("Could not sync booking to CRM:", crmErr);
     }
 
-    // 6. Seamless EMR Continuity: Ensure patient record exists
+    // 5. Seamless EMR Continuity: Ensure patient record exists
     try {
       const allPatients = await getAllPatients();
       const existingPatient = allPatients.find(
@@ -100,6 +121,34 @@ export async function POST(request: Request) {
       }
     } catch (emrErr) {
       console.warn("Could not sync booking to EMR:", emrErr);
+    }
+
+    // 6. Dispatch Booking Confirmation Email via Resend (non-blocking)
+    if (saved.clientEmail) {
+      const confirmationTpl = renderBookingConfirmationEmail({
+        clientName: saved.clientName,
+        bookingReference: saved.bookingReference,
+        offeringTitle: saved.offeringTitle,
+        therapistName: saved.therapistName,
+        bookingDate: saved.date,
+        timeSlot: saved.timeSlot,
+        paymentMethod: saved.paymentMethod || "offline",
+        paymentStatus: saved.paymentStatus || "pending",
+        totalAmount: saved.totalAmount || 0,
+        currency: saved.currency || "INR",
+        invoiceUrl: saved.invoiceNumber
+          ? `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/api/invoices/${saved.invoiceNumber}`
+          : undefined,
+      });
+
+      sendEmail({
+        to: saved.clientEmail,
+        subject: `Appointment Confirmation [${saved.bookingReference}] — Auro Perfect Vision`,
+        html: confirmationTpl.html,
+        text: confirmationTpl.text,
+        templateKey: "booking_confirmation",
+        bookingId: saved.id,
+      }).catch((emailErr) => console.warn("[Booking Confirmation Email Dispatch Notice]:", emailErr.message));
     }
 
     return NextResponse.json({ success: true, booking: saved });
