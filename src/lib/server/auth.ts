@@ -19,10 +19,16 @@ export interface SessionPayload {
 
 export const SESSION_COOKIE_NAME = "apv_staff_session";
 
-// Secret for signing session tokens; can be set in process.env.SESSION_SECRET
-const SESSION_SECRET =
-  process.env.SESSION_SECRET ||
-  "auro_perfect_vision_secure_staff_secret_2026_auroville_holistic_eye_care";
+// Secret for signing session tokens — MUST be set via environment variable in production.
+// No fallback secret is provided. The application will refuse to start sessions without it.
+const SESSION_SECRET = process.env.SESSION_SECRET || "";
+
+if (!SESSION_SECRET && process.env.NODE_ENV === "production") {
+  console.error(
+    "[SECURITY FATAL] SESSION_SECRET environment variable is not set. " +
+    "Session signing is disabled. Set a 32+ character random hex secret in Hostinger hPanel."
+  );
+}
 
 // OWASP recommended iteration standards for PBKDF2-HMAC-SHA512
 export const PBKDF2_ITERATIONS = 220000;
@@ -144,83 +150,35 @@ export async function verifyAndUpgradeStaffPassword(
   return { isValid: false, wasUpgraded: false };
 }
 
-function getBootstrapUsers(): StaffUser[] {
-  const adminPass = process.env.ADMIN_INITIAL_PASSWORD || "AuroVision@2026!";
-  const therapistPass = process.env.THERAPIST_INITIAL_PASSWORD || "AnanyaVision@2026!";
-
-  const { hash: adminHash, salt: adminSalt } = hashPassword(adminPass);
-  const { hash: therHash, salt: therSalt } = hashPassword(therapistPass);
-
-  return [
-    {
-      id: "staff-admin-1",
-      email: "admin@auroperfectvision.com",
-      fullName: "Auro Perfect Vision Admin",
-      role: "super_admin",
-      phone: "+91 8012305151",
-      passwordHash: adminHash,
-      salt: adminSalt,
-      isActive: true,
-      status: "active",
-      createdAt: "2026-11-01T00:00:00.000Z",
-      updatedAt: "2026-11-01T00:00:00.000Z",
-    },
-    {
-      id: "staff-therapist-1",
-      email: "therapist@auroperfectvision.com",
-      fullName: "Dr. Ananya Sen",
-      role: "therapist",
-      therapistId: "therapist-1",
-      phone: "+91 9488005685",
-      passwordHash: therHash,
-      salt: therSalt,
-      isActive: true,
-      status: "active",
-      createdAt: "2026-11-01T00:00:00.000Z",
-      updatedAt: "2026-11-01T00:00:00.000Z",
-    },
-  ];
-}
-
 export async function getStaffUsers(): Promise<StaffUser[]> {
   if (isMySQLConfigured()) {
     try {
-      const users = await db.dbGetStaffUsers();
-      if (users.length > 0) return users;
-
-      // If database table is empty, bootstrap initial staff users
-      const initialUsers = getBootstrapUsers();
-      for (const u of initialUsers) {
-        await db.dbCreateStaffUser(u);
-      }
-      return initialUsers;
+      return await db.dbGetStaffUsers();
     } catch (err) {
       console.error("MySQL getStaffUsers error:", err);
       throw err;
     }
   }
 
-  // Fallback to unified storage engine (never writes to disk in production)
-  return readStore<StaffUser[]>("staff_users.json", getBootstrapUsers());
+  // Fallback to unified storage engine for file-based dev environments (no auto-bootstrap)
+  return readStore<StaffUser[]>("staff_users.json", []);
 }
 
+/**
+ * Looks up a staff user by email address for login purposes.
+ * Returns the full user record so the caller can inspect status, isActive, etc.
+ * Does NOT filter by status — the login route must check status/isActive itself
+ * to give appropriate error messages (e.g. 403 for invited accounts).
+ */
 export async function findStaffByEmail(email: string): Promise<StaffUser | undefined> {
   const normalized = email.toLowerCase().trim();
   if (isMySQLConfigured()) {
     const user = await db.dbFindStaffByEmail(normalized);
-    if (user && user.isActive && user.status !== "suspended") {
-      return user;
-    }
-    return undefined;
+    return user || undefined;
   }
 
   const users = await getStaffUsers();
-  return users.find(
-    (u) =>
-      u.email.toLowerCase() === normalized &&
-      u.isActive &&
-      u.status !== "suspended"
-  );
+  return users.find((u) => u.email.toLowerCase() === normalized);
 }
 
 export async function findStaffById(id: string): Promise<StaffUser | undefined> {
@@ -233,10 +191,18 @@ export async function findStaffById(id: string): Promise<StaffUser | undefined> 
   return users.find((u) => u.id === id);
 }
 
+export function getSessionSecret(): string {
+  return process.env.SESSION_SECRET || "";
+}
+
 export function createSessionToken(payload: SessionPayload): string {
+  const secret = getSessionSecret();
+  if (!secret) {
+    throw new Error("SESSION_SECRET is not configured. Cannot create session tokens.");
+  }
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = crypto
-    .createHmac("sha256", SESSION_SECRET)
+    .createHmac("sha256", secret)
     .update(data)
     .digest("base64url");
   return `${data}.${signature}`;
@@ -244,13 +210,18 @@ export function createSessionToken(payload: SessionPayload): string {
 
 export function verifySessionToken(token: string): SessionPayload | null {
   if (!token || !token.includes(".")) return null;
+  const secret = getSessionSecret();
+  if (!secret) return null; // Cannot verify without a secret
   const [data, signature] = token.split(".");
   const expectedSignature = crypto
-    .createHmac("sha256", SESSION_SECRET)
+    .createHmac("sha256", secret)
     .update(data)
     .digest("base64url");
 
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+  const sigBuf = Buffer.from(signature);
+  const expectedBuf = Buffer.from(expectedSignature);
+
+  if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
     return null;
   }
 
@@ -269,34 +240,40 @@ export function verifySessionToken(token: string): SessionPayload | null {
 
 /**
  * Retrieves the current authenticated staff session.
- * Actively checks the database/store: if the account is suspended or deactivated,
- * active sessions are IMMEDIATELY revoked (returns null).
+ * FAIL-CLOSED: If the database cannot be reached, the session is rejected.
+ * Checks: account must exist, isActive === true, status === "active".
+ * Suspended, invited, deleted, and deactivated accounts are immediately rejected.
  */
 export async function getCurrentStaffSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
 
+  // Reject sessions signed with an empty secret (misconfigured production)
+  const secret = getSessionSecret();
+  if (!secret) return null;
+
   const payload = verifySessionToken(token);
   if (!payload) return null;
 
-  // Active revocation check: user must exist, be active, and not suspended
+  // FAIL-CLOSED active revocation check: user must exist, be active, and have status "active"
   try {
     const staff = await findStaffById(payload.userId);
-    if (!staff || !staff.isActive || staff.status === "suspended") {
-      return null; // Session revoked immediately on suspension!
-    }
+    if (!staff) return null; // Account deleted
+    if (!staff.isActive) return null; // Account deactivated
+    if (staff.status !== "active") return null; // Suspended, invited, or any non-active status
 
-    // Return updated session with live effective role from database
+    // Return session with live effective role from database, not stale token data
     return {
       ...payload,
       role: staff.role,
       fullName: staff.fullName,
       therapistId: staff.therapistId,
     };
-  } catch {
-    // If DB check fails transiently, verify payload is still valid
-    return payload;
+  } catch (err) {
+    // FAIL CLOSED: if DB is unreachable, do NOT trust the cached token payload
+    console.error("[Session Validation] Database lookup failed — session rejected (fail-closed):", err);
+    return null;
   }
 }
 
@@ -378,7 +355,7 @@ export async function createStaffInvitation(data: {
     therapistId: data.therapistId,
     passwordHash: "", // No default passwords allowed
     salt: "",
-    isActive: true,
+    isActive: false, // Account is NOT active until invitation is accepted
     status: "invited",
     invitationToken: tokenHash, // Store ONLY the SHA-256 hash in database
     invitationSentAt: now.toISOString(),
@@ -610,20 +587,50 @@ export async function acceptStaffInvitation(
     return { success: false, error: "Password must contain at least one special character." };
   }
 
+  const tokenHash = crypto.createHash("sha256").update(rawToken.trim()).digest("hex");
   const { hash, salt } = hashPassword(newPassword, undefined, PBKDF2_ITERATIONS);
 
-  const updated = await updateStaffUser(verification.user.id, {
-    passwordHash: hash,
-    salt,
-    status: "active",
-    isActive: true,
-    invitationToken: undefined,
-    invitationSentAt: undefined,
-    invitationExpiresAt: undefined,
-  });
+  let updated: StaffUser | null = null;
+
+  if (isMySQLConfigured()) {
+    // Atomic MySQL update: checks token, status, expiry and sets token columns to SQL NULL
+    updated = await db.dbAcceptStaffInvitation(
+      verification.user.id,
+      tokenHash,
+      hash,
+      salt
+    );
+  } else {
+    const users = await getStaffUsers();
+    const idx = users.findIndex(
+      (u) =>
+        u.id === verification.user!.id &&
+        u.invitationToken === tokenHash &&
+        u.status === "invited"
+    );
+
+    if (idx !== -1) {
+      users[idx] = {
+        ...users[idx],
+        passwordHash: hash,
+        salt,
+        status: "active",
+        isActive: true,
+        invitationToken: undefined,
+        invitationSentAt: undefined,
+        invitationExpiresAt: undefined,
+        updatedAt: new Date().toISOString(),
+      };
+      await writeStore("staff_users.json", users);
+      updated = users[idx];
+    }
+  }
 
   if (!updated) {
-    return { success: false, error: "Failed to activate staff account. Please try again." };
+    return {
+      success: false,
+      error: "This invitation link is invalid, expired, or has already been used.",
+    };
   }
 
   return {
@@ -637,6 +644,10 @@ export async function acceptStaffInvitation(
   };
 }
 
+/**
+ * @deprecated Use createStaffInvitation() instead — this function exists only for
+ * backward compatibility and will be removed. It now delegates to createStaffInvitation.
+ */
 export async function createStaffUser(data: {
   email: string;
   fullName: string;
@@ -645,40 +656,15 @@ export async function createStaffUser(data: {
   therapistId?: string;
   initialPassword?: string;
 }): Promise<StaffUser> {
-  const users = await getStaffUsers();
-  const existing = users.find(
-    (u) => u.email.toLowerCase() === data.email.toLowerCase().trim()
-  );
-  if (existing) {
-    throw new Error("A staff user with this email already exists.");
-  }
-
-  const id = `staff-${Date.now()}`;
-  const password = data.initialPassword || "AuroStaff@2026!";
-  const { hash, salt } = hashPassword(password);
-
-  const newUser: StaffUser = {
-    id,
-    email: data.email.toLowerCase().trim(),
+  // Delegate to the secure invitation pathway — no default passwords
+  const result = await createStaffInvitation({
+    email: data.email,
     fullName: data.fullName,
     role: data.role,
-    phone: data.phone || "",
+    phone: data.phone,
     therapistId: data.therapistId,
-    passwordHash: hash,
-    salt,
-    isActive: true,
-    status: "invited",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (isMySQLConfigured()) {
-    return await db.dbCreateStaffUser(newUser);
-  }
-
-  users.push(newUser);
-  await writeStore("staff_users.json", users);
-  return newUser;
+  });
+  return result.user;
 }
 
 export async function updateStaffUser(

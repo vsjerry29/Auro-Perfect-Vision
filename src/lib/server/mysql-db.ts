@@ -211,6 +211,39 @@ export async function dbFindStaffByInvitationTokenHash(tokenHash: string): Promi
   };
 }
 
+export async function dbAcceptStaffInvitation(
+  userId: string,
+  tokenHash: string,
+  passwordHash: string,
+  salt: string
+): Promise<StaffUser | null> {
+  await initMySQLSchema();
+  // Atomically update ONLY if tokenHash matches, status is 'invited', and not expired.
+  // Explicitly sets invitation_token, invitation_sent_at, invitation_expires_at to SQL NULL.
+  const res = await execute(
+    `UPDATE staff_profiles
+     SET password_hash = ?,
+         salt = ?,
+         is_active = 1,
+         status = 'active',
+         invitation_token = NULL,
+         invitation_sent_at = NULL,
+         invitation_expires_at = NULL,
+         updated_at = NOW()
+     WHERE id = ?
+       AND invitation_token = ?
+       AND status = 'invited'
+       AND (invitation_expires_at IS NULL OR invitation_expires_at > NOW())`,
+    [passwordHash, salt, userId, tokenHash]
+  );
+
+  if (res.affectedRows === 0) {
+    return null;
+  }
+
+  return await dbFindStaffById(userId);
+}
+
 export async function dbUpdateStaffUser(
   id: string,
   updates: Partial<StaffUser>
@@ -256,7 +289,7 @@ export async function dbUpdateStaffUser(
   }
   if (updates.invitationToken !== undefined) {
     fields.push("invitation_token = ?");
-    params.push(updates.invitationToken || null);
+    params.push(updates.invitationToken ?? null);
   }
   if (updates.invitationSentAt !== undefined) {
     fields.push("invitation_sent_at = ?");

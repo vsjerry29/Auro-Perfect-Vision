@@ -10,6 +10,8 @@
  * 7. Hostinger cron secret verification & hold releases
  */
 
+process.env.SESSION_SECRET = process.env.SESSION_SECRET || "test_session_secret_min_32_chars_1234567890";
+
 import { getMySQLConfig, isMySQLConfigured } from "../src/lib/server/mysql";
 import { MYSQL_SCHEMA_STATEMENTS } from "../src/lib/server/mysql-schema";
 import {

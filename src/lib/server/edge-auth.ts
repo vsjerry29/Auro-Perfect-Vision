@@ -7,11 +7,8 @@ export interface EdgeSessionPayload {
   expiresAt: number;
 }
 
-const DEFAULT_SECRET =
-  "auro_perfect_vision_secure_staff_secret_2026_auroville_holistic_eye_care";
-
 function getSecretKey(): string {
-  return process.env.SESSION_SECRET || DEFAULT_SECRET;
+  return process.env.SESSION_SECRET || "";
 }
 
 // Convert string to base64url
@@ -29,13 +26,15 @@ function base64urlDecode(str: string): string {
 
 export async function verifyEdgeToken(token: string): Promise<EdgeSessionPayload | null> {
   if (!token || !token.includes(".")) return null;
+  const secret = getSecretKey();
+  if (!secret) return null;
   const [data, signature] = token.split(".");
 
   try {
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
-      encoder.encode(getSecretKey()),
+      encoder.encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign", "verify"]
