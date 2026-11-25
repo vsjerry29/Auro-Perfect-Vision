@@ -16,7 +16,7 @@ export function HowItWorks() {
       num: "02",
       icon: UserCheck,
       title: "Select Practitioner",
-      description: "Match with our dedicated vision educators in Auroville based on your specific visual goals.",
+      description: "Match with our dedicated vision specialists in Pondicherry based on your specific visual goals.",
     },
     {
       num: "03",
@@ -83,7 +83,7 @@ export function HowItWorks() {
         {/* Bottom Booking Action */}
         <div className="mt-12 text-center">
           <Link
-            href="/therapies"
+            href="/book"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs font-bold tracking-wide shadow-orange-glow transition-all"
           >
             <span>Book Your Session Now</span>

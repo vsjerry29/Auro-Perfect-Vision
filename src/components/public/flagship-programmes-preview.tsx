@@ -25,7 +25,7 @@ export function FlagshipProgrammesPreview() {
             </h2>
 
             <p className="font-inter text-sm sm:text-base text-white/80 leading-relaxed">
-              Step away from screen glare and urban stress into the forest canopy of Auroville. A comprehensive 7-day experiential retreat combining daily Bates methodology, nutritional eye hygiene, sunning, and deep ocular stillness.
+              Step away from screen glare and urban stress in historic Pondicherry. A comprehensive 7-day experiential retreat combining daily Bates methodology, nutritional eye hygiene, sunning, and deep ocular stillness.
             </p>
 
             {/* Key Program Facts */}
@@ -53,7 +53,7 @@ export function FlagshipProgrammesPreview() {
                   Location
                 </span>
                 <span className="font-sora text-sm font-bold text-white block mt-0.5">
-                  Auroville, India
+                  Pondicherry, India
                 </span>
               </div>
             </div>
@@ -98,7 +98,7 @@ export function FlagshipProgrammesPreview() {
               <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-brand-purple">
                 <img
                   src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1400&q=80"
-                  alt="Auroville Residential Eye Camp Sanctuary"
+                  alt="Pondicherry Residential Eye Camp Retreat"
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />

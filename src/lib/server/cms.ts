@@ -118,21 +118,29 @@ export { DEFAULT_HERO_CAROUSEL_SLIDES };
 export type { SiteContent };
 
 const DEFAULT_SITE_CONTENT: SiteContent = {
-  heroHeadline: "A more mindful approach to natural vision.",
+  heroHeadline: "See Better. Live Brighter.",
   heroSubtitle:
-    "Experience holistic ocular restoration amidst the serene forests of Auroville. Combining classical Eye Yoga, conscious relaxation, photobiomodulation, and digital screen recovery for children and adults worldwide.",
+    "Experience comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.",
   heroImageUrl:
     "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80",
   heroCarouselSlides: DEFAULT_HERO_CAROUSEL_SLIDES,
-  primaryCtaText: "Explore Therapies & Book",
-  primaryCtaLink: "/therapies",
-  aboutHeading: "Nurturing sight as a conscious, living sense.",
+  primaryCtaText: "Book an Appointment",
+  primaryCtaLink: "/book",
+  heroCtaLabel: "Book an Appointment",
+  heroSecondaryCtaLabel: "Explore Therapies",
+  secondaryCtaLink: "/therapies",
+  aboutHeading: "Comprehensive, integral vision care in Pondicherry.",
   aboutSummary:
-    "Auro Perfect Vision was established in Auroville with a simple yet profound conviction: the eyes are dynamic organs capable of relaxation, flexibility, and sustained comfort when given mindful care.",
-  phone: "+91 80123 05151",
+    "Auro Perfect Vision (APV) combines clinical eye care, personalised vision therapy, myopia management, specialty contact lenses, and holistic eye wellness for children and adults in Pondicherry.",
+  phone: "+91 94897 63451",
+  contactPhone: "+91 94897 63451",
+  contactPhoneSecondary: "",
+  contactWhatsApp: "",
   email: "auroperfectvision@gmail.com",
-  address: "Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India",
-  whatsappLink: "https://wa.me/918012305151",
+  contactEmail: "auroperfectvision@gmail.com",
+  address: "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
+  physicalAddress: "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
+  whatsappLink: "",
   openingHours: "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)",
   updatedAt: new Date().toISOString(),
 };
@@ -476,7 +484,73 @@ export function saveBlogPost(postData: Partial<BlogPost> & { title: string }): B
 // ==================== SITE CONTENT ====================
 
 export function getSiteContent(): SiteContent {
-  return readJsonFile<SiteContent>("site_content.json", DEFAULT_SITE_CONTENT);
+  const raw = readJsonFile<SiteContent>("site_content.json", DEFAULT_SITE_CONTENT);
+  if (raw.primaryCtaLink === "/therapies") {
+    return { ...raw, primaryCtaLink: "/book" };
+  }
+  return raw;
+}
+
+export async function getEffectiveSiteContent(): Promise<SiteContent> {
+  if (isMySQLConfigured()) {
+    try {
+      const dbContent = await db.dbGetSiteContent();
+      if (dbContent) {
+        const merged: SiteContent = {
+          ...DEFAULT_SITE_CONTENT,
+          ...dbContent,
+          primaryCtaLink:
+            !dbContent.primaryCtaLink || dbContent.primaryCtaLink === "/therapies"
+              ? "/book"
+              : dbContent.primaryCtaLink,
+        };
+        cmsMemoryStore.set("site_content.json", merged);
+        return merged;
+      }
+    } catch (err: any) {
+      console.warn("[getEffectiveSiteContent MySQL Notice]:", err.message);
+    }
+  }
+  return getSiteContent();
+}
+
+export async function getEffectiveOfferings(includeDrafts = true): Promise<Offering[]> {
+  if (isMySQLConfigured()) {
+    try {
+      const dbOfferings = await db.dbGetAllOfferings(includeDrafts);
+      if (dbOfferings.length > 0) {
+        if (includeDrafts) {
+          cmsMemoryStore.set("offerings.json", dbOfferings);
+        }
+        return dbOfferings;
+      }
+    } catch (err: any) {
+      console.warn("[getEffectiveOfferings MySQL Notice]:", err.message);
+    }
+  }
+  return getAllOfferings(includeDrafts);
+}
+
+export async function getEffectiveOfferingBySlug(slug: string): Promise<Offering | undefined> {
+  if (isMySQLConfigured()) {
+    try {
+      const direct = await db.dbGetOfferingBySlug(slug);
+      if (direct) return direct;
+      const slugAliases: Record<string, string> = {
+        "eye-yoga-children-adults": "eye-yoga",
+        "vision-stress-relief-therapy": "vision-stress-relief",
+        "dry-eye-photobiomodulation": "dry-eye-red-light-therapy",
+        "residential-retreat": "retreat-holistic-vision-awakening",
+      };
+      if (slugAliases[slug]) {
+        const aliased = await db.dbGetOfferingBySlug(slugAliases[slug]);
+        if (aliased) return aliased;
+      }
+    } catch (err: any) {
+      console.warn("[getEffectiveOfferingBySlug MySQL Notice]:", err.message);
+    }
+  }
+  return getOfferingBySlug(slug);
 }
 
 export function saveSiteContent(data: Partial<SiteContent>): SiteContent {
@@ -688,12 +762,12 @@ export function removeLeaveException(id: string): void {
 const INITIAL_PROGRAMMES: Programme[] = [
   {
     id: "prog-1",
-    slug: "auroville-7-day-mindful-vision-immersion",
-    title: "Auroville 7-Day Mindful Vision Immersion Retreat",
+    slug: "pondicherry-7-day-mindful-vision-immersion",
+    title: "7-Day Mindful Vision Immersion Retreat",
     shortDescription:
-      "A transformative residential retreat in Auroville. Daily Bates method sessions, ocular photobiomodulation, conscious breathing, and digital detox.",
+      "A transformative residential retreat in Pondicherry. Daily Bates method sessions, ocular photobiomodulation, conscious breathing, and digital detox.",
     fullDescription:
-      "Immerse yourself in seven days of focused ocular restoration amidst the serene forests of Auroville. This comprehensive programme is designed for individuals seeking to cultivate sustainable vision habits, dissolve chronic screen fatigue, and establish lifelong natural eye care practices under dedicated educator guidance.",
+      "Immerse yourself in seven days of focused ocular restoration at our Pondicherry centre. This comprehensive programme is designed for individuals seeking to cultivate sustainable vision habits, dissolve chronic screen fatigue, and establish lifelong natural eye care practices under dedicated specialist guidance.",
     durationLabel: "7 Days / 6 Nights",
     durationDays: 7,
     dailySessionMinutes: 180,
@@ -702,7 +776,7 @@ const INITIAL_PROGRAMMES: Programme[] = [
     priceINR: 28000,
     priceUSD: 420,
     leadFacilitatorIds: ["therapist-1", "therapist-2"],
-    location: "Auro Perfect Vision Centre & Forest Pavilion, Auroville",
+    location: "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
     maxCapacity: 12,
     imageUrl:
       "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
@@ -710,18 +784,18 @@ const INITIAL_PROGRAMMES: Programme[] = [
       { day: 1, title: "Arrival & Individual Ocular Assessment", description: "Orientation, baseline eye ease evaluation, and evening conscious relaxation circle." },
       { day: 2, title: "Foundations of Palming & Shifting", description: "Deep dive into Bates palming techniques, saccadic movement, and natural blinking rhythm." },
       { day: 3, title: "Photobiomodulation & Sunning Rituals", description: "Controlled solar exposure, full-spectrum daylight therapy, and contrast baths." },
-      { day: 4, title: "Peripheral Vision in Nature", description: "Forest walking meditation expanding visual fields and reducing central retinal fixation strain." },
+      { day: 4, title: "Peripheral Vision & Outdoor Practice", description: "Mindful distance walking meditation expanding visual fields and reducing central retinal fixation strain." },
       { day: 5, title: "Digital Fatigue Reversal & Breathwork", description: "Pranayama for ocular microcirculation, screen ergonomics, and blue light recovery." },
       { day: 6, title: "Movement, Accommodation & Near-Far Shifting", description: "Dynamic eye yoga drills, fusion charts, and relaxed accommodation games." },
       { day: 7, title: "Home Practice Blueprint & Closing Circle", description: "Personalized home routine design, follow-up schedule, and certificate of completion." },
     ],
     inclusions: [
-      "7 Days / 6 Nights peaceful Auroville guest house accommodation",
-      "All daily organic, eye-nourishing vegetarian meals and herbal infusions",
+      "7 Days / 6 Nights curated Pondicherry retreat accommodation",
+      "All daily nourishing, eye-healthy meals and herbal infusions",
       "Daily 3-hour guided clinical eye yoga & therapy workshops",
       "Full photobiomodulation sessions and sunning practice",
       "Personalized Home Vision Practice Kit & manual",
-      "1-on-1 progress reviews with Dr. Ananya Sen and educators",
+      "1-on-1 progress reviews with Dr. Ananya Sen and specialists",
     ],
     preparationGuidelines: [
       "Bring current glasses and recent prescription records",
@@ -805,7 +879,7 @@ export function saveProgramme(data: Partial<Programme> & { title: string }): Pro
     priceINR: data.priceINR || 28000,
     priceUSD: data.priceUSD || 420,
     leadFacilitatorIds: data.leadFacilitatorIds || ["therapist-1"],
-    location: data.location || "Auro Perfect Vision Centre, Auroville",
+    location: data.location || "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
     maxCapacity: data.maxCapacity || 12,
     imageUrl:
       data.imageUrl ||
@@ -853,7 +927,7 @@ export function getAllMediaAssets(): MediaAsset[] {
     {
       id: "media-1",
       fileName: "palming-practice.webp",
-      originalName: "natural_palming_auroville.webp",
+      originalName: "natural_palming_pondicherry.webp",
       publicUrl: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80",
       fileSizeBytes: 245000,
       mimeType: "image/webp",
@@ -865,11 +939,11 @@ export function getAllMediaAssets(): MediaAsset[] {
     {
       id: "media-2",
       fileName: "forest-retreat.webp",
-      originalName: "auroville_forest_sanctuary.webp",
+      originalName: "pondicherry_vision_centre.webp",
       publicUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1000&q=80",
       fileSizeBytes: 310000,
       mimeType: "image/webp",
-      altText: "Auroville tranquil forest sanctuary surroundings",
+      altText: "Tranquil holistic eye care centre in Pondicherry",
       uploadedByStaffId: "staff-admin-1",
       uploadedByStaffName: "Dr. Sivakumar",
       createdAt: "2026-11-05T12:00:00Z",

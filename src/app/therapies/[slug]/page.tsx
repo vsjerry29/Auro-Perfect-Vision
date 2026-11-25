@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOfferingBySlug, getAllTherapists } from "@/lib/server/cms";
+import { getEffectiveOfferingBySlug, getAllTherapists } from "@/lib/server/cms";
 import { formatCurrency } from "@/lib/utils";
 import {
   Clock,
@@ -28,7 +28,7 @@ interface OfferingDetailPageProps {
 
 export default async function OfferingDetailPage({ params }: OfferingDetailPageProps) {
   const { slug } = await params;
-  const offering = getOfferingBySlug(slug);
+  const offering = await getEffectiveOfferingBySlug(slug);
 
   if (!offering || !offering.isPublished) {
     return (
@@ -110,7 +110,7 @@ export default async function OfferingDetailPage({ params }: OfferingDetailPageP
                   {isFlagship ? "Flagship Retreat" : "Individual Care"}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-inter font-medium bg-brand-gray text-brand-charcoal capitalize">
-                  {offering.delivery === "onsite" ? "Auroville On-site" : "Online Video Session"}
+                  {offering.delivery === "onsite" ? "Pondicherry On-site" : "Online Video Session"}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-inter font-medium bg-brand-gray text-brand-secondary">
                   {offering.format === "individual" ? "1-on-1 Guidance" : "Group Cohort"}
@@ -292,7 +292,7 @@ export default async function OfferingDetailPage({ params }: OfferingDetailPageP
                     <MapPin className="w-4 h-4 text-brand-purple" /> Venue / Mode
                   </span>
                   <span className="font-semibold text-brand-charcoal capitalize">
-                    {offering.delivery === "onsite" ? "Auroville Centre" : "Online Video / Hybrid"}
+                    {offering.delivery === "onsite" ? "Pondicherry Centre" : "Online Video / Hybrid"}
                   </span>
                 </div>
               </div>

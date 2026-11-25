@@ -1,6 +1,6 @@
 {
   "heroHeadline": "See Better. Live Brighter.",
-  "heroSubtitle": "Explore personalized vision therapy, eye yoga, and eye wellness programmes at Auro Perfect Vision, Auroville.",
+  "heroSubtitle": "Experience comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.",
   "heroImageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80",
   "heroCarouselSlides": [
     {
@@ -49,20 +49,21 @@
     }
   ],
   "primaryCtaText": "Book an Appointment",
-  "primaryCtaLink": "/therapies",
+  "primaryCtaLink": "/book",
   "heroCtaLabel": "Book an Appointment",
   "heroSecondaryCtaLabel": "Explore Therapies",
-  "aboutHeading": "Innovative, holistic eye wellness rooted in Auroville.",
-  "aboutSummary": "Auro Perfect Vision combines classical Bates relaxation, conscious Eye Yoga, red-light photobiomodulation, and digital screen recovery into customized therapies for children and adults worldwide.",
-  "phone": "+91 8012305151",
-  "contactPhone": "+91 8012305151",
-  "contactPhoneSecondary": "+91 9488005685",
-  "contactWhatsApp": "+91 8012305151",
-  "whatsappLink": "https://wa.me/918012305151",
+  "secondaryCtaLink": "/therapies",
+  "aboutHeading": "Comprehensive, integral vision care in Pondicherry.",
+  "aboutSummary": "Auro Perfect Vision (APV) combines clinical eye care, personalised vision therapy, myopia management, specialty contact lenses, and holistic eye wellness for children and adults in Pondicherry.",
+  "phone": "+91 94897 63451",
+  "contactPhone": "+91 94897 63451",
+  "contactPhoneSecondary": "",
+  "contactWhatsApp": "",
+  "whatsappLink": "",
   "email": "auroperfectvision@gmail.com",
   "contactEmail": "auroperfectvision@gmail.com",
-  "address": "Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India",
-  "physicalAddress": "Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India",
+  "address": "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
+  "physicalAddress": "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
   "openingHours": "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)",
-  "updatedAt": "2026-11-17T18:00:00.000Z"
+  "updatedAt": "2026-11-25T14:00:00.000Z"
 }

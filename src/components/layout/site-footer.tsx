@@ -46,31 +46,29 @@ export function SiteFooter() {
                   Auro Perfect <span className="text-brand-orange">Vision</span>
                 </span>
                 <span className="text-[10px] font-inter uppercase tracking-widest text-white/60 block font-semibold">
-                  Auroville Centre for Vision Beyond Glasses
+                  Centre for Integral Vision Care • Pondicherry
                 </span>
               </div>
             </Link>
 
             <p className="text-xs text-white/70 leading-relaxed max-w-sm">
-              Dedicated to natural vision improvement, mindful eye relaxation, Bates exercises, and digital screen recovery for children and adults worldwide. Rooted in the serene environment of Auroville, Tamil Nadu.
+              Dedicated to comprehensive eye care, personalized vision therapy, and holistic eye wellness for children and adults. Located in White Town, Puducherry.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <a
-                href="https://wa.me/918012305151"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 text-xs hover:bg-emerald-600/30 transition-colors"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Chat on WhatsApp</span>
-              </a>
-              <a
-                href="tel:+918012305151"
+                href="tel:+919489763451"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 text-white/90 border border-white/15 text-xs hover:bg-white/20 transition-colors"
               >
-                <Phone className="w-3.5 h-3.5" />
-                <span>+91 80123 05151</span>
+                <Phone className="w-3.5 h-3.5 text-brand-orange" />
+                <span>+91 94897 63451</span>
+              </a>
+              <a
+                href="mailto:auroperfectvision@gmail.com"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 text-white/90 border border-white/15 text-xs hover:bg-white/20 transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-brand-orange" />
+                <span>auroperfectvision@gmail.com</span>
               </a>
             </div>
           </div>
@@ -146,26 +144,26 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/therapies" className="hover:text-white transition-colors text-brand-orange font-semibold">
+                <Link href="/book" className="hover:text-white transition-colors text-brand-orange font-semibold">
                   Book an Appointment &rarr;
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Contact & Auroville */}
+          {/* Column 4: Contact & Location */}
           <div className="space-y-3">
             <h4 className="font-sora text-xs font-bold tracking-wider uppercase text-brand-orange">
-              Sanctuary Details
+              Clinic Details
             </h4>
             <div className="space-y-2 text-xs text-white/70">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
-                <span>Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India</span>
+                <span>Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-brand-orange shrink-0" />
-                <span>+91 80123 05151 / +91 94880 05685</span>
+                <span>+91 94897 63451</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-orange shrink-0" />

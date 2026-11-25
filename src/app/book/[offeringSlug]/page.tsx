@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOfferingBySlug } from "@/lib/server/cms";
+import { getEffectiveOfferingBySlug } from "@/lib/server/cms";
 import { BookingWizard } from "@/components/booking/booking-wizard";
 import { ArrowLeft, Clock, MapPin, Sparkles } from "lucide-react";
 
@@ -19,7 +19,7 @@ interface BookOfferingPageProps {
 export default async function BookOfferingPage({ params, searchParams }: BookOfferingPageProps) {
   const { offeringSlug } = await params;
   const sp = await searchParams;
-  const offering = getOfferingBySlug(offeringSlug);
+  const offering = await getEffectiveOfferingBySlug(offeringSlug);
 
   if (!offering || !offering.isPublished) {
     return (

@@ -64,7 +64,7 @@ function StaffLoginForm() {
           Staff Portal Access
         </h2>
         <p className="text-xs text-gold-dark font-sans uppercase tracking-widest mt-1">
-          Auro Perfect Vision • Auroville
+          Auro Perfect Vision (APV) • Pondicherry
         </p>
       </div>
 

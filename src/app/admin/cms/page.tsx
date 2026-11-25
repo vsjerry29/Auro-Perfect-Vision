@@ -799,7 +799,7 @@ export default function AdminCmsPage() {
                         </label>
                         <input
                           type="text"
-                          value={siteContent.primaryCtaLink || "/therapies"}
+                          value={siteContent.primaryCtaLink || "/book"}
                           onChange={(e) =>
                             setSiteContent({ ...siteContent, primaryCtaLink: e.target.value })
                           }
@@ -875,7 +875,7 @@ export default function AdminCmsPage() {
                 About Page & Sanctuary Narrative
               </h3>
               <p className="text-xs text-ink-muted">
-                Core philosophy, founding vision, and mission rooted in Auroville.
+                Core philosophy, founding vision, and integral eye care mission in Pondicherry.
               </p>
             </div>
             <Badge variant="sage" className="text-[10px]">
@@ -926,7 +926,7 @@ export default function AdminCmsPage() {
           <div className="flex items-center justify-between border-b pb-3">
             <div>
               <h3 className="font-serif text-lg font-medium text-ink">
-                Auroville Centre & Contact Details
+                Pondicherry Centre &amp; Contact Details
               </h3>
               <p className="text-xs text-ink-muted">
                 Used in site header, footer, booking receipts, and the Contact page.
@@ -999,7 +999,7 @@ export default function AdminCmsPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block font-semibold text-ink mb-1">Sanctuary Physical Address</label>
+              <label className="block font-semibold text-ink mb-1">Clinic Physical Address</label>
               <input
                 type="text"
                 value={siteContent.physicalAddress || siteContent.address}
@@ -1353,7 +1353,7 @@ export default function AdminCmsPage() {
                   <option value="Ocular Wellness">Ocular Wellness</option>
                   <option value="Vision Therapy">Vision Therapy</option>
                   <option value="Digital Eye Strain">Digital Eye Strain</option>
-                  <option value="Auroville Sanctuary">Auroville Sanctuary</option>
+                  <option value="Integral Vision Care">Integral Vision Care</option>
                 </select>
               </div>
             </div>

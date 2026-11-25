@@ -92,7 +92,7 @@ export default function AdminNotificationsPage() {
       channel: "Email (Resend)",
       event: "Appointment Confirmation (Client)",
       target: "Guest Email",
-      body: "Subject: Appointment Confirmation [{{booking_ref}}] — Auro Perfect Vision\n\nDear {{client_name}},\n\nYour appointment for {{offering_title}} with {{therapist_name}} is confirmed for {{date}} at {{time_slot}}.\nLocation: Auro Perfect Vision Centre, Auroville.\nPreparation: Arrive 10 minutes early; no contact lenses during evaluation.",
+      body: "Subject: Appointment Confirmation [{{booking_ref}}] — Auro Perfect Vision\n\nDear {{client_name}},\n\nYour appointment for {{offering_title}} with {{therapist_name}} is confirmed for {{date}} at {{time_slot}}.\nLocation: Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001.\nPreparation: Arrive 10 minutes early; no contact lenses during evaluation.",
       status: "Active (Resend Integration)",
     },
     {
@@ -100,7 +100,7 @@ export default function AdminNotificationsPage() {
       channel: "Email (Resend)",
       event: "Payment Received & Official Tax Invoice",
       target: "Payer Email",
-      body: "Subject: Payment Confirmation & Invoice [{{invoice_number}}] — Auro Perfect Vision\n\nDear {{client_name}},\n\nPayment received: {{currency}} {{amount}} via {{gateway}}.\nInvoice Number: {{invoice_number}}\nOfficial Auroville GSTIN & Registration details included.",
+      body: "Subject: Payment Confirmation & Invoice [{{invoice_number}}] — Auro Perfect Vision\n\nDear {{client_name}},\n\nPayment received: {{currency}} {{amount}} via {{gateway}}.\nInvoice Number: {{invoice_number}}\nOfficial clinic invoice & Puducherry registration details included.",
       status: "Active (Resend Integration)",
     },
     {
@@ -108,7 +108,7 @@ export default function AdminNotificationsPage() {
       channel: "Email (Resend)",
       event: "Contact Form Auto-Acknowledgment & Admin Alert",
       target: "Inquirer & Admin Inbox",
-      body: "Subject: Inquiry Received [{{reference}}] — Auro Perfect Vision\n\nDear {{name}},\n\nThank you for reaching out. Our educators have received your question regarding {{subject}} and will respond within 24–48 hours.",
+      body: "Subject: Inquiry Received [{{reference}}] — Auro Perfect Vision\n\nDear {{name}},\n\nThank you for reaching out. Our team has received your question regarding {{subject}} and will respond within 24–48 hours.",
       status: "Active (Resend Integration)",
     },
     {
@@ -116,7 +116,7 @@ export default function AdminNotificationsPage() {
       channel: "WhatsApp",
       event: "Booking Confirmed (Client)",
       target: "Guest Phone",
-      body: "Hey {{client_name}}, your session for *{{offering_title}}* with *{{therapist_name}}* on {{date}} at {{time_slot}} is confirmed. Ref: {{booking_ref}}. Centre Address: Auroville, Tamil Nadu 605101.",
+      body: "Hey {{client_name}}, your session for *{{offering_title}}* with *{{therapist_name}}* on {{date}} at {{time_slot}} is confirmed. Ref: {{booking_ref}}. Centre Address: Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001.",
       status: "Configured (Awaiting Meta WABA Production Phone ID)",
     },
     {

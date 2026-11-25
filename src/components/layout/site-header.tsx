@@ -90,7 +90,7 @@ export function SiteHeader() {
     {
       title: "7-Day Residential Vision Camp",
       slug: "retreat-holistic-vision-awakening",
-      desc: "Immersive nature & eye retreat in Auroville",
+      desc: "Immersive nature & eye wellness retreat in Pondicherry",
     },
   ];
 
@@ -102,18 +102,16 @@ export function SiteHeader() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-brand-orange animate-pulse" />
             <span className="font-medium text-white/95 truncate">
-              Auro Perfect Vision • Auroville Centre for Vision Beyond Glasses
+              Auro Perfect Vision (APV) • Centre for Integral Vision Care • Pondicherry
             </span>
           </div>
           <div className="hidden md:flex items-center gap-5 text-white/80">
             <a
-              href="https://wa.me/918012305151"
-              target="_blank"
-              rel="noreferrer"
+              href="tel:+919489763451"
               className="hover:text-brand-orange flex items-center gap-1.5 transition-colors"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>WhatsApp: +91 80123 05151</span>
+              <Phone className="w-3.5 h-3.5 text-brand-orange" />
+              <span>Direct Desk: +91 94897 63451</span>
             </a>
             <span className="text-white/30">•</span>
             <span className="text-white/70">Mon – Sat: 9:00 AM – 5:30 PM IST</span>
@@ -220,7 +218,7 @@ export function SiteHeader() {
                       Popular Holistic Sessions
                     </span>
                     <span className="text-[10px] bg-brand-lavender text-brand-purple font-sora font-semibold px-2 py-0.5 rounded-full">
-                      Auroville & Online
+                      Pondicherry & Online
                     </span>
                   </div>
                   <div className="space-y-1">
@@ -285,7 +283,7 @@ export function SiteHeader() {
           {/* Action Orange Booking CTA Button */}
           <div className="hidden sm:flex items-center gap-3">
             <Link
-              href="/therapies"
+              href="/book"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs font-bold tracking-wide shadow-orange-glow hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
             >
               <Calendar className="w-3.5 h-3.5" />
@@ -371,7 +369,7 @@ export function SiteHeader() {
               {/* Mobile Booking CTA */}
               <div className="pt-4 mt-2 border-t border-brand-gray space-y-2">
                 <Link
-                  href="/therapies"
+                  href="/book"
                   onClick={() => setMobileOpen(false)}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-brand-orange text-white rounded-xl font-sora text-sm font-bold shadow-orange-glow"
                 >
@@ -379,7 +377,7 @@ export function SiteHeader() {
                   <span>Book Appointment Now</span>
                 </Link>
                 <div className="text-center text-[11px] text-brand-secondary">
-                  Auroville, Tamil Nadu • +91 80123 05151
+                  White Town, Puducherry • +91 94897 63451
                 </div>
               </div>
             </div>

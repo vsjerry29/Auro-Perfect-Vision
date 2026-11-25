@@ -21,13 +21,13 @@ export function BookingCtaBanner() {
         </h2>
 
         <p className="font-sans text-sm sm:text-base text-canvas-dark/80 max-w-2xl mx-auto leading-relaxed">
-          Book a 1-on-1 session at our Auroville Centre or schedule a guided remote consultation from anywhere in the world. No account login required.
+          Book a 1-on-1 session at our Pondicherry Centre or schedule a guided remote consultation from anywhere in the world. No account login required.
         </p>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/therapies">
+          <Link href="/book">
             <Button variant="gold" size="lg" className="w-full sm:w-auto gap-2 group text-plum font-semibold">
-              <span>View Therapies & Reserve Slot</span>
+              <span>Book an Appointment</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>

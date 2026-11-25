@@ -92,11 +92,11 @@ export default function AdminTherapistsPage() {
     setDisplayName("");
     setRoleTitle("Vision Wellness Practitioner");
     setBio("");
-    setQualifications("Holistic Vision Therapy Specialist (Auroville)");
+    setQualifications("Holistic Vision Therapy Specialist (Pondicherry)");
     setSpecialtiesText("Eye Yoga, Screen Strain Recovery");
     setPhotoUrl("https://images.unsplash.com/photo-1594824813583-8a07f7b243b6?auto=format&fit=crop&w=800&q=80");
     setEmail("practitioner@auroperfectvision.com");
-    setPhone("+91 8012305151");
+    setPhone("+91 94897 63451");
     setIsPublished(true);
     setModalOpen(true);
   };
@@ -583,7 +583,7 @@ export default function AdminTherapistsPage() {
                 type="text"
                 value={qualifications}
                 onChange={(e) => setQualifications(e.target.value)}
-                placeholder="e.g. Certified Natural Vision Educator (Auroville)"
+                placeholder="e.g. Certified Natural Vision Specialist (Pondicherry)"
                 className="w-full px-3 py-2 rounded-xl border border-ink-border bg-canvas-light text-ink text-xs"
               />
             </div>

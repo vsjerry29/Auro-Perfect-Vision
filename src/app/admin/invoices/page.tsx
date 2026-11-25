@@ -114,9 +114,9 @@ export default function AdminInvoicesPage() {
 
             <div className="flex justify-between border-b pb-4">
               <div>
-                <h4 className="font-serif text-lg font-bold text-ink">Auro Perfect Vision</h4>
-                <p className="text-xs text-ink-muted">Auroville Centre for Vision Beyond Glasses</p>
-                <p className="text-xs text-ink-muted">Auroville, Tamil Nadu 605101, India</p>
+                <h4 className="font-serif text-lg font-bold text-ink">Auro Perfect Vision (APV)</h4>
+                <p className="text-xs text-ink-muted">Centre for Integral Vision Care • Pondicherry</p>
+                <p className="text-xs text-ink-muted">Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.</p>
                 <p className="text-[11px] text-amber-800 font-medium mt-1">
                   GST Status: Unconfirmed (Draft Simulation)
                 </p>

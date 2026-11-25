@@ -75,7 +75,7 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
   const [isOutOfView, setIsOutOfView] = useState(false);
 
   const carouselRef = useRef<HTMLDivElement>(null);
-  const activeBarRef = useRef<HTMLDivElement | null>(null);
+  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Single reliable animation clock tracking refs
   const startTimeRef = useRef<number | null>(null);
@@ -112,15 +112,31 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
     }
   }, []);
 
+  // Synchronize all segmented progress bars deterministically whenever slide changes
+  useEffect(() => {
+    barRefs.current.forEach((bar, idx) => {
+      if (!bar) return;
+      if (idx < currentIndex) {
+        bar.style.width = "100%";
+        bar.style.opacity = "1";
+      } else if (idx === currentIndex) {
+        if (pausedElapsedRef.current === 0) {
+          bar.style.width = "0%";
+        }
+        bar.style.opacity = "1";
+      } else {
+        bar.style.width = "0%";
+        bar.style.opacity = "0";
+      }
+    });
+  }, [currentIndex, totalSlides]);
+
   // Handle dynamic slide changes from CMS gracefully
   useEffect(() => {
     if (currentIndex >= totalSlides && totalSlides > 0) {
-      setCurrentIndex(0);
       pausedElapsedRef.current = 0;
       startTimeRef.current = null;
-      if (activeBarRef.current) {
-        activeBarRef.current.style.width = "0%";
-      }
+      setCurrentIndex(0);
     }
   }, [totalSlides, currentIndex]);
 
@@ -165,10 +181,21 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
       }
       pausedElapsedRef.current = 0;
       startTimeRef.current = null;
-      if (activeBarRef.current) {
-        activeBarRef.current.style.width = "0%";
-      }
-      setCurrentIndex((index + totalSlides) % totalSlides);
+      const targetIndex = (index + totalSlides) % totalSlides;
+      barRefs.current.forEach((bar, idx) => {
+        if (!bar) return;
+        if (idx < targetIndex) {
+          bar.style.width = "100%";
+          bar.style.opacity = "1";
+        } else if (idx === targetIndex) {
+          bar.style.width = "0%";
+          bar.style.opacity = "1";
+        } else {
+          bar.style.width = "0%";
+          bar.style.opacity = "0";
+        }
+      });
+      setCurrentIndex(targetIndex);
     },
     [totalSlides]
   );
@@ -244,16 +271,18 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
       const pct = Math.min((elapsed / SLIDE_DURATION_MS) * 100, 100);
 
       // Performant direct DOM update of the active progress bar (no React re-renders per frame)
-      if (activeBarRef.current) {
-        activeBarRef.current.style.width = `${pct}%`;
+      const currentBar = barRefs.current[currentIndex];
+      if (currentBar) {
+        currentBar.style.width = `${pct}%`;
+        currentBar.style.opacity = "1";
       }
 
       if (elapsed >= SLIDE_DURATION_MS) {
         // Slide duration elapsed: reset progress and advance immediately
         pausedElapsedRef.current = 0;
         startTimeRef.current = null;
-        if (activeBarRef.current) {
-          activeBarRef.current.style.width = "100%";
+        if (currentBar) {
+          currentBar.style.width = "100%";
         }
         setCurrentIndex((prev) => (prev + 1) % totalSlides);
       } else {
@@ -428,6 +457,8 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
 
   if (totalSlides === 0) return null;
 
+  const currentSlide = activeSlides[currentIndex] || activeSlides[0];
+
   return (
     <section
       ref={carouselRef}
@@ -460,7 +491,7 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
         onMouseUp={handleMouseUp}
         onClick={handleContainerClick}
       >
-        {/* Slides Layer */}
+        {/* Slides Background Image Layer (Smooth Crossfade) */}
         <div
           className="relative w-full h-full"
           aria-live={isPlaying && !isHovered && !isFocused && !isHolding ? "off" : "polite"}
@@ -488,45 +519,55 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                   loading={idx === 0 ? "eager" : "lazy"}
                   draggable={false}
                 />
-
-                {/* Multi-stage contrast overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/95 via-brand-charcoal/40 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-b from-brand-charcoal/40 via-transparent to-transparent pointer-events-none" />
-
-                {/* Floating Top Badge */}
-                <div className="absolute top-9 sm:top-10 left-5 z-20 pointer-events-none">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-xs font-sora font-bold text-brand-purple border border-white/60 shadow-card">
-                    <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0" />
-                    <span>{slide.badge}</span>
-                  </span>
-                </div>
-
-                {/* Bottom Overlay Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-7 z-20 flex flex-col justify-end pointer-events-none">
-                  <h3 className="font-sora text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm mb-2">
-                    {slide.title}
-                  </h3>
-
-                  <p className="font-inter text-xs sm:text-sm text-white/90 line-clamp-2 leading-relaxed max-w-sm mb-4">
-                    {slide.subtitle}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-3 pt-1">
-                    <Link
-                      href={slide.linkUrl || "/therapies"}
-                      onClick={(e) => e.stopPropagation()}
-                      onTouchStart={(e) => e.stopPropagation()}
-                      className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs sm:text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                    >
-                      <span>{slide.linkText || "Explore Therapy"}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
               </div>
             );
           })}
         </div>
+
+        {/* Persistent Multi-Stage Contrast Scrims (Prevents brightness flicker during image crossfades) */}
+        <div className="absolute inset-0 z-[15] bg-gradient-to-t from-brand-charcoal/95 via-brand-charcoal/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 z-[15] bg-gradient-to-b from-brand-charcoal/40 via-transparent to-transparent pointer-events-none" />
+
+        {/* Floating Top Badge (Rendered strictly for active slide — prevents overlapping badges) */}
+        {currentSlide && (
+          <div
+            key={`badge-${currentSlide.id}`}
+            className="absolute top-9 sm:top-10 left-5 z-20 pointer-events-none"
+          >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-xs font-sora font-bold text-brand-purple border border-white/60 shadow-card">
+              <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0" />
+              <span>{currentSlide.badge}</span>
+            </span>
+          </div>
+        )}
+
+        {/* Bottom Overlay Content (Rendered strictly for active slide — prevents overlapping titles & text bleed) */}
+        {currentSlide && (
+          <div
+            key={`content-${currentSlide.id}`}
+            className="absolute bottom-0 left-0 right-0 p-6 sm:p-7 z-20 flex flex-col justify-end pointer-events-none"
+          >
+            <h3 className="font-sora text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm mb-2">
+              {currentSlide.title}
+            </h3>
+
+            <p className="font-inter text-xs sm:text-sm text-white/90 line-clamp-2 leading-relaxed max-w-sm mb-4">
+              {currentSlide.subtitle}
+            </p>
+
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <Link
+                href={currentSlide.linkUrl || "/therapies"}
+                onClick={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs sm:text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>{currentSlide.linkText || "Explore Therapy"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Desktop Controls (Previous, Pause/Play, Next) — Completely hidden on mobile below 768px (md) */}
         {totalSlides > 1 && (
@@ -594,7 +635,9 @@ export function HeroCarousel({ slides, className = "" }: HeroCarouselProps) {
                   className="group relative flex-1 h-1 sm:h-1.5 rounded-full bg-white/30 backdrop-blur-xs overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-orange cursor-pointer"
                 >
                   <div
-                    ref={isActive ? activeBarRef : null}
+                    ref={(el) => {
+                      barRefs.current[idx] = el;
+                    }}
                     className="h-full bg-brand-orange rounded-full will-change-[width]"
                     style={{
                       width: isCompleted ? "100%" : "0%",

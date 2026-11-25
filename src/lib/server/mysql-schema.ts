@@ -372,7 +372,7 @@ export const MYSQL_SCHEMA_STATEMENTS = [
     price_inr DECIMAL(10, 2) NOT NULL DEFAULT 28000.00,
     price_usd DECIMAL(10, 2) NOT NULL DEFAULT 420.00,
     lead_facilitator_ids JSON,
-    location VARCHAR(255) NOT NULL DEFAULT 'Auroville International Township, Tamil Nadu, India',
+    location VARCHAR(255) NOT NULL DEFAULT 'Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.',
     max_capacity INT NOT NULL DEFAULT 12,
     image_url TEXT,
     itinerary JSON,
@@ -596,17 +596,88 @@ export async function initMySQLSchema(): Promise<{ success: boolean; tablesCreat
       // Column already exists or already up-to-date
     }
 
-    // Synchronize active CMS contact email in MySQL
+    // Safe, idempotent migration of obsolete public-facing CMS branding/contact/CTA values in MySQL
     try {
+      const { query } = await import("./mysql");
+      const rows = await query<any>("SELECT content FROM site_content WHERE id = 'global_settings' LIMIT 1");
+      if (rows && rows.length > 0 && rows[0].content) {
+        const current = typeof rows[0].content === "string" ? JSON.parse(rows[0].content) : { ...rows[0].content };
+        let changed = false;
+
+        if (!current.email || current.email === "connect@auroperfectvision.com") {
+          current.email = "auroperfectvision@gmail.com";
+          changed = true;
+        }
+        if (!current.contactEmail || current.contactEmail === "connect@auroperfectvision.com") {
+          current.contactEmail = "auroperfectvision@gmail.com";
+          changed = true;
+        }
+        if (!current.phone || String(current.phone).includes("80123") || String(current.phone).includes("94880")) {
+          current.phone = "+91 94897 63451";
+          changed = true;
+        }
+        if (!current.contactPhone || String(current.contactPhone).includes("80123") || String(current.contactPhone).includes("94880")) {
+          current.contactPhone = "+91 94897 63451";
+          changed = true;
+        }
+        if (current.contactPhoneSecondary && (String(current.contactPhoneSecondary).includes("94880") || String(current.contactPhoneSecondary).includes("80123"))) {
+          current.contactPhoneSecondary = "";
+          changed = true;
+        }
+        if (current.contactWhatsApp && String(current.contactWhatsApp).includes("80123")) {
+          current.contactWhatsApp = "";
+          changed = true;
+        }
+        if (current.whatsappLink && String(current.whatsappLink).includes("80123")) {
+          current.whatsappLink = "";
+          changed = true;
+        }
+        if (!current.address || /auroville|crown road/i.test(String(current.address))) {
+          current.address = "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.";
+          changed = true;
+        }
+        if (!current.physicalAddress || /auroville|crown road/i.test(String(current.physicalAddress))) {
+          current.physicalAddress = "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.";
+          changed = true;
+        }
+        if (!current.heroSubtitle || /auroville/i.test(String(current.heroSubtitle))) {
+          current.heroSubtitle =
+            "Experience comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.";
+          changed = true;
+        }
+        if (!current.aboutHeading || /auroville/i.test(String(current.aboutHeading))) {
+          current.aboutHeading = "Comprehensive, integral vision care in Pondicherry.";
+          changed = true;
+        }
+        if (!current.aboutSummary || /auroville/i.test(String(current.aboutSummary))) {
+          current.aboutSummary =
+            "Auro Perfect Vision (APV) combines clinical eye care, personalised vision therapy, myopia management, specialty contact lenses, and holistic eye wellness for children and adults in Pondicherry.";
+          changed = true;
+        }
+        if (!current.primaryCtaLink || current.primaryCtaLink === "/therapies" || current.primaryCtaLink === "/book-appointment") {
+          current.primaryCtaLink = "/book";
+          changed = true;
+        }
+        if (!current.primaryCtaText || current.primaryCtaText === "Explore Therapies & Book") {
+          current.primaryCtaText = "Book an Appointment";
+          current.heroCtaLabel = "Book an Appointment";
+          changed = true;
+        }
+
+        if (changed) {
+          await execute("UPDATE site_content SET content = ?, updated_at = NOW() WHERE id = 'global_settings'", [
+            JSON.stringify(current),
+          ]);
+        }
+      }
+
+      // Safely update public programme location default without affecting bookings/clinical/financial data
       await execute(
-        `UPDATE site_content
-         SET content = JSON_SET(content, '$.email', 'auroperfectvision@gmail.com', '$.contactEmail', 'auroperfectvision@gmail.com')
-         WHERE id = 'global_settings'
-           AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.email')) = 'connect@auroperfectvision.com'
-                OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.email')) IS NULL)`
+        `UPDATE programmes SET location = 'Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.'
+         WHERE location LIKE '%Auroville%'`
       );
     } catch {
-      // Safe fallback if JSON functions differ
+      // Safe fallback
     }
 
     schemaInitialized = true;

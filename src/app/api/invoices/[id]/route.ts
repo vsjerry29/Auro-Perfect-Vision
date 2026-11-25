@@ -136,9 +136,9 @@ export async function GET(
   <div class="invoice-card">
     <div class="header">
       <div class="logo-title">
-        <h1>Auro Perfect Vision</h1>
-        <p>Holistic Ocular Restoration Sanctuary • Auroville</p>
-        <p style="margin-top: 4px; font-size: 11px; color: #9E968D;">Crown Road, Auroville International Township, Tamil Nadu 605101, India</p>
+        <h1>Auro Perfect Vision (APV)</h1>
+        <p>Centre for Integral Vision Care • Pondicherry</p>
+        <p style="margin-top: 4px; font-size: 11px; color: #9E968D;">Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.</p>
       </div>
       <div style="text-align: right;">
         <span class="badge-paid">Paid &amp; Captured</span>
@@ -189,8 +189,8 @@ export async function GET(
     </table>
 
     <div class="footer">
-      <p>Thank you for choosing Auro Perfect Vision. For questions, call our clinic reception at +91 80123 05151 or email auroperfectvision@gmail.com.</p>
-      <p style="font-size: 10px;">This computer-generated tax invoice is officially valid under the regulations of Auroville International Township, Tamil Nadu.</p>
+      <p>Thank you for choosing Auro Perfect Vision (APV). For questions, call our clinic reception at +91 94897 63451 or email auroperfectvision@gmail.com.</p>
+      <p style="font-size: 10px;">This computer-generated tax invoice is issued by Auro Perfect Vision (APV), White Town, Puducherry – 605001, India.</p>
     </div>
   </div>
 </body>

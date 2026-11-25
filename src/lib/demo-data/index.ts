@@ -149,8 +149,8 @@ export const INITIAL_OFFERINGS: Offering[] = [
     slug: "retreat-holistic-vision-awakening",
     title: "Flagship 7-Day Holistic Vision Awakening Retreat",
     category: "programmes",
-    shortDescription: "An immersive week in Auroville combining daily eye yoga, nature walks, nutritional guidance, and meditation.",
-    fullDescription: "Our signature multi-session residential retreat held amidst the peaceful forests of Auroville. Over seven days, participants immerse themselves in daily eye yoga, mindful movement, suboccipital release, sunning routines, silent visual contemplation, and organic nutritional eye-care.",
+    shortDescription: "An immersive week in Pondicherry combining daily eye yoga, nature walks, nutritional guidance, and meditation.",
+    fullDescription: "Our signature multi-session residential retreat held at our serene centre in Pondicherry. Over seven days, participants immerse themselves in daily eye yoga, mindful movement, suboccipital release, sunning routines, silent visual contemplation, and organic nutritional eye-care.",
     durationMinutes: 180,
     format: "group",
     delivery: "onsite",
@@ -161,14 +161,14 @@ export const INITIAL_OFFERINGS: Offering[] = [
     featured: true,
     suitableFor: [
       "Individuals wanting a deep, transformative visual reset away from screens",
-      "Seekers of holistic wellness immersed in the Auroville environment",
+      "Seekers of integral eye wellness in Pondicherry",
       "Those looking to build sustainable lifelong eye-care rituals"
     ],
     whatToExpect: [
       "7 consecutive morning and evening guided group sessions",
       "One-on-one personal visual assessment & bespoke home regimen",
       "Dedicated eye nutrition workshops and organic herbal teas",
-      "Access to tranquil Auroville nature walking paths"
+      "Peaceful coastal & heritage walking routes in White Town"
     ],
     programmeSyllabus: [
       { stepNumber: 1, title: "Day 1-2: Awareness & De-Stressing", description: "Unlearning ocular tension habits, introduction to palming, and natural light adaptation." },
@@ -187,9 +187,9 @@ export const INITIAL_THERAPISTS: Therapist[] = [
     slug: "dr-ananya-sen",
     displayName: "Dr. Ananya Sen",
     roleTitle: "Senior Vision Wellness Practitioner",
-    bio: "With over 14 years devoted to holistic eye health and natural vision therapy, Dr. Sen combines classical Bates methodology with modern ocular photobiomodulation. She has guided hundreds of residents and international guests toward eye comfort and mindful screen habits in Auroville.",
+    bio: "With over 14 years devoted to holistic eye health and natural vision therapy, Dr. Sen combines classical Bates methodology with modern ocular photobiomodulation. She has guided hundreds of residents and visitors toward eye comfort and mindful screen habits in Pondicherry.",
     specialties: ["Eye Yoga", "Vision Stress Relief", "Dry Eye Photobiomodulation", "Children's Vision"],
-    qualifications: "B.Optom, Holistic Vision Therapy Specialist (Auroville)",
+    qualifications: "B.Optom, Holistic Vision Therapy Specialist (Pondicherry)",
     photoUrl: "https://images.unsplash.com/photo-1594824813583-8a07f7b243b6?auto=format&fit=crop&w=800&q=80",
     assignedOfferingIds: ["off-1", "off-2", "off-3", "off-5", "off-6"],
     email: "ananya@auroperfectvision.demo",
@@ -346,7 +346,7 @@ export const INITIAL_INTAKE_TEMPLATES: IntakeTemplate[] = [
         fieldKey: "referral_source",
         label: "How did you hear about Auro Perfect Vision?",
         fieldType: "radio",
-        options: ["Auroville Directory / Community", "Friend or Family Recommendation", "Web Search", "Social Media"],
+        options: ["Pondicherry Directory / Local Community", "Friend or Family Recommendation", "Web Search", "Social Media"],
         isRequired: false,
         displayOrder: 5,
       }
@@ -465,7 +465,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
     slug: "gentle-art-of-palming-and-sunning",
     title: "The Gentle Art of Palming & Sunning: Classical Techniques for Modern Vision",
     excerpt: "Explore the profound parasympathetic benefits of natural daylight exposure combined with deep ocular warmth.",
-    content: `For decades, vision educators across Auroville have shared simple, grounding practices that realign the visual system with the rhythms of nature. Sunning and palming are two pillars of this mindful approach.\n\n### Sunning: Awakening Retinal Light Sensitivity\nSunning involves closing your eyes and gently rotating your head from shoulder to shoulder facing the morning sun. The gentle warmth passes through the eyelids, encouraging relaxed pupil dilation and contraction without any glare or direct optical strain.\n\n### Transition to Palming\nDirectly following sunning, step into the shade and cup your palms over your eyes. The contrast between warm golden light and deep velvety darkness provides profound neurological relief to fatigued eyes.`,
+    content: `For decades, vision educators in Pondicherry have shared simple, grounding practices that realign the visual system with the rhythms of nature. Sunning and palming are two pillars of this mindful approach.\n\n### Sunning: Awakening Retinal Light Sensitivity\nSunning involves closing your eyes and gently rotating your head from shoulder to shoulder facing the morning sun. The gentle warmth passes through the eyelids, encouraging relaxed pupil dilation and contraction without any glare or direct optical strain.\n\n### Transition to Palming\nDirectly following sunning, step into the shade and cup your palms over your eyes. The contrast between warm golden light and deep velvety darkness provides profound neurological relief to fatigued eyes.`,
     category: "Eye Yoga & Practices",
     readTime: "5 min read",
     publishedDate: "November 08, 2026",

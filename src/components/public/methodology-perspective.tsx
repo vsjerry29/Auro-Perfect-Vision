@@ -37,7 +37,7 @@ export function MethodologyPerspective() {
           <div className="lg:col-span-6 space-y-6 text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-brand-purple/20 text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
               <Eye className="w-3.5 h-3.5 text-brand-orange" />
-              <span>Auroville Vision Philosophy</span>
+              <span>Integral Vision Philosophy</span>
             </div>
 
             <h2 className="font-sora text-3xl sm:text-4xl font-bold text-brand-charcoal tracking-tight leading-snug">

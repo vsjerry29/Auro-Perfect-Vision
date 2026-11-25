@@ -33,7 +33,7 @@ export function FeaturedTherapies({ initialOfferings }: FeaturedTherapiesProps) 
               Featured Holistic Therapies
             </h2>
             <p className="font-inter text-sm sm:text-base text-brand-secondary">
-              From focused 60-minute eye relaxation sessions to multi-day immersive vision camps in Auroville.
+              From focused 60-minute eye relaxation sessions to multi-day immersive vision camps in Pondicherry.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export function FeaturedTherapies({ initialOfferings }: FeaturedTherapiesProps) 
                         {offering.delivery === "online"
                           ? "Global Online"
                           : offering.delivery === "onsite"
-                          ? "Auroville On-site"
+                          ? "Pondicherry On-site"
                           : "Hybrid"}
                       </span>
                     </div>

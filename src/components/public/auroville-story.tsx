@@ -13,7 +13,7 @@ export function AurovilleStory() {
             <div className="relative rounded-3xl overflow-hidden shadow-card border-4 border-white bg-white">
               <img
                 src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1000&q=80"
-                alt="Tranquil natural surroundings of Auroville"
+                alt="Serene centre surroundings in Pondicherry"
                 className="w-full h-[400px] object-cover"
               />
             </div>
@@ -30,26 +30,26 @@ export function AurovilleStory() {
           <div className="lg:col-span-7 space-y-6 lg:pl-6">
             <div className="inline-flex items-center gap-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold-dark">
               <Trees className="w-4 h-4 text-sage-dark" />
-              <span>Conscious Township Heritage</span>
+              <span>Centre for Integral Vision Care</span>
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl text-ink font-normal tracking-tight leading-tight">
-              Rooted in the spirit of Auroville: <br />
+              Comprehensive eye care in Pondicherry: <br />
               <span className="italic text-plum">Holistic growth, wellness & inner balance.</span>
             </h2>
 
             <p className="text-sm sm:text-base text-ink-muted leading-relaxed">
-              Auroville was conceived as an international city dedicated to human unity, sustainable ecology, and integral education. For decades, natural vision educators within the community have researched non-pharmaceutical eye care practices, cultivating deep awareness of the link between ocular fatigue, breathing patterns, and mental stress.
+              Auro Perfect Vision (APV) brings together clinical vision science and integral ocular wellness in White Town, Puducherry. For years, our practitioners have cultivated personalised vision therapies bridging modern optometry with deep awareness of the link between ocular fatigue, breathing patterns, and nervous system calm.
             </p>
 
             <p className="text-sm sm:text-base text-ink-muted leading-relaxed">
-              At Auro Perfect Vision, our centre operates as a peaceful sanctuary away from urban glare. Here, nature, organic architecture, and conscious attention combine to give your sight the quiet respite it needs.
+              At Auro Perfect Vision, our Pondicherry centre operates as a calm clinical and wellness sanctuary. Here, diagnostic expertise, guided eye therapies, and mindful attention combine to give your sight lasting visual comfort.
             </p>
 
             <div className="pt-2">
               <Link href="/about">
                 <Button variant="primary" size="md" className="gap-2">
-                  <span>Discover Our Auroville Roots</span>
+                  <span>Discover Our Pondicherry Story</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>

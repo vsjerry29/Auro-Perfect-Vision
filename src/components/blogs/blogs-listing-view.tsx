@@ -43,7 +43,7 @@ export function BlogsListingView({ initialBlogs }: BlogsListingViewProps) {
             The Eye Wellness <span className="text-brand-purple">Journal</span>
           </h1>
           <p className="font-inter text-base text-brand-secondary max-w-xl mx-auto leading-relaxed">
-            Practical guides on digital eye strain, classical palming routines, and holistic visual habits from our Auroville practitioners.
+            Practical guides on digital eye strain, classical palming routines, and holistic visual habits from our Pondicherry practitioners.
           </p>
         </div>
       </section>

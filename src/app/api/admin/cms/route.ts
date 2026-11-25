@@ -3,12 +3,15 @@ import { revalidatePath } from "next/cache";
 import { getCurrentStaffSession } from "@/lib/server/auth";
 import {
   getSiteContent,
+  getEffectiveSiteContent,
   saveSiteContent,
   getCmsRevisions,
   createCmsRevision,
   rollbackCmsRevision,
   logAuditEvent,
 } from "@/lib/server/cms";
+import { isMySQLConfigured } from "@/lib/server/mysql";
+import * as db from "@/lib/server/mysql-db";
 
 export async function GET(request: Request) {
   const session = await getCurrentStaffSession();
@@ -19,7 +22,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const includeRevisions = searchParams.get("revisions") === "true";
 
-  const content = getSiteContent();
+  const content = await getEffectiveSiteContent();
   const revisions = includeRevisions ? getCmsRevisions("global_settings") : [];
 
   return NextResponse.json({ content, revisions });
@@ -49,12 +52,14 @@ export async function PUT(request: Request) {
       });
       try {
         revalidatePath("/", "page");
+        revalidatePath("/book", "page");
+        revalidatePath("/contact", "page");
       } catch {}
-      return NextResponse.json({ success: true, content: getSiteContent() });
+      return NextResponse.json({ success: true, content: await getEffectiveSiteContent() });
     }
 
     // Save current content as revision before updating
-    const previous = getSiteContent();
+    const previous = await getEffectiveSiteContent();
     createCmsRevision(
       "global_settings",
       `Revision by ${session.fullName}`,
@@ -63,12 +68,20 @@ export async function PUT(request: Request) {
     );
 
     const updated = saveSiteContent(body);
+    if (isMySQLConfigured()) {
+      try {
+        await db.dbSaveSiteContent(updated);
+      } catch (dbErr: any) {
+        console.warn("[Admin CMS MySQL Persist Warning]:", dbErr.message);
+      }
+    }
 
     try {
       revalidatePath("/", "page");
       revalidatePath("/about", "page");
       revalidatePath("/contact", "page");
       revalidatePath("/therapies", "page");
+      revalidatePath("/book", "page");
     } catch {
       // In testing contexts without request context, continue cleanly
     }

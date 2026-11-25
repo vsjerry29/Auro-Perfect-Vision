@@ -53,7 +53,7 @@ export function ConfirmationView({ booking }: ConfirmationViewProps) {
     icon = <CheckCircle2 className="w-12 h-12 text-emerald-600" />;
     headline = "Appointment & Payment Confirmed";
     explanation =
-      "Your appointment is confirmed and payment has been verified. We look forward to welcoming you to Auroville.";
+      "Your appointment is confirmed and payment has been verified. We look forward to welcoming you to our Pondicherry centre.";
   } else if (isBookingConfirmed && !isPaid) {
     bannerBg = "bg-emerald-50/90 border-emerald-200";
     icon = <CheckCircle2 className="w-12 h-12 text-emerald-600" />;
@@ -201,7 +201,7 @@ export function ConfirmationView({ booking }: ConfirmationViewProps) {
               </a>
             ) : (
               <div className="text-xs font-inter text-amber-800 bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
-                Fee payable at our Auroville centre reception desk upon arrival via Cash, UPI, or Card.
+                Fee payable at our Pondicherry centre reception desk upon arrival via Cash, UPI, or Card.
               </div>
             )}
           </div>
@@ -215,16 +215,16 @@ export function ConfirmationView({ booking }: ConfirmationViewProps) {
           </div>
           <div className="bg-white p-4 rounded-2xl border border-brand-gray text-xs font-inter text-brand-secondary space-y-2 shadow-sm">
             <p className="font-semibold text-brand-charcoal">
-              Auro Perfect Vision Clinic &amp; Ocular Sanctuary
+              Auro Perfect Vision (APV) — Centre for Integral Vision Care
             </p>
             <p className="leading-relaxed">
-              Crown Road, Auroville International Township, Tamil Nadu 605101, India.
+              Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.
             </p>
             <p className="text-[11px] text-brand-secondary leading-relaxed pt-1 border-t border-brand-gray/60">
-              Please arrive 10 minutes before your scheduled appointment time. Wear comfortable clothing suitable for gentle eye gymnastics and conscious relaxation.
+              Please arrive 10 minutes before your scheduled appointment time. Wear comfortable clothing suitable for gentle vision therapy and relaxation.
             </p>
             <p className="text-[11px] text-brand-purple font-medium">
-              Direct Desk: +91 80123 05151 • auroperfectvision@gmail.com
+              Direct Desk: +91 94897 63451 • auroperfectvision@gmail.com
             </p>
           </div>
         </div>

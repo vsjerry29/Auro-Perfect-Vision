@@ -641,7 +641,7 @@ export default function AdminOfferingsPage() {
                       onChange={(e) => setDelivery(e.target.value as OfferingDelivery)}
                       className="w-full px-3 py-1.5 rounded-lg border border-ink-border bg-canvas-light text-ink"
                     >
-                      <option value="onsite">On-site (Auroville)</option>
+                      <option value="onsite">On-site (Pondicherry)</option>
                       <option value="online">Online Video</option>
                       <option value="hybrid">Hybrid (Both)</option>
                     </select>

@@ -40,7 +40,7 @@ export function PhilosophySection() {
             <span className="italic text-plum">It is a living coordination of body and mind.</span>
           </h2>
           <p className="font-sans text-base text-ink-muted leading-relaxed">
-            Founded on the pioneering vision therapy research within the intentional township of Auroville, our approach avoids quick fixes and aggressive interventions. We gently retrain how the eyes relax, focus, and interact with light.
+            Grounded in comprehensive clinical vision care and integral wellness principles in Pondicherry, our approach avoids quick fixes and aggressive interventions. We gently retrain how the eyes relax, focus, and interact with light.
           </p>
         </div>
 
@@ -77,13 +77,13 @@ export function PhilosophySection() {
         <div className="mt-16 bg-sage/40 rounded-3xl p-8 sm:p-12 border border-sage-muted grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-8 space-y-3">
             <span className="text-xs font-sans uppercase tracking-widest text-sage-dark font-semibold">
-              The Auroville Context
+              Our Pondicherry Centre
             </span>
             <h3 className="font-serif text-2xl sm:text-3xl text-ink font-normal">
-              A serene haven dedicated to conscious health and human unity.
+              A calm clinical environment dedicated to conscious eye health.
             </h3>
             <p className="text-sm sm:text-base text-ink-muted leading-relaxed">
-              Sessions are hosted at our peaceful centre surrounded by the lush green belt of Auroville, or conducted live via encrypted video consultations for international guests seeking gentle, guided practice.
+              Sessions are hosted at our welcoming clinic in historic White Town, Puducherry, or conducted live via encrypted video consultations for remote clients seeking gentle, guided practice.
             </p>
           </div>
           <div className="lg:col-span-4 flex justify-start lg:justify-end">

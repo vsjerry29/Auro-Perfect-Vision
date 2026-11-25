@@ -1,10 +1,10 @@
 [
   {
     "id": "prog-1",
-    "slug": "auroville-7-day-mindful-vision-immersion",
-    "title": "Auroville 7-Day Mindful Vision Immersion Retreat",
-    "shortDescription": "A transformative residential retreat in Auroville. Daily Bates method sessions, ocular photobiomodulation, conscious breathing, and digital detox.",
-    "fullDescription": "Immerse yourself in seven days of focused ocular restoration amidst the serene forests of Auroville. This comprehensive programme is designed for individuals seeking to cultivate sustainable vision habits, dissolve chronic screen fatigue, and establish lifelong natural eye care practices under dedicated educator guidance.",
+    "slug": "pondicherry-7-day-mindful-vision-immersion",
+    "title": "7-Day Mindful Vision Immersion Retreat",
+    "shortDescription": "A transformative residential retreat in Pondicherry. Daily Bates method sessions, ocular photobiomodulation, conscious breathing, and digital detox.",
+    "fullDescription": "Immerse yourself in seven days of focused ocular restoration at our Pondicherry centre. This comprehensive programme is designed for individuals seeking to cultivate sustainable vision habits, dissolve chronic screen fatigue, and establish lifelong natural eye care practices under dedicated specialist guidance.",
     "durationLabel": "7 Days / 6 Nights",
     "durationDays": 7,
     "dailySessionMinutes": 180,
@@ -16,7 +16,7 @@
       "therapist-1",
       "therapist-2"
     ],
-    "location": "Auro Perfect Vision Centre & Forest Pavilion, Auroville",
+    "location": "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
     "maxCapacity": 12,
     "imageUrl": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
     "itinerary": [
@@ -57,7 +57,7 @@
       }
     ],
     "inclusions": [
-      "7 Days / 6 Nights peaceful Auroville guest house accommodation",
+      "7 Days / 6 Nights curated Pondicherry retreat accommodation",
       "All daily organic, eye-nourishing vegetarian meals and herbal infusions",
       "Daily 3-hour guided clinical eye yoga & therapy workshops",
       "Full photobiomodulation sessions and sunning practice",

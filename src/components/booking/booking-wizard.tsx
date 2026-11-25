@@ -90,7 +90,7 @@ export function BookingWizard({ offering, initialTherapistId }: BookingWizardPro
       errs.clientEmail = "Please enter a valid email address.";
     }
     if (!clientPhone.trim() || clientPhone.length < 8) {
-      errs.clientPhone = "Please enter your WhatsApp phone number.";
+      errs.clientPhone = "Please enter your phone number.";
     }
 
     // Dynamic fields validation

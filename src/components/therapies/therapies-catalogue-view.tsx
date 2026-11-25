@@ -38,7 +38,7 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
     { id: "digital_eye_strain", label: "Digital Screen Relief" },
     { id: "children_vision_habits", label: "Pediatric Vision" },
     { id: "photobiomodulation", label: "Red Light & Tech" },
-    { id: "residential_retreat", label: "Auroville Retreats" },
+    { id: "residential_retreat", label: "Wellness Retreats" },
   ];
 
   const filtered = useMemo(() => {
@@ -77,7 +77,7 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
           <div className="max-w-3xl space-y-3">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-              <span>Auroville Centre for Vision Beyond Glasses</span>
+              <span>Centre for Integral Vision Care • Pondicherry</span>
             </div>
             <h1 className="font-sora text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-charcoal tracking-tight">
               Explore Vision Therapies & <span className="text-brand-purple">Programmes</span>
@@ -151,7 +151,7 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
               className="px-3.5 py-2.5 text-xs font-inter font-medium rounded-xl border border-brand-gray bg-[#FAF9FC] text-brand-charcoal focus:outline-none focus:ring-2 focus:ring-brand-purple/50 cursor-pointer"
             >
               <option value="all">All Locations</option>
-              <option value="onsite">Auroville On-site</option>
+              <option value="onsite">Pondicherry On-site</option>
               <option value="online">Online Video Consult</option>
             </select>
 
@@ -239,7 +239,7 @@ export function TherapiesCatalogueView({ initialOfferings }: TherapiesCatalogueV
                           </>
                         ) : (
                           <>
-                            <MapPin className="w-3 h-3 text-brand-orange" /> Auroville
+                            <MapPin className="w-3 h-3 text-brand-orange" /> Pondicherry
                           </>
                         )}
                       </span>

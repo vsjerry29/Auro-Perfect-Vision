@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "About Us | Auro Perfect Vision — Centre for Vision Beyond Glasses",
+  title: "About Us | Auro Perfect Vision (APV) — Pondicherry",
   description:
-    "Discover the philosophy, integrative Bates methodology, and serene Auroville roots of Auro Perfect Vision.",
+    "Discover the philosophy, comprehensive vision care, and integral wellness methodology of Auro Perfect Vision in Pondicherry.",
 };
 
 export default function AboutPage() {
@@ -34,33 +34,33 @@ export default function AboutPage() {
           </h1>
 
           <p className="font-inter text-base sm:text-lg text-brand-secondary leading-relaxed max-w-3xl mx-auto">
-            Auro Perfect Vision was established in Auroville with a transformative conviction: the eyes are dynamic organs capable of relaxation, neuromuscular adaptability, and sustained comfort when given mindful care and proper visual hygiene.
+            Auro Perfect Vision (APV) was established in Pondicherry with a transformative conviction: the eyes are dynamic organs capable of relaxation, neuromuscular adaptability, and sustained comfort when given mindful care and proper visual hygiene.
           </p>
         </div>
       </section>
 
       {/* Main Narrative & Photographic Journey */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        {/* Story Block 1: Auroville Forest Haven */}
+        {/* Story Block 1: Pondicherry Centre */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-5">
             <span className="text-xs font-inter font-bold uppercase tracking-widest text-brand-orange">
-              The Auroville Sanctuary
+              Centre for Integral Vision Care
             </span>
             <h2 className="font-sora text-3xl sm:text-4xl font-bold text-brand-charcoal leading-tight">
-              An ecosystem of mindful living, green canopies, and quiet distance.
+              Comprehensive eye care and vision therapies in Pondicherry.
             </h2>
             <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
-              Situated in the international universal township of Auroville, our centre draws deeply from the spirit of integral development. Rather than treating ocular fatigue as an isolated mechanical defect, we understand it within the broader rhythm of human wellbeing — physical relaxation, mental stillness, and harmony with natural sunlight.
+              Situated in historic White Town, Puducherry, our centre draws deeply from the spirit of integral health and wellness. Rather than treating visual fatigue or refractive challenges as isolated mechanical defects, we understand vision within the broader rhythm of human wellbeing — physical relaxation, mental clarity, and clinical excellence.
             </p>
             <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
-              Our quiet facility is surrounded by lush green foliage and open horizons that naturally encourage the ciliary muscles to disengage from constant near-point strain and gaze effortlessly into infinity.
+              Our quiet facility in White Town provides dedicated spaces engineered to help children and adults disengage from constant near-point strain and develop sustainable ocular wellness.
             </p>
           </div>
           <div className="lg:col-span-6 rounded-3xl overflow-hidden shadow-lg border border-brand-gray/80 group">
             <img
               src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80"
-              alt="Serene natural setting in Auroville"
+              alt="Auro Perfect Vision Centre in White Town, Puducherry"
               className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             />
           </div>
@@ -167,14 +167,14 @@ export default function AboutPage() {
         {/* Call to action */}
         <div className="text-center pt-8 space-y-5">
           <h3 className="font-sora text-2xl sm:text-3xl font-bold text-brand-charcoal">
-            Experience our mindful approach in Auroville or online.
+            Experience our mindful approach in Pondicherry or online.
           </h3>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/therapies"
+              href="/book"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-brand-orange hover:bg-brand-orangeHover text-white text-sm font-sora font-bold shadow-md hover:shadow-lg transition-all"
             >
-              <span>Explore Therapies & Book</span>
+              <span>Book an Appointment</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

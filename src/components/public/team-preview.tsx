@@ -82,7 +82,7 @@ export function TeamPreview({ initialTherapists }: TeamPreviewProps) {
 
                 <div className="pt-3">
                   <Link
-                    href={`/therapies`}
+                    href={`/book?therapist=${therapist.id}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-orange hover:bg-brand-orangeHover text-white text-xs font-sora font-bold rounded-xl shadow-orange-glow transition-all"
                   >
                     <Calendar className="w-3.5 h-3.5" />

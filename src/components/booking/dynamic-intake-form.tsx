@@ -89,7 +89,7 @@ export function DynamicIntakeForm({
 
           <div>
             <label className="block text-xs font-inter font-semibold text-brand-charcoal mb-1.5">
-              WhatsApp Phone Number <span className="text-brand-orange">*</span>
+              Phone Number <span className="text-brand-orange">*</span>
             </label>
             <input
               type="tel"

@@ -18,17 +18,17 @@ export function FinalCtaBanner() {
         </div>
 
         <h2 className="font-sora text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-          Ready to Experience Conscious Vision Restoration?
+          Ready to Experience Comprehensive Vision Care?
         </h2>
 
         <p className="font-inter text-base sm:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
-          Book your private consultation or residential retreat at Auro Perfect Vision in Auroville. Personalized guidance for children, professionals, and international guests.
+          Book your consultation at Auro Perfect Vision (APV) in Pondicherry. Personalized guidance for children, professionals, and families.
         </p>
 
         {/* Buttons */}
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href="/therapies"
+            href="/book"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-sm font-bold tracking-wide shadow-orange-glow transition-all duration-200 transform hover:-translate-y-0.5"
           >
             <Calendar className="w-4 h-4" />
@@ -45,10 +45,10 @@ export function FinalCtaBanner() {
         </div>
 
         <div className="pt-4 text-xs font-inter text-white/60 flex items-center justify-center gap-4">
-          <span>Auroville International Township</span>
+          <span>White Town, Puducherry</span>
           <span>•</span>
-          <a href="tel:+918012305151" className="hover:text-white transition-colors">
-            +91 80123 05151
+          <a href="tel:+919489763451" className="hover:text-white transition-colors">
+            +91 94897 63451
           </a>
         </div>
       </div>

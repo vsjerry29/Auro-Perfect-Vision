@@ -135,22 +135,22 @@ export default function AdminProgrammesPage() {
       delivery: "onsite",
       priceINR: 28000,
       priceUSD: 420,
-      location: "Auroville International Township, Tamil Nadu, India",
+      location: "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
       maxCapacity: 12,
       imageUrl: "/images/offerings/retreat-residential.webp",
       isPublished: true,
       itinerary: [
         { day: 1, title: "Arrival & Foundational Eye Acuity Assessment", description: "Comprehensive Bates screening, eye strain mapping, and introductory gentle sunning." },
         { day: 2, title: "The Art of Relaxation & Palming Technique", description: "Deep palming rituals, cranial release, and optical stillness meditation." },
-        { day: 3, title: "Central Fixation & Peripheral Awakenings", description: "Dynamic central fixation charts, broad awareness walking in Auroville forest." },
+        { day: 3, title: "Central Fixation & Peripheral Awakenings", description: "Dynamic central fixation charts, broad awareness outdoor walking." },
         { day: 4, title: "Shifting, Saccadic Motion & Illusions of Rest", description: "Long swings, optic flow pacing, and micro-movement eye tracking." },
         { day: 5, title: "Digital Deconditioning & Natural Sun Bathing", description: "Morning sunning, cold eye splash routines, and circadian alignment." },
-        { day: 6, title: "Night Walk & Subtle Contrast Training", description: "Auroville starlight walk, rod cell reactivation, and deep relaxation." },
+        { day: 6, title: "Twilight Walk & Subtle Contrast Training", description: "Coastal starlight walk, rod cell reactivation, and deep relaxation." },
         { day: 7, title: "Post-Camp Assessment & Home Practice Blueprint", description: "Comparative visual acuity test and personalized lifelong vision hygiene protocol." },
       ],
       inclusions: [
         "Daily personalized vision sessions",
-        "Auroville campus stay and organic sattvic meals",
+        "Curated Pondicherry retreat stay and nourishing meals",
         "Complete Bates vision training kit",
         "Follow-up virtual review at 30 days",
       ],
@@ -479,7 +479,7 @@ export default function AdminProgrammesPage() {
                   type="text"
                   value={editingProg.shortDescription || ""}
                   onChange={(e) => setEditingProg({ ...editingProg, shortDescription: e.target.value })}
-                  placeholder="Intensive holistic residential eye retreat in the peaceful environs of Auroville..."
+                  placeholder="Intensive holistic residential eye retreat at our Pondicherry centre..."
                   className="w-full p-2 border border-ink-border rounded bg-ivory/30 focus:outline-none"
                   required
                 />

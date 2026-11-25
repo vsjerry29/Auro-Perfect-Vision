@@ -12,17 +12,17 @@ import { VisitCentre } from "@/components/public/visit-centre";
 import { ArticlesPreview } from "@/components/public/articles-preview";
 import { FinalCtaBanner } from "@/components/public/final-cta-banner";
 import {
-  getSiteContent,
-  getAllOfferings,
+  getEffectiveSiteContent,
+  getEffectiveOfferings,
   getAllTherapists,
   getAllBlogPosts,
 } from "@/lib/server/cms";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const siteContent = getSiteContent();
-  const offerings = getAllOfferings(false); // strictly published only
+export default async function HomePage() {
+  const siteContent = await getEffectiveSiteContent();
+  const offerings = await getEffectiveOfferings(false); // strictly published only
   const therapists = getAllTherapists(false); // strictly published only
   const blogs = getAllBlogPosts(false); // strictly published only
 
@@ -55,8 +55,8 @@ export default function HomePage() {
       {/* 9. What to Expect (Transparent Patient Journey) */}
       <WhatToExpect />
 
-      {/* 10. Visit Our Sanctuary in Auroville */}
-      <VisitCentre />
+      {/* 10. Visit Our Centre in Pondicherry */}
+      <VisitCentre siteContent={siteContent} />
 
       {/* 11. Educational Eye-Care Journal */}
       <ArticlesPreview initialBlogs={blogs} />

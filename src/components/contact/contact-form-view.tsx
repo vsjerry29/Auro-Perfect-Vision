@@ -22,7 +22,7 @@ export function ContactFormView() {
     "Vision Therapy Consultation",
     "Residential Eye Camp",
     "Online Programme",
-    "Visiting Auroville Centre",
+    "Visiting Pondicherry Centre",
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

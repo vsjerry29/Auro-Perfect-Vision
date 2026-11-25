@@ -224,17 +224,17 @@ function baseEmailWrapper(title: string, contentHtml: string): string {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Auro Perfect Vision</h1>
-      <p>Auroville • Holistic Ocular Restoration</p>
+      <h1>Auro Perfect Vision (APV)</h1>
+      <p>Centre for Integral Vision Care • Pondicherry</p>
     </div>
     <div class="body">
       ${contentHtml}
     </div>
     <div class="footer">
-      <p><strong>Auro Perfect Vision</strong></p>
-      <p>Auroville International Township, Tamil Nadu 605101, India</p>
-      <p>Direct Center Desk: +91 80123 05151 • <a href="mailto:auroperfectvision@gmail.com" style="color: #7B7268; text-decoration: underline;">auroperfectvision@gmail.com</a></p>
-      <p style="margin-top: 10px; font-size: 10px; color: #A0988E;">This is an automated communication from Auro Perfect Vision.</p>
+      <p><strong>Auro Perfect Vision (APV)</strong></p>
+      <p>Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.</p>
+      <p>Direct Centre Desk: +91 94897 63451 • <a href="mailto:auroperfectvision@gmail.com" style="color: #7B7268; text-decoration: underline;">auroperfectvision@gmail.com</a></p>
+      <p style="margin-top: 10px; font-size: 10px; color: #A0988E;">This is an automated communication from Auro Perfect Vision (APV).</p>
     </div>
   </div>
 </body>
@@ -291,8 +291,8 @@ ${data.inviteUrl}
 
 This link is single-use and will expire in ${hours} hours.
 
-Auro Perfect Vision
-Auroville International Township, Tamil Nadu 605101, India`;
+Auro Perfect Vision (APV)
+Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.`;
 
   return {
     html: baseEmailWrapper("Staff Portal Invitation — Auro Perfect Vision", htmlContent),
@@ -376,7 +376,7 @@ export function renderBookingConfirmationEmail(data: {
     ${
       !isPaid
         ? `<p style="font-size: 13px; color: #B45309; background: #FEF3C7; padding: 12px; border-radius: 8px;">
-            <strong>Offline Payment Notice:</strong> Your slot is reserved. Please settle your fee at our Auroville centre reception desk upon arrival or via UPI/bank transfer prior to your session.
+            <strong>Offline Payment Notice:</strong> Your slot is reserved. Please settle your fee at our Pondicherry centre reception desk upon arrival or via UPI/bank transfer prior to your session.
            </p>`
         : ""
     }
@@ -390,8 +390,8 @@ export function renderBookingConfirmationEmail(data: {
     }
 
     <p style="font-size: 13px;">
-      <strong>Centre Location:</strong> Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.<br>
-      Please arrive 10 minutes before your scheduled start time. Wear comfortable clothing suitable for relaxation and eye-gymnastics.
+      <strong>Centre Location:</strong> Auro Perfect Vision (APV), Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.<br>
+      Please arrive 10 minutes before your scheduled start time. Wear comfortable clothing suitable for relaxation and vision care.
     </p>
   `;
 
@@ -407,8 +407,8 @@ Time: ${data.timeSlot} IST
 Fee: ${textFee}
 Payment Status: ${isPaid ? "Paid & Verified" : "Pending Offline Payment"}
 
-Centre Location: Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.
-Contact: +91 80123 05151 • auroperfectvision@gmail.com`;
+Centre Location: Auro Perfect Vision (APV), Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.
+Contact: +91 94897 63451 • auroperfectvision@gmail.com`;
 
   return {
     html: baseEmailWrapper(subject, htmlContent),
@@ -447,7 +447,7 @@ export function renderBookingCancelledEmail(data: {
 
 Your session for ${data.offeringTitle} on ${data.bookingDate} (Ref: ${data.bookingReference}) has been cancelled.
 ${data.reason ? `Reason: ${data.reason}\n` : ""}
-If you wish to reschedule, please contact us at auroperfectvision@gmail.com or +91 80123 05151.`;
+If you wish to reschedule, please contact us at auroperfectvision@gmail.com or +91 94897 63451.`;
 
   return {
     html: baseEmailWrapper(`Appointment Cancelled: ${data.bookingReference}`, htmlContent),
@@ -493,7 +493,7 @@ export function renderBookingReminderEmail(data: {
     </div>
 
     <p style="font-size: 13px; color: #7B7268;">
-      Please remove contact lenses prior to the session if practical. We look forward to welcoming you to our tranquil sanctuary in Auroville.
+      Please remove contact lenses prior to the session if practical. We look forward to welcoming you to our Pondicherry centre.
     </p>
   `;
 
@@ -502,8 +502,8 @@ export function renderBookingReminderEmail(data: {
 Reminder: Your session for ${data.offeringTitle} with ${data.therapistName} is scheduled on ${data.bookingDate} at ${data.timeSlot} IST.
 Booking Ref: ${data.bookingReference}
 
-Location: Auro Perfect Vision Clinic, Crown Road, Auroville.
-Phone: +91 80123 05151`;
+Location: Auro Perfect Vision (APV), Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.
+Phone: +91 94897 63451`;
 
   return {
     html: baseEmailWrapper(`Upcoming Session Reminder: ${data.bookingReference}`, htmlContent),
@@ -650,7 +650,7 @@ export function renderContactAcknowledgmentClientEmail(data: {
     <p>Dear ${escapeHtml(data.name)},</p>
     <p>Thank you for contacting <strong>Auro Perfect Vision</strong>. We have received your inquiry regarding <em>"${escapeHtml(data.subject)}"</em> (Reference: <code>${escapeHtml(data.reference)}</code>).</p>
     <p>Our educators will review your request and get back to you shortly within 24–48 hours.</p>
-    <p style="font-size: 13px; color: #7B7268;">For urgent appointments or directions in Auroville, please call our reception at +91 80123 05151.</p>
+    <p style="font-size: 13px; color: #7B7268;">For urgent appointments or directions in Pondicherry, please call our reception at +91 94897 63451.</p>
   `;
 
   const textContent = `Dear ${data.name},
@@ -659,8 +659,8 @@ Thank you for contacting Auro Perfect Vision. We have received your message rega
 
 Our team will respond within 24-48 business hours.
 
-Auro Perfect Vision
-Auroville, Tamil Nadu 605101`;
+Auro Perfect Vision (APV)
+Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.`;
 
   return {
     html: baseEmailWrapper(`Inquiry Received [${data.reference}] — Auro Perfect Vision`, htmlContent),
@@ -1103,7 +1103,7 @@ export function renderBookingApprovedEmail(data: BookingApprovedEmailData): {
     ${
       !isPaid
         ? `<div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 12px; padding: 14px 18px; margin: 18px 0; font-size: 13px; color: #92400E;">
-            <strong>Payment Notice:</strong> Your appointment is confirmed! As you selected offline payment, the fee of <strong>${formattedFee}</strong> can be settled at our Auroville centre reception desk upon arrival via Cash, UPI, or Card.
+            <strong>Payment Notice:</strong> Your appointment is confirmed! As you selected offline payment, the fee of <strong>${formattedFee}</strong> can be settled at our Pondicherry centre reception desk upon arrival via Cash, UPI, or Card.
            </div>`
         : ""
     }
@@ -1113,7 +1113,7 @@ export function renderBookingApprovedEmail(data: BookingApprovedEmailData): {
     </div>
 
     <p style="font-size: 13px; color: #2C2621; line-height: 1.6;">
-      <strong>Centre Location:</strong> Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.<br>
+      <strong>Centre Location:</strong> Auro Perfect Vision (APV), Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.<br>
       Please arrive 10 minutes prior to your scheduled session. If you wear contact lenses, we recommend removing them before eye-relaxation therapies.
     </p>
   `;
@@ -1137,8 +1137,8 @@ ${!isPaid ? `Payment of ${formattedFee} can be completed at our centre reception
 
 View Live Booking: ${trackingUrl}
 
-Centre Location: Auro Perfect Vision Clinic, Crown Road, Auroville, Tamil Nadu 605101.
-Contact: +91 80123 05151 • auroperfectvision@gmail.com`;
+Centre Location: Auro Perfect Vision (APV), Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.
+Contact: +91 94897 63451 • auroperfectvision@gmail.com`;
 
   return {
     html: baseEmailWrapper(`Appointment Confirmed [${data.bookingReference}] — Auro Perfect Vision`, htmlContent),
@@ -1165,7 +1165,7 @@ export function renderBookingRejectedEmail(data: BookingRejectedEmailData): {
 } {
   const rescheduleUrl =
     data.rescheduleUrl ||
-    `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/therapies`;
+    `${process.env.NEXT_PUBLIC_APP_URL || "https://auroperfectvision.com"}/book`;
 
   const htmlContent = `
     <h2 style="font-family: Georgia, serif; font-size: 20px; color: #2C2621; margin-top: 0;">Booking Request Update</h2>
@@ -1200,7 +1200,7 @@ export function renderBookingRejectedEmail(data: BookingRejectedEmailData): {
     </div>
 
     <p style="font-size: 12px; color: #7B7268;">
-      If you need personal assistance with scheduling or have specific timing requirements, please feel free to reach out directly to our team at <a href="mailto:auroperfectvision@gmail.com" style="color: #3B1E4A;">auroperfectvision@gmail.com</a> or phone <strong>+91 80123 05151</strong>.
+      If you need personal assistance with scheduling or have specific timing requirements, please feel free to reach out directly to our team at <a href="mailto:auroperfectvision@gmail.com" style="color: #3B1E4A;">auroperfectvision@gmail.com</a> or phone <strong>+91 94897 63451</strong>.
     </p>
   `;
 
@@ -1215,7 +1215,7 @@ ${data.reason ? `Reason: ${data.reason}\n` : ""}
 Your reserved slot has been released. You may choose an alternative time slot or explore other therapies here:
 ${rescheduleUrl}
 
-For assistance, please contact us at auroperfectvision@gmail.com or +91 80123 05151.`;
+For assistance, please contact us at auroperfectvision@gmail.com or +91 94897 63451.`;
 
   return {
     html: baseEmailWrapper(`Booking Request Update [${data.bookingReference}] — Auro Perfect Vision`, htmlContent),

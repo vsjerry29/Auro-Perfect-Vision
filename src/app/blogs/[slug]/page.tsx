@@ -69,7 +69,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           <span>•</span>
           <span>Published: {post.publishedDate}</span>
           <span>•</span>
-          <span>Auroville Vision Insights</span>
+          <span>APV Pondicherry Vision Insights</span>
         </div>
       </header>
 

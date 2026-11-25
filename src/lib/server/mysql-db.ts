@@ -1376,7 +1376,7 @@ export async function dbSaveProgramme(p: Programme): Promise<Programme> {
     p.priceINR || 28000,
     p.priceUSD || 420,
     JSON.stringify(p.leadFacilitatorIds || []),
-    p.location || "Auroville International Township, Tamil Nadu, India",
+    p.location || "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.",
     p.maxCapacity || 12,
     p.imageUrl || "",
     JSON.stringify(p.itinerary || []),

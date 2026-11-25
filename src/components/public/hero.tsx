@@ -34,12 +34,16 @@ export function Hero({ siteContent }: HeroProps) {
   const headline = siteContent?.heroHeadline || "See Better. Live Brighter.";
   const subtitle =
     siteContent?.heroSubtitle ||
-    "Explore personalized vision therapy, eye yoga, and eye wellness programmes at Auro Perfect Vision, Auroville.";
+    "Experience comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.";
   const heroImage =
     siteContent?.heroImageUrl ||
     "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80";
   const ctaText = siteContent?.primaryCtaText || siteContent?.heroCtaLabel || "Book an Appointment";
-  const ctaLink = siteContent?.primaryCtaLink || "/therapies";
+  const rawCtaLink = siteContent?.primaryCtaLink;
+  const ctaLink =
+    !rawCtaLink || rawCtaLink === "/therapies" || rawCtaLink === "/book-appointment"
+      ? "/book"
+      : rawCtaLink;
   const secondaryCta = siteContent?.heroSecondaryCtaLabel || "Explore Therapies";
   const secondaryCtaLink = siteContent?.secondaryCtaLink || "/therapies";
 
@@ -89,7 +93,7 @@ export function Hero({ siteContent }: HeroProps) {
             {/* Pill Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-lavender border border-brand-purple/15 text-xs font-inter font-semibold text-brand-purple">
               <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-              <span>Auroville International Sanctuary • Natural Eye Care</span>
+              <span>Centre for Integral Vision Care • Vision Beyond Eyesight</span>
             </div>
 
             {/* Main Bold Headline */}
@@ -126,13 +130,13 @@ export function Hero({ siteContent }: HeroProps) {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span className="text-xs font-inter font-medium text-brand-charcoal">
-                  Non-Surgical
+                  Comprehensive Eye Care
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span className="text-xs font-inter font-medium text-brand-charcoal">
-                  1-on-1 & Retreats
+                  Personalised Vision Care
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -144,7 +148,7 @@ export function Hero({ siteContent }: HeroProps) {
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span className="text-xs font-inter font-medium text-brand-charcoal">
-                  Instant Booking
+                  Clinical & Holistic Approach
                 </span>
               </div>
             </div>

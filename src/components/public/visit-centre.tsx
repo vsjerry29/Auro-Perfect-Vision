@@ -25,14 +25,10 @@ interface VisitCentreProps {
 }
 
 export function VisitCentre({ siteContent }: VisitCentreProps) {
-  const address = siteContent?.address || "Auro Perfect Vision Centre, Auroville, Tamil Nadu 605101, India";
-  const phone = siteContent?.phone || "+91 80123 05151";
-  const phoneSecondary = siteContent?.contactPhoneSecondary || "+91 94880 05685";
-  const wa = siteContent?.contactWhatsApp || "+91 8012305151";
+  const address = siteContent?.address || "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.";
+  const phone = siteContent?.phone || "+91 94897 63451";
   const email = siteContent?.email || "auroperfectvision@gmail.com";
   const hours = siteContent?.openingHours || "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)";
-
-  const cleanWa = wa.replace(/[^0-9]/g, "");
 
   return (
     <section className="py-16 lg:py-24 bg-white border-b border-brand-gray">
@@ -42,15 +38,15 @@ export function VisitCentre({ siteContent }: VisitCentreProps) {
           <div className="lg:col-span-6 space-y-6 text-left">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
               <MapPin className="w-3.5 h-3.5 text-brand-orange" />
-              <span>Auroville International Sanctuary</span>
+              <span>Pondicherry Centre • White Town</span>
             </div>
 
             <h2 className="font-sora text-3xl sm:text-4xl font-bold text-brand-charcoal tracking-tight">
-              Visit Auro Perfect Vision
+              Visit Auro Perfect Vision (APV)
             </h2>
 
             <p className="font-inter text-sm sm:text-base text-brand-secondary leading-relaxed">
-              Located amidst the peaceful green belt of Auroville. Visitors and residential participants are welcomed into a serene setting engineered for optic rest and natural recovery.
+              Located in historic White Town, Puducherry. Visitors and families are welcomed into a modern clinical setting engineered for comprehensive eye care, vision therapy, and natural wellness.
             </p>
 
             <div className="space-y-4 pt-2">
@@ -60,7 +56,7 @@ export function VisitCentre({ siteContent }: VisitCentreProps) {
                 </div>
                 <div>
                   <span className="font-sora text-xs font-bold text-brand-charcoal block">
-                    Sanctuary Address
+                    Clinic Address
                   </span>
                   <span className="font-inter text-xs text-brand-secondary leading-relaxed">
                     {address}
@@ -90,24 +86,24 @@ export function VisitCentre({ siteContent }: VisitCentreProps) {
                   <span className="font-sora text-xs font-bold text-brand-charcoal block">
                     Direct Telephone
                   </span>
-                  <span className="font-inter text-xs text-brand-secondary leading-relaxed">
-                    {phone} • {phoneSecondary}
-                  </span>
+                  <a
+                    href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
+                    className="font-inter text-xs font-semibold text-brand-purple hover:underline leading-relaxed inline-block"
+                  >
+                    {phone}
+                  </a>
                 </div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="pt-4 flex flex-wrap items-center gap-3">
-              <a
-                href={`https://wa.me/${cleanWa}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-sora text-xs font-bold shadow-sm transition-all"
+              <Link
+                href="/book"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-orange hover:bg-brand-orangeHover text-white font-sora text-xs font-bold shadow-sm transition-all"
               >
-                <MessageCircle className="w-4 h-4" />
-                <span>Chat on WhatsApp</span>
-              </a>
+                <span>Book an Appointment</span>
+              </Link>
 
               <a
                 href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
@@ -129,25 +125,34 @@ export function VisitCentre({ siteContent }: VisitCentreProps) {
             </div>
           </div>
 
-          {/* Right Column: Visual Map / Sanctuary Preview */}
+          {/* Right Column: Interactive Location Map & Address Preview */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-3xl overflow-hidden border-4 border-white shadow-elevated bg-brand-gray aspect-[16/11]">
-              <img
-                src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80"
-                alt="Auroville Sanctuary and surroundings"
-                className="w-full h-full object-cover"
+            <div className="relative rounded-3xl overflow-hidden border-4 border-white shadow-elevated bg-brand-gray aspect-[16/11] flex flex-col">
+              <iframe
+                title="Auro Perfect Vision (APV) — White Town, Puducherry Location Map"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent("Tresor Nursing Home, 9, St Louis St, White Town, Puducherry 605001, India")}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                className="w-full h-full border-0 flex-1"
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/80 via-brand-deep/20 to-transparent flex flex-col justify-end p-6 text-white">
-                <span className="text-[10px] font-inter uppercase tracking-wider text-brand-orange font-bold">
-                  Peaceful Forest Environs
-                </span>
-                <h3 className="font-sora text-xl font-bold mt-1">
-                  Auroville International Township
-                </h3>
-                <p className="text-xs text-white/80 mt-1 line-clamp-2">
-                  Minutes from the Matrimandir peaceful zones. Complete residential lodging available for multi-day participants.
-                </p>
+              <div className="bg-brand-deep text-white px-5 py-3.5 flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-inter uppercase tracking-wider text-brand-orange font-bold block">
+                    Historic White Town, Puducherry
+                  </span>
+                  <span className="font-sora text-sm font-bold block">
+                    Tresor Nursing Home, 9, St Louis St
+                  </span>
+                </div>
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="shrink-0 inline-flex items-center gap-1 text-xs font-sora font-semibold text-brand-orange hover:text-white transition-colors"
+                >
+                  <span>Directions</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
               </div>
             </div>
           </div>

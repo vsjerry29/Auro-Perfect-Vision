@@ -5,24 +5,25 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
-  title: "Auro Perfect Vision — Centre for Vision Beyond Glasses",
+  title: "Auro Perfect Vision (APV) — Centre for Integral Vision Care • Pondicherry",
   description:
-    "Holistic natural eye care, Eye Yoga, screen strain recovery, and guided retreats in Auroville. Conscious visual relaxation for children and adults worldwide.",
+    "Comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.",
   keywords: [
     "Auro Perfect Vision",
-    "Auroville eye care",
-    "Eye Yoga",
-    "natural vision therapy",
-    "Bates method",
-    "screen eye fatigue relief",
-    "Auroville holistic health",
+    "APV Pondicherry",
+    "Centre for Integral Vision Care",
+    "vision therapy Pondicherry",
+    "eye care White Town Puducherry",
+    "myopia management",
+    "specialty contact lenses",
+    "holistic eye wellness",
   ],
   openGraph: {
-    title: "Auro Perfect Vision — Centre for Vision Beyond Glasses",
+    title: "Auro Perfect Vision (APV) — Centre for Integral Vision Care",
     description:
-      "A more mindful approach to natural vision. Holistic ocular wellness and eye yoga rooted in the intentional township of Auroville.",
+      "Experience comprehensive eye care, personalised vision therapy, myopia management, specialty contact lenses and holistic eye wellness at Auro Perfect Vision (APV), Pondicherry.",
     url: "https://auroperfectvision.com",
-    siteName: "Auro Perfect Vision",
+    siteName: "Auro Perfect Vision (APV)",
     locale: "en_IN",
     type: "website",
   },

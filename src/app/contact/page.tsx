@@ -1,40 +1,39 @@
 import React from "react";
-import { getSiteContent } from "@/lib/server/cms";
+import Link from "next/link";
+import { getEffectiveSiteContent } from "@/lib/server/cms";
 import { ContactFormView } from "@/components/contact/contact-form-view";
-import { Phone, Mail, MapPin, Clock, MessageCircle, ShieldCheck, Sparkles, Navigation } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Calendar, ShieldCheck, Sparkles, Navigation } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Contact Us | Auro Perfect Vision — Auroville",
-  description: "Get in touch with Auro Perfect Vision in Auroville. Phone, email, WhatsApp, and visitor location.",
+  title: "Contact Us | Auro Perfect Vision (APV) — Pondicherry",
+  description: "Get in touch with Auro Perfect Vision (APV) in Pondicherry. Phone, email, and clinic location at White Town.",
 };
 
-export default function ContactPage() {
-  const siteContent = getSiteContent();
+export default async function ContactPage() {
+  const siteContent = await getEffectiveSiteContent();
 
-  const phonePrimary = siteContent.phone || "+91 8012305151";
-  const phoneSecondary = "+91 9488005685";
+  const phonePrimary = siteContent.phone || "+91 94897 63451";
   const email = siteContent.email || "auroperfectvision@gmail.com";
-  const address = siteContent.address || "Auroville, Tamil Nadu 605101, India";
+  const address = siteContent.address || "Tresor Nursing Home, 9, St Louis St, White Town, Puducherry – 605001, India.";
   const hours = siteContent.openingHours || "Monday - Saturday: 9:00 AM - 5:30 PM IST (Closed Sundays)";
-  const whatsappUrl = siteContent.whatsappLink || "https://wa.me/918012305151";
 
   // Google LocalBusiness Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
-    name: "Auro Perfect Vision",
-    description: "Holistic eye care, Bates method, conscious eye relaxation, and photobiomodulation centre in Auroville.",
+    name: "Auro Perfect Vision (APV)",
+    description: "Centre for Integral Vision Care in Pondicherry. Comprehensive eye care, vision therapy, myopia management, and specialty contact lenses.",
     url: "https://auroperfectvision.com/contact",
     telephone: phonePrimary,
     email: email,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Arka Crown Road",
-      addressLocality: "Auroville",
-      addressRegion: "Tamil Nadu",
-      postalCode: "605101",
+      streetAddress: "Tresor Nursing Home, 9, St Louis St, White Town",
+      addressLocality: "Puducherry",
+      addressRegion: "Puducherry",
+      postalCode: "605001",
       addressCountry: "IN",
     },
     openingHoursSpecification: [
@@ -60,7 +59,7 @@ export default function ContactPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-            <span>Auroville Centre for Vision Beyond Glasses</span>
+            <span>Centre for Integral Vision Care • Pondicherry</span>
           </div>
           <h1 className="font-sora text-4xl sm:text-5xl font-extrabold text-brand-charcoal tracking-tight">
             Connect with Our <span className="text-brand-purple">Vision Educators</span>
@@ -84,7 +83,7 @@ export default function ContactPage() {
                 Direct Contact Information
               </h2>
               <p className="font-inter text-sm text-brand-secondary leading-relaxed">
-                Reach us during centre operating hours or drop a message anytime. For urgent booking consultations, our WhatsApp desk is monitored daily.
+                Reach us during clinic hours or send us an online message anytime. You can also choose a therapy and request an appointment directly online.
               </p>
             </div>
 
@@ -104,12 +103,6 @@ export default function ContactPage() {
                     >
                       {phonePrimary}
                     </a>
-                    <a
-                      href={`tel:${phoneSecondary.replace(/[^0-9+]/g, "")}`}
-                      className="text-xs font-sora text-brand-secondary hover:text-brand-purple hover:underline block"
-                    >
-                      {phoneSecondary}
-                    </a>
                   </div>
                   <span className="text-[11px] font-inter text-brand-secondary mt-1 block">Mon–Sat 9:00 AM – 5:30 PM IST</span>
                 </div>
@@ -128,27 +121,25 @@ export default function ContactPage() {
                   >
                     {email}
                   </a>
-                  <span className="text-[11px] font-inter text-brand-secondary mt-1 block">Average reply within 24 hours</span>
+                  <span className="text-[11px] font-inter text-brand-secondary mt-1 block">Direct patient desk: auroperfectvision@gmail.com</span>
                 </div>
               </div>
 
-              {/* WhatsApp card */}
+              {/* Appointment Desk Card */}
               <div className="p-5 bg-white rounded-3xl border border-brand-gray/80 shadow-sm flex items-start gap-4 hover:shadow-md transition-all">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <MessageCircle className="w-5 h-5" />
+                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-brand-orange flex items-center justify-center shrink-0 mt-0.5">
+                  <Calendar className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-sora text-sm font-bold text-brand-charcoal">WhatsApp Direct</h3>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-sora font-bold text-emerald-700 hover:underline mt-1"
+                  <h3 className="font-sora text-sm font-bold text-brand-charcoal">Appointment Booking</h3>
+                  <Link
+                    href="/book"
+                    className="inline-flex items-center gap-1.5 text-xs font-sora font-bold text-brand-purple hover:underline mt-1"
                   >
-                    <span>Message Centre Desk</span>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-inter font-semibold">Quick Reply</span>
-                  </a>
-                  <span className="text-[11px] font-inter text-brand-secondary mt-1 block">Consultation queries & retreat assistance</span>
+                    <span>Book Your Appointment Online</span>
+                    <span className="text-[10px] bg-brand-lavender text-brand-purple px-1.5 py-0.5 rounded-full font-inter font-semibold">Select Therapy</span>
+                  </Link>
+                  <span className="text-[11px] font-inter text-brand-secondary mt-1 block">Choose your preferred therapy &amp; schedule your visit</span>
                 </div>
               </div>
 
@@ -168,7 +159,7 @@ export default function ContactPage() {
                   </div>
                   <div className="pt-3">
                     <a
-                      href="https://maps.google.com/?q=Auroville+Centre+for+Vision+Beyond+Glasses"
+                      href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs font-sora font-bold text-brand-purple hover:underline"
@@ -193,6 +184,41 @@ export default function ContactPage() {
           {/* Right Column: Interactive Contact Form */}
           <div className="lg:col-span-7">
             <ContactFormView />
+          </div>
+        </div>
+
+        {/* Embedded Google Map Section */}
+        <div className="mt-12 bg-white rounded-3xl border border-brand-gray/80 shadow-sm overflow-hidden">
+          <div className="p-6 sm:p-8 border-b border-brand-gray/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-inter font-bold uppercase tracking-wider text-brand-orange">
+                Location Map
+              </span>
+              <h2 className="font-sora text-xl sm:text-2xl font-bold text-brand-charcoal mt-0.5">
+                Auro Perfect Vision (APV) — White Town, Puducherry
+              </h2>
+              <p className="font-inter text-xs sm:text-sm text-brand-secondary mt-1">
+                {address}
+              </p>
+            </div>
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-violet text-white text-xs font-sora font-bold transition-colors"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Open Directions in Maps</span>
+            </a>
+          </div>
+          <div className="w-full h-80 sm:h-96 bg-brand-gray">
+            <iframe
+              title="Auro Perfect Vision (APV) — Tresor Nursing Home, White Town, Puducherry"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent("Tresor Nursing Home, 9, St Louis St, White Town, Puducherry 605001, India")}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+              className="w-full h-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </div>

@@ -19,9 +19,9 @@ export function WhyChooseUs() {
     },
     {
       icon: Trees,
-      title: "Peaceful Auroville Sanctuary",
+      title: "Calm Pondicherry Clinic",
       description:
-        "Nestled in the lush, organic forest environment of Auroville, Tamil Nadu—an ideal backdrop for sensory stillness and visual rejuvenation.",
+        "Located in the heritage coastal quarter of White Town, Puducherry—a serene setting for clinical care, sensory stillness, and visual rejuvenation.",
     },
     {
       icon: CalendarCheck,

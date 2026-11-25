@@ -1,18 +1,18 @@
 import React from "react";
 import Link from "next/link";
-import { getAllTherapists, getAllOfferings } from "@/lib/server/cms";
+import { getAllTherapists, getEffectiveOfferings } from "@/lib/server/cms";
 import { ArrowRight, UserCheck, Sparkles, Calendar, Award } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Specialists & Practitioners | Auro Perfect Vision",
-  description: "Meet our certified Bates method vision educators and natural eyesight specialists in Auroville.",
+  title: "Specialists & Practitioners | Auro Perfect Vision (APV) — Pondicherry",
+  description: "Meet our optometrists, vision therapy specialists, and holistic eye wellness practitioners at Auro Perfect Vision (APV), Pondicherry.",
 };
 
-export default function TeamDirectoryPage() {
+export default async function TeamDirectoryPage() {
   const therapists = getAllTherapists(false); // published only
-  const offerings = getAllOfferings(false); // published only
+  const offerings = await getEffectiveOfferings(false); // published only
 
   return (
     <div className="bg-[#FAF9FC] min-h-screen pb-24">
@@ -21,7 +21,7 @@ export default function TeamDirectoryPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-lavender text-brand-purple text-xs font-inter font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-            <span>Auroville Vision Educators</span>
+            <span>Pondicherry Vision Specialists</span>
           </div>
           <h1 className="font-sora text-4xl sm:text-5xl font-extrabold text-brand-charcoal tracking-tight">
             Meet Our Dedicated <span className="text-brand-purple">Practitioners</span>
