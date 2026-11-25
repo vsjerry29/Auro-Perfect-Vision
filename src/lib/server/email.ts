@@ -61,6 +61,28 @@ export function getContactEmail(): string {
 /**
  * Logs notification attempts and status to the MySQL notification_jobs table.
  */
+const globalForEmail = globalThis as unknown as {
+  __apvEmailNotificationLogs?: Array<{
+    id: string;
+    booking_id: string | null;
+    channel: "email";
+    recipient: string;
+    template_key: string;
+    status: "queued" | "sent" | "failed";
+    attempts: number;
+    error_message: string | null;
+    sent_at: string | null;
+    created_at: string;
+  }>;
+};
+
+function getMemoryEmailLogs() {
+  if (!globalForEmail.__apvEmailNotificationLogs) {
+    globalForEmail.__apvEmailNotificationLogs = [];
+  }
+  return globalForEmail.__apvEmailNotificationLogs;
+}
+
 async function logNotificationJob(params: {
   bookingId?: string;
   recipient: string;
@@ -68,10 +90,28 @@ async function logNotificationJob(params: {
   status: "queued" | "sent" | "failed";
   errorMessage?: string;
 }): Promise<void> {
-  if (!isMySQLConfigured()) return;
+  const id = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  const nowIso = new Date().toISOString();
+
+  if (!isMySQLConfigured()) {
+    const logs = getMemoryEmailLogs();
+    logs.unshift({
+      id,
+      booking_id: params.bookingId || null,
+      channel: "email",
+      recipient: params.recipient,
+      template_key: params.templateKey,
+      status: params.status,
+      attempts: 1,
+      error_message: params.errorMessage || null,
+      sent_at: params.status === "sent" ? nowIso : null,
+      created_at: nowIso,
+    });
+    if (logs.length > 100) logs.length = 100;
+    return;
+  }
 
   try {
-    const id = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     await execute(
       `INSERT INTO notification_jobs (
         id, booking_id, channel, recipient, template_key, status, attempts, error_message, scheduled_at, sent_at, created_at
@@ -167,7 +207,9 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
  * Helper to fetch recent email dispatch attempts from MySQL notification_jobs table.
  */
 export async function getRecentEmailLogs(limit = 20): Promise<any[]> {
-  if (!isMySQLConfigured()) return [];
+  if (!isMySQLConfigured()) {
+    return getMemoryEmailLogs().slice(0, limit);
+  }
   try {
     const rows = await query<any[]>(
       `SELECT id, booking_id, channel, recipient, template_key, status, attempts, error_message, sent_at, created_at

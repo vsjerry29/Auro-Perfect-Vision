@@ -23,8 +23,7 @@ import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
 import * as db from "./mysql-db";
 
-// In-Memory Data Store for resilient offline / local dev / unit testing
-const emrStore: {
+type EmrStoreState = {
   patients: Map<string, PatientRecord>;
   medicalHistories: Map<string, PatientMedicalHistory>;
   encounters: Map<string, ClinicalEncounter>;
@@ -34,17 +33,26 @@ const emrStore: {
   documents: Map<string, ClinicalDocument>;
   consents: Map<string, ClinicalConsent>;
   auditLogs: ClinicalAuditEvent[];
-} = {
-  patients: new Map(),
-  medicalHistories: new Map(),
-  encounters: new Map(),
-  assessments: new Map(),
-  notes: new Map(),
-  treatmentPlans: new Map(),
-  documents: new Map(),
-  consents: new Map(),
-  auditLogs: [],
 };
+
+const globalForEmr = globalThis as unknown as {
+  __apvEmrMemoryStore?: EmrStoreState;
+};
+
+// In-Memory Data Store for resilient offline / local dev / unit testing
+const emrStore: EmrStoreState =
+  globalForEmr.__apvEmrMemoryStore ||
+  (globalForEmr.__apvEmrMemoryStore = {
+    patients: new Map(),
+    medicalHistories: new Map(),
+    encounters: new Map(),
+    assessments: new Map(),
+    notes: new Map(),
+    treatmentPlans: new Map(),
+    documents: new Map(),
+    consents: new Map(),
+    auditLogs: [],
+  });
 
 // Seed baseline clinical patients
 function initializeBaselineEmrSeed() {

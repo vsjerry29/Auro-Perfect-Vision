@@ -980,6 +980,208 @@ async function runRegressionSuite() {
     assert(valid && valid.role === "super_admin");
   });
 
+  // ───────────────────────────────────────────────────────────────────────────
+  console.log("\nSECTION 8: COMMON BOOKING PAGE API, VALIDATION & IDEMPOTENCY");
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const {
+    GET: getPublicContentHandler,
+  } = require("../../src/app/api/public/content/route");
+  const {
+    GET: getPublicBookingHandler,
+    POST: postPublicBookingHandler,
+  } = require("../../src/app/api/public/bookings/route");
+  const { getRecentEmailLogs } = require("../../src/lib/server/email");
+
+  await test("GET /api/public/content exposes published therapies, active therapists, and sanitized bookedSlots", async () => {
+    const res = await getPublicContentHandler();
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert(Array.isArray(data.offerings) && data.offerings.length >= 6);
+    assert(data.offerings.every((o: any) => o.isPublished));
+    assert(Array.isArray(data.therapists) && data.therapists.length >= 2);
+    assert(data.therapists.every((t: any) => t.isPublished && !t.isArchived));
+    assert(Array.isArray(data.intakeTemplates) && data.intakeTemplates.length >= 1);
+    assert(Array.isArray(data.weeklySchedule) && data.weeklySchedule.length === 7);
+    assert(Array.isArray(data.bookedSlots));
+    if (data.bookedSlots.length > 0) {
+      const sample = data.bookedSlots[0];
+      assert.strictEqual(sample.clientEmail, undefined, "Public bookedSlots must not leak clientEmail");
+      assert.strictEqual(sample.clientPhone, undefined, "Public bookedSlots must not leak clientPhone");
+      assert(sample.therapistId && sample.date && sample.timeSlot);
+    }
+  });
+
+  await test("POST /api/public/bookings rejects mismatched practitioner, missing intake, and Sunday closure", async () => {
+    // 1. Mismatched practitioner (off-4 Visual Skill Enhancement is only therapist-2 Rajesh Kannan)
+    const mismatchRes = await postPublicBookingHandler(
+      new Request("http://localhost/api/public/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offeringId: "off-4",
+          therapistId: "therapist-1",
+          date: "2026-12-15",
+          timeSlot: "10:00 AM - 11:00 AM",
+          clientName: "Test Visitor",
+          clientEmail: "visitor@example.com",
+          clientPhone: "+91 9876543210",
+          intakeAnswers: { client_age: "30", primary_eye_concern: "Screen Strain & Digital Fatigue" },
+        }),
+      })
+    );
+    assert.strictEqual(mismatchRes.status, 400);
+
+    // 2. Sunday closed date (2026-12-13 is a Sunday)
+    const sundayRes = await postPublicBookingHandler(
+      new Request("http://localhost/api/public/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offeringId: "off-1",
+          therapistId: "therapist-1",
+          date: "2026-12-13",
+          timeSlot: "10:00 AM - 11:00 AM",
+          clientName: "Test Visitor",
+          clientEmail: "visitor@example.com",
+          clientPhone: "+91 9876543210",
+          intakeAnswers: {
+            client_age: "30",
+            primary_eye_concern: "Other",
+            daily_screen_hours: "3 to 6 hours",
+          },
+        }),
+      })
+    );
+    assert.strictEqual(sundayRes.status, 400);
+
+    // 3. Missing required dynamic intake fields for off-1
+    const missingIntakeRes = await postPublicBookingHandler(
+      new Request("http://localhost/api/public/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offeringId: "off-1",
+          therapistId: "therapist-1",
+          date: "2026-12-15",
+          timeSlot: "10:00 AM - 11:00 AM",
+          clientName: "Test Visitor",
+          clientEmail: "visitor@example.com",
+          clientPhone: "+91 9876543210",
+          intakeAnswers: {},
+        }),
+      })
+    );
+    assert.strictEqual(missingIntakeRes.status, 400);
+  });
+
+  await test("POST /api/public/bookings enforces offline pending_approval + INR fee + retry idempotency + 409 double-booking + email logs", async () => {
+    const contentRes = await getPublicContentHandler();
+    const contentData = await contentRes.json();
+    const eyeYoga = contentData.offerings.find((o: any) => o.id === "off-1");
+    assert(eyeYoga && eyeYoga.price?.inr > 0, "Eye Yoga offering must exist with INR price");
+
+    const uniqueDate = "2026-12-16"; // Wednesday
+    const uniqueSlot = "9:00 AM - 10:00 AM";
+    const draftId = `bk-test-common-${Date.now()}`;
+    const draftRef = `APV-TC-${Date.now().toString().slice(-6)}`;
+
+    // Attempt payment/status spoofing + tampered amount from unauthenticated caller
+    const createReq = () =>
+      new Request("http://localhost/api/public/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: draftId,
+          bookingReference: draftRef,
+          offeringId: "off-1",
+          therapistId: "therapist-1",
+          date: uniqueDate,
+          timeSlot: uniqueSlot,
+          clientName: "Common Flow Patient",
+          clientEmail: "patient.common@example.com",
+          clientPhone: "+91 9876501234",
+          clientTimezone: "Asia/Kolkata",
+          seatsBooked: 1,
+          currency: "USD",
+          totalAmount: 1,
+          paymentMethod: "online_razorpay",
+          paymentStatus: "captured",
+          status: "confirmed",
+          invoiceIssued: true,
+          intakeAnswers: {
+            client_age: "34",
+            primary_eye_concern: "Screen Strain & Heavy Ocular Fatigue",
+            daily_screen_hours: "7 to 10 hours",
+          },
+        }),
+      });
+
+    const res1 = await postPublicBookingHandler(createReq());
+    assert.strictEqual(res1.status, 200);
+    const body1 = await res1.json();
+    assert.strictEqual(body1.success, true);
+    assert.strictEqual(body1.booking.status, "pending_approval", "Public booking must stay pending_approval");
+    assert.strictEqual(body1.booking.paymentStatus, "pending", "Public booking must stay paymentStatus pending");
+    assert.strictEqual(body1.booking.invoiceIssued, false, "Public booking must not pre-issue invoice");
+    assert.strictEqual(body1.booking.currency, "INR", "Public booking currency must be INR");
+    assert.strictEqual(
+      body1.booking.totalAmount,
+      eyeYoga.price.inr,
+      "Authoritative INR fee for Eye Yoga must override tampered amount"
+    );
+
+    // Idempotent retry on identical ID/reference/slot/email
+    const resRetry = await postPublicBookingHandler(createReq());
+    assert.strictEqual(resRetry.status, 200);
+    const bodyRetry = await resRetry.json();
+    assert.strictEqual(bodyRetry.idempotentRetry, true);
+    assert.strictEqual(bodyRetry.booking.bookingReference, draftRef);
+
+    // Concurrent second visitor trying same therapist + date + slot must fail 409
+    const conflictRes = await postPublicBookingHandler(
+      new Request("http://localhost/api/public/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: `bk-conflict-${Date.now()}`,
+          offeringId: "off-2",
+          therapistId: "therapist-1",
+          date: uniqueDate,
+          timeSlot: uniqueSlot,
+          clientName: "Second Client",
+          clientEmail: "second@example.com",
+          clientPhone: "+91 9876599999",
+          intakeAnswers: {
+            client_age: "40",
+            primary_eye_concern: "Screen Strain & Digital Fatigue",
+          },
+        }),
+      })
+    );
+    assert.strictEqual(conflictRes.status, 409, "Concurrent double-booking must return HTTP 409");
+
+    // GET tracking lookup returns saved booking
+    const lookupRes = await getPublicBookingHandler(
+      new Request(`http://localhost/api/public/bookings?reference=${encodeURIComponent(draftRef)}`)
+    );
+    assert.strictEqual(lookupRes.status, 200);
+    const lookupData = await lookupRes.json();
+    assert.strictEqual(lookupData.booking.bookingReference, draftRef);
+
+    // Verify customer confirmation & admin notification dispatch logs were recorded
+    const emailLogs = await getRecentEmailLogs(20);
+    const custLog = emailLogs.find(
+      (l: any) => l.booking_id === draftId && l.template_key === "booking_confirmation"
+    );
+    const adminLog = emailLogs.find(
+      (l: any) => l.booking_id === draftId && l.template_key === "admin_new_booking_alert"
+    );
+    assert(custLog, "Customer email dispatch log must be recorded");
+    assert(adminLog, "Admin email dispatch log must be recorded");
+    assert.strictEqual(adminLog.recipient, "auroperfectvision@gmail.com");
+  });
+
   console.log("\n========================================================");
   console.log(`  REGRESSION SUITE COMPLETED: ${passedTests}/${totalTests} TESTS PASSED`);
   if (failedTests.length > 0) {

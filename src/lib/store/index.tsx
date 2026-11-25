@@ -52,6 +52,8 @@ interface DemoStoreContextType {
 
   // Booking actions
   createBooking: (bookingData: {
+    id?: string;
+    bookingReference?: string;
     offeringId: string;
     therapistId: string;
     date: string;
@@ -64,7 +66,8 @@ interface DemoStoreContextType {
     currency: "INR" | "USD";
     paymentMethod: PaymentMethod;
     intakeAnswers: Record<string, any>;
-  }) => Booking;
+  }) => Promise<Booking>;
+  refreshPublicContent: () => Promise<void>;
   approveBooking: (bookingId: string) => void;
   markOfflineBookingPaid: (bookingId: string) => void;
   cancelBooking: (bookingId: string) => void;
@@ -91,31 +94,47 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
   const [leaveExceptions, setLeaveExceptions] = useState<LeaveException[]>(INITIAL_LEAVE_EXCEPTIONS);
   const [intakeTemplates, setIntakeTemplates] = useState<IntakeTemplate[]>(INITIAL_INTAKE_TEMPLATES);
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+  const [occupiedSlots, setOccupiedSlots] = useState<
+    Array<{ therapistId: string; date: string; timeSlot: string }>
+  >([]);
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const syncFromServer = async () => {
+    try {
+      const res = await fetch("/api/public/content", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.offerings) && data.offerings.length > 0) {
+          setOfferings(data.offerings);
+        }
+        if (Array.isArray(data.therapists) && data.therapists.length > 0) {
+          setTherapists(data.therapists);
+        }
+        if (Array.isArray(data.blogs) && data.blogs.length > 0) {
+          setBlogs(data.blogs);
+        }
+        if (Array.isArray(data.intakeTemplates) && data.intakeTemplates.length > 0) {
+          setIntakeTemplates(data.intakeTemplates);
+        }
+        if (Array.isArray(data.weeklySchedule) && data.weeklySchedule.length > 0) {
+          setWeeklySchedule(data.weeklySchedule);
+        }
+        if (Array.isArray(data.leaveExceptions)) {
+          setLeaveExceptions(data.leaveExceptions);
+        }
+        if (Array.isArray(data.bookedSlots)) {
+          setOccupiedSlots(data.bookedSlots);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not sync public content from server:", err);
+    }
+    setIsLoaded(true);
+  };
+
   // Sync from server-side persistent CMS store
   useEffect(() => {
-    async function syncFromServer() {
-      try {
-        const res = await fetch("/api/public/content");
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.offerings) && data.offerings.length > 0) {
-            setOfferings(data.offerings);
-          }
-          if (Array.isArray(data.therapists) && data.therapists.length > 0) {
-            setTherapists(data.therapists);
-          }
-          if (Array.isArray(data.blogs) && data.blogs.length > 0) {
-            setBlogs(data.blogs);
-          }
-        }
-      } catch (err) {
-        console.warn("Could not sync public content from server:", err);
-      }
-      setIsLoaded(true);
-    }
     syncFromServer();
   }, []);
 
@@ -230,9 +249,9 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     );
     if (onLeave) return false;
 
-    // Check weekday schedule
-    const date = new Date(dateStr);
-    const dayOfWeek = date.getDay();
+    // Check weekday schedule using UTC noon to avoid timezone day-shift
+    const date = new Date(`${dateStr}T12:00:00Z`);
+    const dayOfWeek = date.getUTCDay();
     const daySchedule = weeklySchedule.find((d) => d.dayOfWeek === dayOfWeek);
     if (!daySchedule || !daySchedule.active || daySchedule.slots.length === 0) {
       return false;
@@ -242,12 +261,12 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getAvailableSlots = (offeringId: string, therapistId: string, dateStr: string): string[] => {
-    if (!isDateAvailable(therapistId, dateStr)) {
+    if (!therapistId || !dateStr || !isDateAvailable(therapistId, dateStr)) {
       return [];
     }
 
-    const date = new Date(dateStr);
-    const dayOfWeek = date.getDay();
+    const date = new Date(`${dateStr}T12:00:00Z`);
+    const dayOfWeek = date.getUTCDay();
     const daySchedule = weeklySchedule.find((d) => d.dayOfWeek === dayOfWeek);
     if (!daySchedule) return [];
 
@@ -270,20 +289,27 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Filter out already booked slots for this therapist and date
-    const bookedForSlot = bookings
-      .filter(
-        (b) =>
-          b.therapistId === therapistId &&
-          b.date === dateStr &&
-          b.status !== "cancelled"
-      )
-      .map((b) => b.timeSlot);
+    // Exclude already booked slots from both local bookings and live server occupiedSlots
+    const bookedForSlot = new Set<string>([
+      ...bookings
+        .filter(
+          (b) =>
+            b.therapistId === therapistId &&
+            b.date === dateStr &&
+            b.status !== "cancelled"
+        )
+        .map((b) => b.timeSlot),
+      ...occupiedSlots
+        .filter((s) => s.therapistId === therapistId && s.date === dateStr)
+        .map((s) => s.timeSlot),
+    ]);
 
-    return candidateSlots.filter((slot) => !bookedForSlot.includes(slot));
+    return candidateSlots.filter((slot) => !bookedForSlot.has(slot));
   };
 
-  const createBooking = (bookingData: {
+  const createBooking = async (bookingData: {
+    id?: string;
+    bookingReference?: string;
     offeringId: string;
     therapistId: string;
     date: string;
@@ -296,20 +322,15 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     currency: "INR" | "USD";
     paymentMethod: PaymentMethod;
     intakeAnswers: Record<string, any>;
-  }): Booking => {
+  }): Promise<Booking> => {
     const offering = offerings.find((o) => o.id === bookingData.offeringId);
     const therapist = therapists.find((t) => t.id === bookingData.therapistId);
-    const ref = generateBookingReference();
+    const ref = bookingData.bookingReference || generateBookingReference();
+    const draftId =
+      bookingData.id || `bk-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 
-    const isOnlinePayment =
-      bookingData.paymentMethod === "online_razorpay" ||
-      bookingData.paymentMethod === "online_paypal";
-
-    const unitPrice = offering?.price.inr || 2000;
-    const totalAmount = unitPrice * bookingData.seatsBooked;
-
-    const newBooking: Booking = {
-      id: `b-${Date.now()}`,
+    const payload: Booking = {
+      id: draftId,
       bookingReference: ref,
       offeringId: bookingData.offeringId,
       offeringTitle: offering?.title || "Custom Vision Therapy",
@@ -317,32 +338,57 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
       therapistName: therapist?.displayName || "Assigned Practitioner",
       date: bookingData.date,
       timeSlot: bookingData.timeSlot,
-      clientTimezone: bookingData.clientTimezone,
+      clientTimezone: bookingData.clientTimezone || "Asia/Kolkata",
       clientName: bookingData.clientName,
       clientEmail: bookingData.clientEmail,
       clientPhone: bookingData.clientPhone,
-      seatsBooked: bookingData.seatsBooked,
+      seatsBooked: bookingData.seatsBooked || 1,
       currency: "INR",
-      totalAmount,
-      status: isOnlinePayment ? "confirmed" : "pending_approval",
-      paymentMethod: bookingData.paymentMethod,
-      paymentStatus: isOnlinePayment ? "captured" : "pending",
+      totalAmount: (offering?.price.inr || 0) * (bookingData.seatsBooked || 1),
+      status: "pending_approval",
+      paymentMethod:
+        bookingData.paymentMethod === "offline_bank_transfer"
+          ? "offline_bank_transfer"
+          : "offline_cash",
+      paymentStatus: "pending",
       intakeAnswers: bookingData.intakeAnswers,
-      invoiceIssued: isOnlinePayment,
-      invoiceNumber: isOnlinePayment ? generateInvoiceNumber(bookings.length + 1) : undefined,
+      invoiceIssued: false,
       createdAt: new Date().toISOString(),
     };
 
-    setBookings((prev) => [newBooking, ...prev]);
-
-    // Persist to server store asynchronously
-    fetch("/api/public/bookings", {
+    const res = await fetch("/api/public/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newBooking),
-    }).catch((err) => console.warn("Failed to persist booking to server:", err));
+      body: JSON.stringify(payload),
+    });
 
-    return newBooking;
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.booking) {
+      if (res.status === 409) {
+        await syncFromServer();
+      }
+      throw new Error(
+        data?.error ||
+          "Unable to save your booking request right now. Please try again."
+      );
+    }
+
+    const savedBooking: Booking = data.booking;
+
+    setBookings((prev) => [
+      savedBooking,
+      ...prev.filter((b) => b.id !== savedBooking.id),
+    ]);
+    setOccupiedSlots((prev) => [
+      ...prev,
+      {
+        therapistId: savedBooking.therapistId,
+        date: savedBooking.date,
+        timeSlot: savedBooking.timeSlot,
+      },
+    ]);
+
+    return savedBooking;
   };
 
   const approveBooking = (bookingId: string) => {
@@ -424,6 +470,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
         getIntakeTemplateForOffering,
         saveIntakeFields,
         createBooking,
+        refreshPublicContent: syncFromServer,
         approveBooking,
         markOfflineBookingPaid,
         cancelBooking,

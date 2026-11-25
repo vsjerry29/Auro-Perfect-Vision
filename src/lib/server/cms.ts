@@ -30,7 +30,11 @@ import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
 import * as db from "./mysql-db";
 
-const cmsMemoryStore: Map<string, any> = new Map();
+const globalForCms = globalThis as unknown as {
+  __apvCmsMemoryStore?: Map<string, any>;
+};
+const cmsMemoryStore: Map<string, any> =
+  globalForCms.__apvCmsMemoryStore || (globalForCms.__apvCmsMemoryStore = new Map());
 
 async function syncCmsToMySQL(filename: string, data: any): Promise<void> {
   if (!isMySQLConfigured()) return;
@@ -264,7 +268,7 @@ export function deleteOffering(id: string): boolean {
 export function getAllTherapists(includeUnpublished = true): Therapist[] {
   const therapists = readJsonFile<Therapist[]>("therapists.json", INITIAL_THERAPISTS);
   if (includeUnpublished) return therapists;
-  return therapists.filter((t) => t.isPublished);
+  return therapists.filter((t) => t.isPublished && !t.isArchived);
 }
 
 export function getTherapistById(id: string): Therapist | undefined {
@@ -551,6 +555,72 @@ export async function getEffectiveOfferingBySlug(slug: string): Promise<Offering
     }
   }
   return getOfferingBySlug(slug);
+}
+
+export async function getEffectiveOfferingById(id: string): Promise<Offering | undefined> {
+  if (isMySQLConfigured()) {
+    try {
+      const direct = await db.dbGetOfferingById(id);
+      if (direct) return direct;
+    } catch (err: any) {
+      console.warn("[getEffectiveOfferingById MySQL Notice]:", err.message);
+    }
+  }
+  return getAllOfferings(true).find((o) => o.id === id);
+}
+
+export async function getEffectiveTherapists(includeUnpublished = true): Promise<Therapist[]> {
+  if (isMySQLConfigured()) {
+    try {
+      const dbTherapists = await db.dbGetAllTherapists(includeUnpublished);
+      if (dbTherapists.length > 0) {
+        if (includeUnpublished) {
+          cmsMemoryStore.set("therapists.json", dbTherapists);
+        }
+        return dbTherapists;
+      }
+    } catch (err: any) {
+      console.warn("[getEffectiveTherapists MySQL Notice]:", err.message);
+    }
+  }
+  return getAllTherapists(includeUnpublished);
+}
+
+export async function getEffectiveTherapistById(id: string): Promise<Therapist | undefined> {
+  if (isMySQLConfigured()) {
+    try {
+      const direct = await db.dbGetTherapistById(id);
+      if (direct) return direct;
+    } catch (err: any) {
+      console.warn("[getEffectiveTherapistById MySQL Notice]:", err.message);
+    }
+  }
+  return getTherapistById(id);
+}
+
+export async function getEffectiveBookings(): Promise<Booking[]> {
+  if (isMySQLConfigured()) {
+    try {
+      const dbBookings = await db.dbGetAllBookings();
+      cmsMemoryStore.set("bookings.json", dbBookings);
+      return dbBookings;
+    } catch (err: any) {
+      console.warn("[getEffectiveBookings MySQL Notice]:", err.message);
+    }
+  }
+  return getAllBookings();
+}
+
+export async function getEffectiveBookingByRef(ref: string): Promise<Booking | undefined> {
+  if (isMySQLConfigured()) {
+    try {
+      const found = await db.dbGetBookingByRef(ref);
+      if (found) return found;
+    } catch (err: any) {
+      console.warn("[getEffectiveBookingByRef MySQL Notice]:", err.message);
+    }
+  }
+  return getBookingByRef(ref);
 }
 
 export function saveSiteContent(data: Partial<SiteContent>): SiteContent {

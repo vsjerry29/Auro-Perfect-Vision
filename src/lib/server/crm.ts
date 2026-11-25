@@ -15,7 +15,11 @@ import { isMySQLConfigured } from "./mysql";
 import { isTestMode } from "./storage-engine";
 import * as db from "./mysql-db";
 
-const crmMemoryStore: Map<string, any> = new Map();
+const globalForCrm = globalThis as unknown as {
+  __apvCrmMemoryStore?: Map<string, any>;
+};
+const crmMemoryStore: Map<string, any> =
+  globalForCrm.__apvCrmMemoryStore || (globalForCrm.__apvCrmMemoryStore = new Map());
 
 async function syncCrmToMySQL(filename: string, data: any): Promise<void> {
   if (!isMySQLConfigured()) return;
